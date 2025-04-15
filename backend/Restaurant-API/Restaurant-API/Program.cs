@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Restaurant_API.Data;
 
 namespace Restaurant_API
 {
@@ -30,7 +32,12 @@ namespace Restaurant_API
 			 * .AddTransient	=> New instance every time it’s requested.
 			 */
 
-			// TODO: Setup DbContext
+			// TODO: Remove when Settings are added
+			var connectionString =
+				builder.Configuration.GetConnectionString("PostgresConnection") ??
+				throw new InvalidOperationException("Connection string 'PostgresConnection' not found!");
+
+			builder.Services.AddDbContext<AppDbContext>(c => c.UseNpgsql(connectionString));
 
 			// TODO: Setup Repositories
 
