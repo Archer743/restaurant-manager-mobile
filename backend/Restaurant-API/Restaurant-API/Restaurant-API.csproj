@@ -22,13 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-    <Folder Include="Services\" />
     <Folder Include="Repositories\" />
-    <Folder Include="Data\" />
-    <Folder Include="Middlewares\" />
-    <Folder Include="Exceptions\" />
-    <Folder Include="Attributes\" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>

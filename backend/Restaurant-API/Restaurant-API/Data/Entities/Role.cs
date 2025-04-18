@@ -9,8 +9,15 @@ namespace Restaurant_API.Data.Entities
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public Guid Id { get; set; }
 
+
+		[Required]
+		[StringLength(40, MinimumLength = 1)]
 		public string Name { get; set; }
 
+
+		// Unique
+		[Required]
+		[StringLength(40, MinimumLength = 1)]
 		public string NormalizedName { get; set; }
 	}
 }

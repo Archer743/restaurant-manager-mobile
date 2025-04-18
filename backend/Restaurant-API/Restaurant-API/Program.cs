@@ -1,6 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Restaurant_API.Constants;
 using Restaurant_API.Data;
+using Restaurant_API.Middlewares;
+using Restaurant_API.Services;
+using Restaurant_API.Services.Interfaces;
 
 namespace Restaurant_API
 {
@@ -11,6 +15,23 @@ namespace Restaurant_API
 			builder.Services.AddControllers();  // Support for controllers, model binding, attribute routing, etc.
 			builder.Services.AddEndpointsApiExplorer();  // Swagger can find and display all API endpoints
 			builder.Services.AddSwaggerGen();  // Swagger UI to test the API in the browser
+
+
+			// ASP.NET Core automatically validates the input model before it reaches the action method by default
+			// Overrides the default automatic 400 Bad Request response behavior
+			builder.Services.Configure<ApiBehaviorOptions>(options =>
+			{
+				options.InvalidModelStateResponseFactory = context =>
+				{
+					// TODO: Specify what is invalid in each model field [FUTURE]
+					var errorResponse = new
+					{
+						errorCode = ErrorCodes.General.InvalidInput
+					};
+
+					return new BadRequestObjectResult(errorResponse);
+				};
+			});
 
 
 			// Allows receiving requests from other domains
@@ -42,6 +63,7 @@ namespace Restaurant_API
 			// TODO: Setup Repositories
 
 			// TODO: Setup Services
+			builder.Services.AddScoped<IUserService, UserService>();
 		}
 
 		// Middleware Setup
@@ -58,7 +80,7 @@ namespace Restaurant_API
 			app.UseHttpsRedirection();  // Redirects all HTTP requests to HTTPS
 
 			// TODO: Add Global Exception Handling
-			// app.UseGlobalExceptionHandler();
+			app.UseGlobalExceptionHandler();
 
 			// TODO: Add JWT Support
 			// app.UseAccessToken();

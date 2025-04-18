@@ -10,5 +10,20 @@ namespace Restaurant_API.Data
 		public DbSet<User> Users { get; set; }
 
 		public DbSet<Role> Roles { get; set; }
+
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{
+			base.OnModelCreating(modelBuilder);
+
+			// Makes User.Username Unique
+			modelBuilder.Entity<User>()
+						.HasIndex(u => u.Username)
+						.IsUnique();
+
+			// Makes Role.NormalizedName Unique
+			modelBuilder.Entity<Role>()
+						.HasIndex(r => r.NormalizedName)
+						.IsUnique();
+		}
 	}
 }
