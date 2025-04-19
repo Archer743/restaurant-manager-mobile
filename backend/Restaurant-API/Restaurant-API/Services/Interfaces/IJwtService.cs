@@ -4,7 +4,7 @@ namespace Restaurant_API.Services.Interfaces
 {
 	public interface IJwtService
 	{
-		UserAuthModel GenerateUserTokens(Guid userId, string roleNormalizedName);
+		UserAuthModel GenerateAuthTokens(Guid userId, string roleNormalizedName);
 
 		string GenerateNewAccessToken(Guid userId, string roleNormalizedName);
 

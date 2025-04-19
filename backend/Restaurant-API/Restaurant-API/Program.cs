@@ -95,7 +95,7 @@ namespace Restaurant_API
 			app.UseCors();  // Enables CORS
 			app.UseHttpsRedirection();  // Redirects all HTTP requests to HTTPS
 
-			// TODO: Add Global Exception Handling
+			// Custom Middlewares
 			app.UseGlobalExceptionHandler();
 
 			// TODO: Add JWT Support

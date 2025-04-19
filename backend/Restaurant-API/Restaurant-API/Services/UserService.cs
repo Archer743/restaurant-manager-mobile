@@ -36,7 +36,7 @@ namespace Restaurant_API.Services
 			// Add a user to the database
 			await userRepository.AddUserAsync(user);
 
-			return jwtService.GenerateUserTokens(user.Id, Roles.Staff);
+			return jwtService.GenerateAuthTokens(user.Id, Roles.Staff);
 		}
 
 		public async Task<UserAuthModel> LoginAsync(UserLoginModel loginModel)
@@ -48,7 +48,7 @@ namespace Restaurant_API.Services
 				throw new UnauthorizedException(ErrorCodes.User.InvalidCredentials);
 			}
 
-			return jwtService.GenerateUserTokens(user.Id, Roles.Staff);
+			return jwtService.GenerateAuthTokens(user.Id, user.Role.NormalizedName);
 		}
 
 		private async Task<bool> IsUsernameAvailableAsync(string username)

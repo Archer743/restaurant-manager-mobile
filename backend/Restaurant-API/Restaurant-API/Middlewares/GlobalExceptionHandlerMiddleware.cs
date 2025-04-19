@@ -25,8 +25,8 @@ namespace Restaurant_API.Middlewares
             }
             catch (Exception e)
             {
-				// TODO: Add Logger
-				Console.WriteLine($"[LOGGER | Error] : {e.Message}");
+			    // TODO: Add Logger
+			    Console.WriteLine($"[LOGGER | Error] : {e.Message}");
                 await WriteErrorResponseAsync(context, HttpStatusCode.InternalServerError);
             }
         }

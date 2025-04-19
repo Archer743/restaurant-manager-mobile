@@ -18,7 +18,7 @@ namespace Restaurant_API.Services
 			jwtSettings = settings.Value;
 		}
 
-		public UserAuthModel GenerateUserTokens(Guid userId, string roleNormalizedName)
+		public UserAuthModel GenerateAuthTokens(Guid userId, string roleNormalizedName)
 		{
 			return new UserAuthModel
 			{
