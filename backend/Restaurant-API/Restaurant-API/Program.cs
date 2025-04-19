@@ -1,15 +1,29 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Restaurant_API.Constants;
 using Restaurant_API.Data;
 using Restaurant_API.Middlewares;
+using Restaurant_API.Repositories;
+using Restaurant_API.Repositories.Interfaces;
 using Restaurant_API.Services;
 using Restaurant_API.Services.Interfaces;
+using Restaurant_API.Settings;
 
 namespace Restaurant_API
 {
 	public class Program
 	{
+		// Retrieves server configurations and validates them
+		private static void ConfigureSettings(WebApplicationBuilder builder)
+		{
+			builder.Services.AddOptions<ConnectionStrings>().BindConfiguration("ConnectionStrings")
+							.ValidateDataAnnotations().ValidateOnStart();
+
+			builder.Services.AddOptions<JwtSettings>().BindConfiguration("JwtSettings")
+							.ValidateDataAnnotations().ValidateOnStart();
+		}
+
 		private static void ConfigureServices(WebApplicationBuilder builder)
 		{
 			builder.Services.AddControllers();  // Support for controllers, model binding, attribute routing, etc.
@@ -26,7 +40,7 @@ namespace Restaurant_API
 					// TODO: Specify what is invalid in each model field [FUTURE]
 					var errorResponse = new
 					{
-						errorCode = ErrorCodes.General.InvalidInput
+						errorCode = ErrorCodes.General.InvalidModel
 					};
 
 					return new BadRequestObjectResult(errorResponse);
@@ -53,17 +67,19 @@ namespace Restaurant_API
 			 * .AddTransient	=> New instance every time it’s requested.
 			 */
 
-			// TODO: Remove when Settings are added
-			var connectionString =
-				builder.Configuration.GetConnectionString("PostgresConnection") ??
-				throw new InvalidOperationException("Connection string 'PostgresConnection' not found!");
+			// Database Setup
+			var connectionStrings = builder.Services.BuildServiceProvider()
+													.GetService<IOptions<ConnectionStrings>>()!.Value;
+			builder.Services.AddDbContext<AppDbContext>(c => c.UseNpgsql(connectionStrings.PostgresConnection));
 
-			builder.Services.AddDbContext<AppDbContext>(c => c.UseNpgsql(connectionString));
+			// TODO: Repositories Setup
+			builder.Services.AddScoped<IUserRepository, UserRepository>();
+			builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 
-			// TODO: Setup Repositories
-
-			// TODO: Setup Services
+			// TODO: Services Setup
 			builder.Services.AddScoped<IUserService, UserService>();
+			builder.Services.AddScoped<IRoleService, RoleService>();
+			builder.Services.AddScoped<IJwtService, JwtService>();
 		}
 
 		// Middleware Setup
@@ -96,6 +112,7 @@ namespace Restaurant_API
 		{
 			// Create an app builder
 			var builder = WebApplication.CreateBuilder(args);
+			ConfigureSettings(builder);
 			ConfigureServices(builder);
 
 			// Create an app based on the builder

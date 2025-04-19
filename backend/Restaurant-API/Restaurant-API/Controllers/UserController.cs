@@ -16,16 +16,19 @@ namespace Restaurant_API.Controllers
 		}
 
 
-		// ======================================================= GET ENDPOINTS
+		// ======================================================= Authentication Endpoints
 		[HttpPost("register")]
 		public async Task<IActionResult> RegisterAsync(UserRegisterModel registerModel)
 		{
-			// throw new Exception("Test");
+			UserAuthModel auth = await userService.RegisterAsync(registerModel);
+			return Ok(auth);
+		}
 
-			// TODO: Add JWT Support -> Get Access and Refresh Tokens
-			// await userService.RegisterAsync(registerModel);
-
-			return Ok();
+		[HttpPost("login")]
+		public async Task<IActionResult> LoginAsync(UserLoginModel loginModel)
+		{
+			UserAuthModel auth = await userService.LoginAsync(loginModel);
+			return Ok(auth);
 		}
 	}
 }

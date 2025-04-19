@@ -1,4 +1,5 @@
 ﻿using Restaurant_API.Exceptions;
+using System.Net;
 using System.Text.Json;
 
 namespace Restaurant_API.Middlewares
@@ -20,30 +21,24 @@ namespace Restaurant_API.Middlewares
             }
             catch (HttpException e)
             {
-                await WriteErrorResponseAsync(context, e);
+                await WriteErrorResponseAsync(context, e.StatusCode, e.ErrorCode);
             }
             catch (Exception e)
             {
-                // TODO: Add Logger
-                Console.WriteLine($"!!! Exception: {e.Message} !!!");
-
-                // TODO: Add errorCode
-                var error = new InternalServerErrorException();
-                await WriteErrorResponseAsync(context, error);
+				// TODO: Add Logger
+				Console.WriteLine($"[LOGGER | Error] : {e.Message}");
+                await WriteErrorResponseAsync(context, HttpStatusCode.InternalServerError);
             }
         }
 
-        private async Task WriteErrorResponseAsync(HttpContext context, HttpException e)
+		private async Task WriteErrorResponseAsync(HttpContext context, HttpStatusCode statusCode, string? errorCode = null)
         {
 			context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)e.StatusCode;
+			context.Response.StatusCode = (int)statusCode;
 
-            var response = JsonSerializer.Serialize(new
-            {
-                errorCode = e.ErrorCode
-            });
+			var response = JsonSerializer.Serialize(new { errorCode });
 
-            await context.Response.WriteAsync(response);
+			await context.Response.WriteAsync(response);
 		}
 	}
 

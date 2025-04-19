@@ -4,6 +4,8 @@ namespace Restaurant_API.Services.Interfaces
 {
 	public interface IUserService
 	{
-		Task RegisterAsync(UserRegisterModel registerModel);
+		Task<UserAuthModel> RegisterAsync(UserRegisterModel registerModel);
+
+		Task<UserAuthModel> LoginAsync(UserLoginModel loginModel);
 	}
 }

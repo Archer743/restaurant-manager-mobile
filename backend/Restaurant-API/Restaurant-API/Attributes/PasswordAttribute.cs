@@ -21,11 +21,8 @@ namespace Restaurant_API.Attributes
 		{
 			string? password = value as string;
 
-			if (password == null || password == "")
-				return new ValidationResult("Password cannot be null or empty!");
-
-			if (!re.IsMatch(password))
-				return new ValidationResult("Password must meet the following requirements: must have at least one lowercase letter, one uppercase letter, one digit, one special character (!@#$%^&*()_+), and length between 8 and 16 characters!");
+			if (password == null || password == "" || !re.IsMatch(password))
+				return new ValidationResult(null);
 
 			return ValidationResult.Success;
 		}
