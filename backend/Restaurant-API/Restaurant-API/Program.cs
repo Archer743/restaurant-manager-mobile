@@ -100,12 +100,14 @@ namespace Restaurant_API
 			app.UseCors();  // Enables CORS
 			app.UseHttpsRedirection();  // Redirects all HTTP requests to HTTPS
 
-			// Custom Middlewares
+			/*
+			 * Middleware ordering is critical:
+			 * GlobalExceptionHandler -> Authentication -> Authorization
+			 */
+			
 			app.UseGlobalExceptionHandler();
-
-			// TODO: Add JWT Support
-			// app.UseAccessToken();
-			// app.UseRefreshToken();
+			app.UseAppAuthentication();
+			app.UseAppAuthorization();
 
 			app.MapControllers();  // Routes requests to controller actions
 

@@ -106,7 +106,7 @@ namespace Restaurant_API.Middlewares
 
 	public static class AuthenticationMiddlewareExtensions
 	{
-		public static IApplicationBuilder UseAuthentication(this IApplicationBuilder app)
+		public static IApplicationBuilder UseAppAuthentication(this IApplicationBuilder app)
 		{
 			return app.UseMiddleware<AuthenticationMiddleware>();
 		}

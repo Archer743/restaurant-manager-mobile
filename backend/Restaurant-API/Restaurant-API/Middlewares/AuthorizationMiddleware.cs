@@ -36,7 +36,7 @@ namespace Restaurant_API.Middlewares
 
 	public static class AuthorizationMiddlewareExtensions
 	{
-		public static IApplicationBuilder UseAuthorization(this IApplicationBuilder app)
+		public static IApplicationBuilder UseAppAuthorization(this IApplicationBuilder app)
 		{
 			return app.UseMiddleware<AuthorizationMiddleware>();
 		}
