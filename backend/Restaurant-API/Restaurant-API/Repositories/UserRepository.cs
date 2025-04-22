@@ -26,5 +26,12 @@ namespace Restaurant_API.Repositories
 								.Include(user => user.Role)
 								.FirstOrDefaultAsync(user => user.Username == username);
 		}
+
+		public async Task<User?> GetUserByIdAsync(Guid id)
+		{
+			return await context.Users
+								.Include(user => user.Role)
+								.FirstOrDefaultAsync(user => user.Id == id);
+		}
 	}
 }

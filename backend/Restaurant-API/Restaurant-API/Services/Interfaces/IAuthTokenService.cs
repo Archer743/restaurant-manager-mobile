@@ -1,13 +1,9 @@
-﻿using Restaurant_API.Data.Models.User;
+﻿using Restaurant_API.Data.Models.Auth;
 
 namespace Restaurant_API.Services.Interfaces
 {
-	public interface IAuthTokenService
+    public interface IAuthTokenService
 	{
 		UserAuthModel GenerateAuthTokens(Guid userId, string roleNormalizedName);
-
-		string GenerateAccessToken(Guid userId, string roleNormalizedName);
-
-		string GenerateRefreshToken();
 	}
 }

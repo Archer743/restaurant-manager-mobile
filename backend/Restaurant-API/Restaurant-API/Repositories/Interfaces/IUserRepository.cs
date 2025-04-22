@@ -7,5 +7,7 @@ namespace Restaurant_API.Repositories.Interfaces
 		Task AddUserAsync(User user);
 
 		Task<User?> GetUserByUsernameAsync(string username);
+
+		Task<User?> GetUserByIdAsync(Guid id);
 	}
 }

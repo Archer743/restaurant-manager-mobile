@@ -6,14 +6,14 @@ namespace Restaurant_API.Middlewares
 {
     public class GlobalExceptionHandlerMiddleware
     {
-        private readonly RequestDelegate next;
+		private readonly RequestDelegate next;
 
-        public GlobalExceptionHandlerMiddleware(RequestDelegate next)
+		public GlobalExceptionHandlerMiddleware(RequestDelegate next)
         {
-            this.next = next;
-        }
+			this.next = next;
+		}
 
-        public async Task InvokeAsync(HttpContext context)
+		public async Task InvokeAsync(HttpContext context)
         {
             try
             {
@@ -32,7 +32,7 @@ namespace Restaurant_API.Middlewares
         }
 
 		private async Task WriteErrorResponseAsync(HttpContext context, HttpStatusCode statusCode, string? errorCode = null)
-        {
+		{
 			context.Response.ContentType = "application/json";
 			context.Response.StatusCode = (int)statusCode;
 

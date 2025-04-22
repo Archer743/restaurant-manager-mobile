@@ -31,7 +31,7 @@ namespace Restaurant_API.Services
 		}
 
 		// Access Token is a JWT token
-		public string GenerateAccessToken(Guid userId, string roleNormalizedName)
+		private string GenerateAccessToken(Guid userId, string roleNormalizedName)
 		{
 			var expiration = DateTime.UtcNow.Add(jwtSettings.AccessTokenLifetime);
 
@@ -56,7 +56,7 @@ namespace Restaurant_API.Services
 		}
 
 		// Refresh token is a random string
-		public string GenerateRefreshToken()
+		private string GenerateRefreshToken()
 		{
 			var randomBytes = new byte[sessionSettings.RefreshTokenLength];
 			using var rng = RandomNumberGenerator.Create();  // Creates a cryptographically secure random number generator

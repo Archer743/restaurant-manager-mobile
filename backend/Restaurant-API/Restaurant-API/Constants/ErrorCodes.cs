@@ -8,6 +8,12 @@
 			public const string InvalidCredentials = "INVALID_CREDENTIALS";
 		}
 
+		public static class Auth
+		{
+			public const string InvalidAuthorization = "INVALID_AUTHORIZATION";
+			public const string ForbiddenAccess = "FORBIDDEN_ACCESS";
+		}
+
 		public static class Session
 		{
 			public const string InvalidSession = "INVALID_SESSION";

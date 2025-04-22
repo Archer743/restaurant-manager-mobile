@@ -2,16 +2,19 @@
 using Restaurant_API.Repositories.Interfaces;
 using Restaurant_API.Services.Interfaces;
 using Restaurant_API.Exceptions;
+using Restaurant_API.Repositories;
 
 namespace Restaurant_API.Services
 {
 	public class RoleService : IRoleService
 	{
 		private readonly IRoleRepository roleRepository;
+		private readonly IUserRepository userRepository;
 
-		public RoleService(IRoleRepository roleRepository)
+		public RoleService(IRoleRepository roleRepository, IUserRepository userRepository)
 		{
 			this.roleRepository = roleRepository;
+			this.userRepository = userRepository;
 		}
 
 		public async Task<Guid> GetRoleIdByNormalizedNameAsync(string normalizedName)
@@ -24,6 +27,12 @@ namespace Restaurant_API.Services
 			}
 
 			return role.Id;
+		}
+
+		public async Task<string?> GetUserRoleNormalizedNameByIdAsync(Guid userId)
+		{
+			User? user = await userRepository.GetUserByIdAsync(userId);
+			return user?.Role.NormalizedName;
 		}
 	}
 }
