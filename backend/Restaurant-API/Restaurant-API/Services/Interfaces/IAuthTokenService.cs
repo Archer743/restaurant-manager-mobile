@@ -4,6 +4,6 @@ namespace Restaurant_API.Services.Interfaces
 {
     public interface IAuthTokenService
 	{
-		UserAuthModel GenerateAuthTokens(Guid userId, string roleNormalizedName);
+		UserAuthModel GenerateAuthTokens(Guid userId);
 	}
 }

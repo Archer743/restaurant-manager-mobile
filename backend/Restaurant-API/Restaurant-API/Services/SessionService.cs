@@ -24,10 +24,10 @@ namespace Restaurant_API.Services
 			this.sessionRepository = sessionRepository;
 		}
 
-		public async Task<UserAuthModel> CreateNewSessionAsync(Guid userId, string roleNormalizedName)
+		public async Task<UserAuthModel> CreateNewSessionAsync(Guid userId)
 		{
 			// Generate new access and refresh tokens
-			UserAuthModel tokens = authTokenService.GenerateAuthTokens(userId, roleNormalizedName);
+			UserAuthModel tokens = authTokenService.GenerateAuthTokens(userId);
 
 			var session = new Session
 			{
@@ -57,7 +57,7 @@ namespace Restaurant_API.Services
 			}
 
 			// Generate new access and refresh tokens
-			UserAuthModel tokens = authTokenService.GenerateAuthTokens(session.UserId, session.User.Role.NormalizedName);
+			UserAuthModel tokens = authTokenService.GenerateAuthTokens(session.UserId);
 
 			// Update session's refresh token & extend the session
 			session.RefreshTokenHash = GetHashedRefreshToken(tokens.RefreshToken);

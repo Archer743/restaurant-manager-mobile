@@ -29,19 +29,17 @@ namespace Restaurant_API.Services
 				throw new ConflictException(ErrorCodes.User.UsernameTaken);
 			}
 			
-			const string userRole = Roles.Staff;
-
 			// User Setup
 			User user = registerModel.ToEntity();
 			user.Id = Guid.NewGuid();
 			user.PasswordHash = GetHashedPassword(registerModel.Password);
-			user.RoleId = await roleService.GetRoleIdByNormalizedNameAsync(userRole);
+			user.RoleId = await roleService.GetRoleIdByNormalizedNameAsync(Roles.Staff);
 
 			// Save the user in the database
 			await userRepository.AddUserAsync(user);
 
 			// Create a new session and retrieve the access & refresh tokens
-			UserAuthModel tokens = await sessionService.CreateNewSessionAsync(user.Id, userRole);
+			UserAuthModel tokens = await sessionService.CreateNewSessionAsync(user.Id);
 			return tokens;
 		}
 
@@ -55,7 +53,7 @@ namespace Restaurant_API.Services
 			}
 
 			// Create a new session and retrieve the access & refresh tokens
-			UserAuthModel tokens = await sessionService.CreateNewSessionAsync(user.Id, user.Role.NormalizedName);
+			UserAuthModel tokens = await sessionService.CreateNewSessionAsync(user.Id);
 			return tokens;
 		}
 

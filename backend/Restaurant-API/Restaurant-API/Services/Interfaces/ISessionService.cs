@@ -4,7 +4,7 @@ namespace Restaurant_API.Services.Interfaces
 {
     public interface ISessionService
 	{
-		Task<UserAuthModel> CreateNewSessionAsync(Guid userId, string roleNormalizedName);
+		Task<UserAuthModel> CreateNewSessionAsync(Guid userId);
 
 		Task<UserAuthModel> RefreshSessionAsync(string refreshToken);
 

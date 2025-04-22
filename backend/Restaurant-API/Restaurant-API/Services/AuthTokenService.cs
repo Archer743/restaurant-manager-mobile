@@ -21,23 +21,22 @@ namespace Restaurant_API.Services
 			this.sessionSettings = sessionSettings.Value;
 		}
 
-		public UserAuthModel GenerateAuthTokens(Guid userId, string roleNormalizedName)
+		public UserAuthModel GenerateAuthTokens(Guid userId)
 		{
 			return new UserAuthModel
 			{
-				AccessToken = GenerateAccessToken(userId, roleNormalizedName),
+				AccessToken = GenerateAccessToken(userId),
 				RefreshToken = GenerateRefreshToken()
 			};
 		}
 
 		// Access Token is a JWT token
-		private string GenerateAccessToken(Guid userId, string roleNormalizedName)
+		private string GenerateAccessToken(Guid userId)
 		{
 			var expiration = DateTime.UtcNow.Add(jwtSettings.AccessTokenLifetime);
 
 			Claim[] claims = [
-				new Claim("userId", userId.ToString()),
-				new Claim("userRole", roleNormalizedName)
+				new Claim("userId", userId.ToString())
 			];
 
 			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.ServerSecretKey));
