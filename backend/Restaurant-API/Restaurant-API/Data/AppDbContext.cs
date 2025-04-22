@@ -11,6 +11,8 @@ namespace Restaurant_API.Data
 
 		public DbSet<Role> Roles { get; set; }
 
+		public DbSet<Session> Sessions { get; set; }
+
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);

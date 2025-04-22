@@ -5,29 +5,33 @@ using System.Security.Claims;
 using System.Text;
 using Restaurant_API.Services.Interfaces;
 using Restaurant_API.Settings;
-using Restaurant_API.Data.Models.User;
+using System.Security.Cryptography;
+using Restaurant_API.Data.Models.Auth;
 
 namespace Restaurant_API.Services
 {
-	public class JwtService : IJwtService
+    public class AuthTokenService : IAuthTokenService
 	{
 		private readonly JwtSettings jwtSettings;
+		private readonly SessionSettings sessionSettings;
 
-		public JwtService(IOptions<JwtSettings> settings)
+		public AuthTokenService(IOptions<JwtSettings> jwtSettings, IOptions<SessionSettings> sessionSettings)
 		{
-			jwtSettings = settings.Value;
+			this.jwtSettings = jwtSettings.Value;
+			this.sessionSettings = sessionSettings.Value;
 		}
 
 		public UserAuthModel GenerateAuthTokens(Guid userId, string roleNormalizedName)
 		{
 			return new UserAuthModel
 			{
-				AccessToken = GenerateNewAccessToken(userId, roleNormalizedName),
-				RefreshToken = GenerateNewRefreshToken(userId)
+				AccessToken = GenerateAccessToken(userId, roleNormalizedName),
+				RefreshToken = GenerateRefreshToken()
 			};
 		}
 
-		public string GenerateNewAccessToken(Guid userId, string roleNormalizedName)
+		// Access Token is a JWT token
+		public string GenerateAccessToken(Guid userId, string roleNormalizedName)
 		{
 			var expiration = DateTime.UtcNow.Add(jwtSettings.AccessTokenLifetime);
 
@@ -36,22 +40,6 @@ namespace Restaurant_API.Services
 				new Claim("userRole", roleNormalizedName)
 			];
 
-			return GenerateNewJwtToken(expiration, claims);
-		}
-
-		public string GenerateNewRefreshToken(Guid userId)
-		{
-			var expiration = DateTime.UtcNow.Add(jwtSettings.RefreshTokenLifetime);
-
-			Claim[] claims = [
-				new Claim("userId", userId.ToString())
-			];
-
-			return GenerateNewJwtToken(expiration, claims);
-		}
-
-		private string GenerateNewJwtToken(DateTime expiration, Claim[] claims)
-		{
 			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.ServerSecretKey));
 
 			var token = new JwtSecurityToken(
@@ -65,6 +53,16 @@ namespace Restaurant_API.Services
 			var tokenHandler = new JwtSecurityTokenHandler();
 
 			return tokenHandler.WriteToken(token);
+		}
+
+		// Refresh token is a random string
+		public string GenerateRefreshToken()
+		{
+			var randomBytes = new byte[sessionSettings.RefreshTokenLength];
+			using var rng = RandomNumberGenerator.Create();  // Creates a cryptographically secure random number generator
+			rng.GetBytes(randomBytes);  // Fills the randomBytes array with secure random values
+
+			return Convert.ToBase64String(randomBytes);  // Base64 string is URL-safe
 		}
 	}
 }

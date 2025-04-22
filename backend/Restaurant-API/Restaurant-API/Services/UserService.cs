@@ -1,6 +1,7 @@
 ﻿using Restaurant_API.Constants;
 using Restaurant_API.Data.Entities;
 using Restaurant_API.Data.Mappers;
+using Restaurant_API.Data.Models.Auth;
 using Restaurant_API.Data.Models.User;
 using Restaurant_API.Exceptions;
 using Restaurant_API.Repositories.Interfaces;
@@ -8,16 +9,16 @@ using Restaurant_API.Services.Interfaces;
 
 namespace Restaurant_API.Services
 {
-	public class UserService : IUserService
+    public class UserService : IUserService
 	{
 		private readonly IRoleService roleService;
-		private readonly IJwtService jwtService;
+		private readonly ISessionService sessionService;
 		private readonly IUserRepository userRepository;
 
-		public UserService(IRoleService roleService, IJwtService jwtService, IUserRepository userRepository)
+		public UserService(IRoleService roleService, ISessionService sessionService, IUserRepository userRepository)
 		{
 			this.roleService = roleService;
-			this.jwtService = jwtService;
+			this.sessionService = sessionService;
 			this.userRepository = userRepository;
 		}
 
@@ -27,16 +28,21 @@ namespace Restaurant_API.Services
 			{
 				throw new ConflictException(ErrorCodes.User.UsernameTaken);
 			}
+			
+			const string userRole = Roles.Staff;
 
+			// User Setup
 			User user = registerModel.ToEntity();
 			user.Id = Guid.NewGuid();
 			user.PasswordHash = GetHashedPassword(registerModel.Password);
-			user.RoleId = await roleService.GetRoleIdByNormalizedNameAsync(Roles.Staff);
+			user.RoleId = await roleService.GetRoleIdByNormalizedNameAsync(userRole);
 
-			// Add a user to the database
+			// Save the user in the database
 			await userRepository.AddUserAsync(user);
 
-			return jwtService.GenerateAuthTokens(user.Id, Roles.Staff);
+			// Create a new session and retrieve the access & refresh tokens
+			UserAuthModel tokens = await sessionService.CreateNewSessionAsync(user.Id, userRole);
+			return tokens;
 		}
 
 		public async Task<UserAuthModel> LoginAsync(UserLoginModel loginModel)
@@ -48,7 +54,9 @@ namespace Restaurant_API.Services
 				throw new UnauthorizedException(ErrorCodes.User.InvalidCredentials);
 			}
 
-			return jwtService.GenerateAuthTokens(user.Id, user.Role.NormalizedName);
+			// Create a new session and retrieve the access & refresh tokens
+			UserAuthModel tokens = await sessionService.CreateNewSessionAsync(user.Id, user.Role.NormalizedName);
+			return tokens;
 		}
 
 		private async Task<bool> IsUsernameAvailableAsync(string username)

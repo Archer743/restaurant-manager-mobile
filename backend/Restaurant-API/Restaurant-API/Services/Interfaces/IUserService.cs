@@ -1,8 +1,9 @@
-﻿using Restaurant_API.Data.Models.User;
+﻿using Restaurant_API.Data.Models.Auth;
+using Restaurant_API.Data.Models.User;
 
 namespace Restaurant_API.Services.Interfaces
 {
-	public interface IUserService
+    public interface IUserService
 	{
 		Task<UserAuthModel> RegisterAsync(UserRegisterModel registerModel);
 

@@ -22,6 +22,9 @@ namespace Restaurant_API
 
 			builder.Services.AddOptions<JwtSettings>().BindConfiguration("JwtSettings")
 							.ValidateDataAnnotations().ValidateOnStart();
+
+			builder.Services.AddOptions<SessionSettings>().BindConfiguration("SessionSettings")
+							.ValidateDataAnnotations().ValidateOnStart();
 		}
 
 		private static void ConfigureServices(WebApplicationBuilder builder)
@@ -75,11 +78,13 @@ namespace Restaurant_API
 			// TODO: Repositories Setup
 			builder.Services.AddScoped<IUserRepository, UserRepository>();
 			builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+			builder.Services.AddScoped<ISessionRepository, SessionRepository>();
 
 			// TODO: Services Setup
 			builder.Services.AddScoped<IUserService, UserService>();
 			builder.Services.AddScoped<IRoleService, RoleService>();
-			builder.Services.AddScoped<IJwtService, JwtService>();
+			builder.Services.AddScoped<IAuthTokenService, AuthTokenService>();
+			builder.Services.AddScoped<ISessionService, SessionService>();
 		}
 
 		// Middleware Setup

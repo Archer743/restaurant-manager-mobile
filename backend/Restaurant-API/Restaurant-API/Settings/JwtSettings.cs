@@ -15,8 +15,5 @@ namespace Restaurant_API.Settings
 
 		[Required]
 		public TimeSpan AccessTokenLifetime { get; init; }
-
-		[Required]
-		public TimeSpan RefreshTokenLifetime { get; init; }
 	}
 }

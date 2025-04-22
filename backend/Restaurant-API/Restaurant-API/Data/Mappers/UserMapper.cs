@@ -15,10 +15,5 @@ namespace Restaurant_API.Data.Mappers
 				// Id, PasswordHash and RoleId are set in UserService
 			};
 		}
-
-		private static string GetHashedPassword(string password)
-		{
-			return BCrypt.Net.BCrypt.EnhancedHashPassword(password, 13);
-		}
 	}
 }

@@ -46,6 +46,35 @@ namespace Restaurant_API.Migrations
                     b.ToTable("Roles");
                 });
 
+            modelBuilder.Entity("Restaurant_API.Data.Entities.Session", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("RefreshTokenHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Sessions");
+                });
+
             modelBuilder.Entity("Restaurant_API.Data.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -82,6 +111,17 @@ namespace Restaurant_API.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Restaurant_API.Data.Entities.Session", b =>
+                {
+                    b.HasOne("Restaurant_API.Data.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Restaurant_API.Data.Entities.User", b =>
