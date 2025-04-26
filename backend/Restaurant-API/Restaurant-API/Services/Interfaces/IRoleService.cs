@@ -1,6 +1,4 @@
-﻿using Restaurant_API.Repositories;
-
-namespace Restaurant_API.Services.Interfaces
+﻿namespace Restaurant_API.Services.Interfaces
 {
 	public interface IRoleService
 	{

@@ -1,8 +1,6 @@
 ﻿using Restaurant_API.Data.Entities;
 using Restaurant_API.Repositories.Interfaces;
 using Restaurant_API.Services.Interfaces;
-using Restaurant_API.Exceptions;
-using Restaurant_API.Repositories;
 
 namespace Restaurant_API.Services
 {

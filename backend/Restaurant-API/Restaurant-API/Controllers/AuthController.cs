@@ -6,20 +6,18 @@ using Restaurant_API.Services.Interfaces;
 namespace Restaurant_API.Controllers
 {
     [ApiController]
-	[Route("users")]
-	public class UserController : ControllerBase
+	[Route("api/auth")]
+	public class AuthController : ControllerBase
 	{
 		private readonly IUserService userService;
 		private readonly ISessionService sessionService;
 
-		public UserController(IUserService userService, ISessionService sessionService)
+		public AuthController(IUserService userService, ISessionService sessionService)
 		{
 			this.userService = userService;
 			this.sessionService = sessionService;
 		}
 
-
-		// ======================================================= Authentication Endpoints
 		[HttpPost("register")]
 		public async Task<IActionResult> RegisterAsync(UserRegisterModel registerModel)
 		{

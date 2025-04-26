@@ -12,12 +12,9 @@ namespace Restaurant_API.Middlewares
 	public class AuthenticationMiddleware : BaseAuthMiddleware
 	{
 		private readonly TokenValidationParameters validParams;
-		private readonly IRoleService roleService;
 
-		public AuthenticationMiddleware(RequestDelegate next, IOptions<JwtSettings> settings, IRoleService roleService) : base(next)
+		public AuthenticationMiddleware(RequestDelegate next, IOptions<JwtSettings> settings) : base(next)
 		{
-			this.roleService = roleService;
-
 			JwtSettings jwtSettings = settings.Value;
 			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.ServerSecretKey));
 
@@ -33,7 +30,7 @@ namespace Restaurant_API.Middlewares
 			};
 		}
 
-		public async Task InvokeAsync(HttpContext context)
+		public async Task InvokeAsync(HttpContext context, IRoleService roleService)
 		{
 			var endpointAuth = GetEndpointAuthorization(context);
 

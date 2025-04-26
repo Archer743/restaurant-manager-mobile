@@ -6,10 +6,10 @@ namespace Restaurant_API.Data.Models.User
 	public class UserLoginModel
 	{
 		[StringLength(40, MinimumLength = 3)]
-		public string Username { get; set; }
+		public string Username { get; init; }
 
 
 		[Password]
-		public string Password { get; set; }
+		public string Password { get; init; }
 	}
 }
