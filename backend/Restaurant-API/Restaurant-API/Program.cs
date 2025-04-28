@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Restaurant_API.Constants;
 using Restaurant_API.Data;
 using Restaurant_API.Middlewares;
@@ -70,10 +72,24 @@ namespace Restaurant_API
 			 * .AddTransient	=> New instance every time it’s requested.
 			 */
 
+
 			// Database Setup
 			var connectionStrings = builder.Services.BuildServiceProvider()
 													.GetService<IOptions<ConnectionStrings>>()!.Value;
+
 			builder.Services.AddDbContext<AppDbContext>(c => c.UseNpgsql(connectionStrings.PostgresConnection));
+
+
+			// Hangfire Setup
+			builder.Services.AddHangfire(config => config
+					.SetDataCompatibilityLevel(CompatibilityLevel.Version_180)  // Use compatibility rules from Hangfire 1.8.0 (and later)
+					.UseSimpleAssemblyNameTypeSerializer()
+					.UseRecommendedSerializerSettings()
+					.UsePostgreSqlStorage(options => options.UseNpgsqlConnection(connectionStrings.PostgresConnection))
+			);
+
+			builder.Services.AddHangfireServer();  // Adds a background worker that processes jobs
+
 
 			// TODO: Repositories Setup
 			builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -87,18 +103,21 @@ namespace Restaurant_API
 			builder.Services.AddScoped<ISessionService, SessionService>();
 		}
 
-		// Middleware Setup
 		private static void ConfigureApp(WebApplication app)
 		{
-			// Swagger Setup in Dev Environment
+			// Swagger & Hangfire Setup in Dev Environment
 			if (app.Environment.IsDevelopment())
 			{
 				app.UseSwagger();
 				app.UseSwaggerUI();
+
+				app.UseHangfireDashboard("/hangfire");
 			}
+
 
 			app.UseCors();  // Enables CORS
 			app.UseHttpsRedirection();  // Redirects all HTTP requests to HTTPS
+
 
 			/*
 			 * Middleware ordering is critical:
@@ -109,7 +128,14 @@ namespace Restaurant_API
 			app.UseAppAuthentication();
 			app.UseAppAuthorization();
 
+
 			app.MapControllers();  // Routes requests to controller actions
+
+
+			// Hangfire Recurring Jobs
+			// Will remove old inactive sessions at midnight UTC everyday
+			RecurringJob.AddOrUpdate<ISessionService>("rm-old-inactive-sessions-job", service => service.RemoveOldInactiveSessionsAsync(), Cron.Daily());
+
 
 			// TODO: Enable Database Seeding
 			// app.SeedDbAsync().GetAwaiter().GetResult();

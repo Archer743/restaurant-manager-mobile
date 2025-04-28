@@ -26,12 +26,29 @@ namespace Restaurant_API.Repositories
 			await context.SaveChangesAsync();
 		}
 
+		public async Task RemoveSessionRangeAsync(IEnumerable<Session> sessions)
+		{
+			context.Sessions.RemoveRange(sessions);
+			await context.SaveChangesAsync();
+		}
+
 		public async Task<Session?> GetSessionByHashedTokenAsync(string refreshTokenHash)
 		{
 			return await context.Sessions
 								.Include(session => session.User)
 								.ThenInclude(user => user.Role)
 								.FirstOrDefaultAsync(session => session.RefreshTokenHash == refreshTokenHash);
+		}
+
+		public async Task<List<Session>> GetOldInactiveSessionsAsync(uint thresholdDays)
+		{
+			var thresholdDate = DateTime.UtcNow.AddDays(-thresholdDays);
+
+			return await context.Sessions
+								.Where(session =>
+									(session.ExpiresAt < DateTime.UtcNow || session.IsRevoked)
+									&& session.ExpiresAt < thresholdDate)
+								.ToListAsync();
 		}
 	}
 }

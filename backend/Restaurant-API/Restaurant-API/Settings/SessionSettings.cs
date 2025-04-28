@@ -5,15 +5,15 @@ namespace Restaurant_API.Settings
 	public class SessionSettings
 	{
 		[Required]
-		public int RefreshTokenLength { get; set; }
+		public uint RefreshTokenLength { get; init; }
 
 		[Required]
-		public string ServerSecretKey { get; set; }
+		public string ServerSecretKey { get; init; }
 
 		[Required]
 		public TimeSpan SessionLifetime { get; init; }
 
 		[Required]
-		public TimeSpan CleanupInterval { get; init; }
+		public uint RetentionDays { get; init; }
 	}
 }

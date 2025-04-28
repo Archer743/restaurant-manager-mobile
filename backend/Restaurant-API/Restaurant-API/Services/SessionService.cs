@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Restaurant_API.Constants;
 using Restaurant_API.Data.Models.Auth;
+using Restaurant_API.Repositories;
 
 namespace Restaurant_API.Services
 {
@@ -81,6 +82,12 @@ namespace Restaurant_API.Services
 			// End session
 			session.IsRevoked = true;
 			await sessionRepository.UpdateSessionAsync(session);
+		}
+
+		public async Task RemoveOldInactiveSessionsAsync()
+		{
+			var oldSessions = await sessionRepository.GetOldInactiveSessionsAsync(sessionSettings.RetentionDays);
+			await sessionRepository.RemoveSessionRangeAsync(oldSessions);
 		}
 
 		private string GetHashedRefreshToken(string refreshToken)
