@@ -1,0 +1,56 @@
+name: restaurant_manager_app
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # State management
+  flutter_bloc: ^9.1.0
+
+  # Comparing dart objects 
+  equatable: ^2.0.7
+
+  # Service locator
+  get_it: ^8.0.3
+
+  # Date format
+  intl: ^0.20.2
+
+  # Make requests to api
+  dio: ^5.8.0+1
+  retrofit: ^4.4.2
+
+  # Used for transfortming objects into json
+  json_annotation: ^4.9.0
+  
+  # Handle Success/Error State From Data Source
+  dartz: ^0.10.1
+
+  # Securely store access and refresh tokens on the device
+  flutter_secure_storage: ^4.2.1
+
+  # App Routing
+  go_router: ^14.6.2
+  jwt_decoder: ^2.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  retrofit_generator: 8.2.1
+  build_runner: ^2.4.9
+  json_serializable: ^6.8.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/

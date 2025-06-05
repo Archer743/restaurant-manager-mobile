@@ -116,14 +116,15 @@ namespace Restaurant_API
 
 
 			app.UseCors();  // Enables CORS
-			app.UseHttpsRedirection();  // Redirects all HTTP requests to HTTPS
+			// TODO: Fix in Production !!!!!
+			// app.UseHttpsRedirection();  // Redirects all HTTP requests to HTTPS
 
 
 			/*
 			 * Middleware ordering is critical:
 			 * GlobalExceptionHandler -> Authentication -> Authorization
 			 */
-			
+
 			app.UseGlobalExceptionHandler();
 			app.UseAppAuthentication();
 			app.UseAppAuthorization();
@@ -145,6 +146,7 @@ namespace Restaurant_API
 		{
 			// Create an app builder
 			var builder = WebApplication.CreateBuilder(args);
+
 			ConfigureSettings(builder);
 			ConfigureServices(builder);
 
