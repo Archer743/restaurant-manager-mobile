@@ -37,8 +37,8 @@ Future<Either<Failure, T>> handleRequest<T>(
     }
 
     return Left(ServerFailure(statusCode: statusCode, errorCode: errorCode));
-  } on AuthException {
-    return Left(AuthFailure());
+  } on AuthTokenException {
+    return Left(AuthTokenFailure());
   } catch (e) {
     // TODO: Add logger
     return Left(UnknownFailure());

@@ -29,6 +29,8 @@ final appBarTextStyle = TextStyle(
     color: textColor.toColor(), fontSize: 26, fontWeight: FontWeight.w600);
 final snackBarTextStyle = TextStyle(
     color: textColor.toColor(), fontSize: 16, fontWeight: FontWeight.w600);
+final defaultTextStyle = TextStyle(
+    color: textColor.toColor(), fontSize: 16, fontWeight: FontWeight.w600);
 
 // Border Settings
 const double borderRadius = 12;

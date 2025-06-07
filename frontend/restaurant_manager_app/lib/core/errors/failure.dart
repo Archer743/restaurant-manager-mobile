@@ -18,4 +18,4 @@ class ServerFailure extends Failure {
 }
 
 /// Auth tokens are invalid or null
-class AuthFailure extends Failure {}
+class AuthTokenFailure extends Failure {}

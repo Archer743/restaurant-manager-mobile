@@ -43,16 +43,14 @@ class AuthRepositoryImpl implements AuthRepository {
       // Get refresh token
       final refreshToken = await _tokenService.getRefreshToken();
 
-      // Remove old tokens
-      await _tokenService.clearTokens();
-
       // User should login / register
       if (refreshToken == null || refreshToken.isEmpty) {
-        throw AuthException();
+        throw AuthTokenException();
       }
 
       final model = AuthRefreshModel(refreshToken);
       final result = await _authApiService.refresh(model);
+
       await _tokenService.saveTokens(result.data); // Save new tokens locally
       return null;
     });
@@ -66,8 +64,8 @@ class AuthRepositoryImpl implements AuthRepository {
       }
 
       return const Right(null);
-    } on AuthException {
-      return Left(AuthFailure());
+    } on AuthTokenException {
+      return Left(AuthTokenFailure());
     }
   }
 }

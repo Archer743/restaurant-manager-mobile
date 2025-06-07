@@ -26,13 +26,13 @@ class TokenStorageService {
     final String? accessToken = await getAccessToken();
 
     if (accessToken == null || accessToken.isEmpty) {
-      throw AuthException();
+      throw AuthTokenException();
     }
 
     try {
       return JwtDecoder.isExpired(accessToken);
     } on FormatException {
-      throw AuthException();
+      throw AuthTokenException();
     }
   }
 }

@@ -1,1 +1,1 @@
-class AuthException {}
+class AuthTokenException {}

@@ -1,4 +1,5 @@
-abstract class ServerErrorCodes {
+abstract class ErrorCodes {
+  // ======================================================== Server Error Codes
   // Group: User
   static const String usernameTaken = 'USERNAME_TAKEN';
   static const String invalidCredentials = 'INVALID_CREDENTIALS';
@@ -12,4 +13,8 @@ abstract class ServerErrorCodes {
 
   // Group: General
   static const String invalidModel = 'INVALID_MODEL';
+
+  // ======================================================== App Error Codes
+  static const String network = 'NETWORK';
+  static const String unknown = 'UNKNOWN';
 }

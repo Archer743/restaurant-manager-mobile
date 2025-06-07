@@ -10,7 +10,7 @@ class SnackBarService {
   }
 
   static void showFailure(BuildContext context, Failure failure) {
-    final message = getErrorMessage(failure);
+    final message = getFailureMessage(failure);
     _showSnackbar(context, Icons.close, message, warningColor);
   }
 

@@ -1,7 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
-import 'package:restaurant_manager_app/config/routing/auth_state_notifier.dart';
 import 'package:restaurant_manager_app/core/constants/api_urls.dart';
 import 'package:restaurant_manager_app/features/auth/data/data_sources/local/token_storage_service.dart';
 import 'package:restaurant_manager_app/features/auth/data/data_sources/remote/auth_api_service.dart';
@@ -11,6 +10,9 @@ import 'package:restaurant_manager_app/features/auth/domain/usecases/login_user.
 import 'package:restaurant_manager_app/features/auth/domain/usecases/register_user.dart';
 import 'package:restaurant_manager_app/features/auth/presentation/bloc/login/login_bloc.dart';
 import 'package:restaurant_manager_app/features/auth/presentation/bloc/register/register_bloc.dart';
+import 'package:restaurant_manager_app/features/splash/domain/usecases/check_auth_status.dart';
+import 'package:restaurant_manager_app/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:restaurant_manager_app/features/splash/presentation/bloc/splash_event.dart';
 
 final sl = GetIt.instance;
 
@@ -46,12 +48,10 @@ Future<void> initDependencies() async {
   // UseCases
   sl.registerSingleton<LoginUserUseCase>(LoginUserUseCase(sl()));
   sl.registerSingleton<RegisterUserUseCase>(RegisterUserUseCase(sl()));
+  sl.registerSingleton<CheckAuthStatusUseCase>(CheckAuthStatusUseCase(sl()));
 
   // Blocs
   sl.registerFactory<LoginBloc>(() => LoginBloc(sl()));
   sl.registerFactory<RegisterBloc>(() => RegisterBloc(sl()));
-
-  // Auth State Notifier
-  sl.registerSingleton<AuthStateNotifier>(
-      AuthStateNotifier(sl<AuthRepository>()));
+  sl.registerFactory<SplashBloc>(() => SplashBloc(sl()));
 }
