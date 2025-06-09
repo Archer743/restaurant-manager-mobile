@@ -6,18 +6,18 @@ namespace Restaurant_API.Services
 {
 	public class RoleService : IRoleService
 	{
-		private readonly IRoleRepository roleRepository;
-		private readonly IUserRepository userRepository;
+		private readonly IRoleRepo roleRepo;
+		private readonly IUserRepo userRepo;
 
-		public RoleService(IRoleRepository roleRepository, IUserRepository userRepository)
+		public RoleService(IRoleRepo roleRepo, IUserRepo userRepo)
 		{
-			this.roleRepository = roleRepository;
-			this.userRepository = userRepository;
+			this.roleRepo = roleRepo;
+			this.userRepo = userRepo;
 		}
 
 		public async Task<Guid> GetRoleIdByNormalizedNameAsync(string normalizedName)
 		{
-			Role? role = await roleRepository.GetByNormalizedNameAsync(normalizedName);
+			Role? role = await roleRepo.GetByNormalizedNameAsync(normalizedName);
 
 			if (role == null)
 			{
@@ -29,7 +29,7 @@ namespace Restaurant_API.Services
 
 		public async Task<string?> GetUserRoleNormalizedNameByIdAsync(Guid userId)
 		{
-			User? user = await userRepository.GetUserByIdAsync(userId);
+			User? user = await userRepo.GetByIdAsync(userId);
 			return user?.Role.NormalizedName;
 		}
 	}

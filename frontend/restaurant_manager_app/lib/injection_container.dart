@@ -12,7 +12,6 @@ import 'package:restaurant_manager_app/features/auth/presentation/bloc/login/log
 import 'package:restaurant_manager_app/features/auth/presentation/bloc/register/register_bloc.dart';
 import 'package:restaurant_manager_app/features/splash/domain/usecases/check_auth_status.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:restaurant_manager_app/features/splash/presentation/bloc/splash_event.dart';
 
 final sl = GetIt.instance;
 

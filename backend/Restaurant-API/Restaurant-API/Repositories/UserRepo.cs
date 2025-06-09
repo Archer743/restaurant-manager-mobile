@@ -5,29 +5,29 @@ using Restaurant_API.Repositories.Interfaces;
 
 namespace Restaurant_API.Repositories
 {
-	public class UserRepository : IUserRepository
+	public class UserRepo : IUserRepo
 	{
 		private readonly AppDbContext context;
 
-		public UserRepository(AppDbContext context)
+		public UserRepo(AppDbContext context)
 		{
 			this.context = context;
 		}
 
-		public async Task AddUserAsync(User user)
+		public async Task AddAsync(User user)
 		{
 			context.Users.Add(user);
 			await context.SaveChangesAsync();
 		}
 
-		public async Task<User?> GetUserByUsernameAsync(string username)
+		public async Task<User?> GetByUsernameAsync(string username)
 		{
 			return await context.Users
 								.Include(user => user.Role)
 								.FirstOrDefaultAsync(user => user.Username == username);
 		}
 
-		public async Task<User?> GetUserByIdAsync(Guid id)
+		public async Task<User?> GetByIdAsync(Guid id)
 		{
 			return await context.Users
 								.Include(user => user.Role)

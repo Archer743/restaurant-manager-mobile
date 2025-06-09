@@ -45,7 +45,7 @@ namespace Restaurant_API
 					// TODO: Specify what is invalid in each model field [FUTURE]
 					var errorResponse = new
 					{
-						errorCode = ErrorCodes.General.InvalidModel
+						errorCode = ErrorCodes.Data.InvalidModel
 					};
 
 					return new BadRequestObjectResult(errorResponse);
@@ -92,16 +92,19 @@ namespace Restaurant_API
 
 
 			// TODO: Repositories Setup
-			builder.Services.AddScoped<IUserRepository, UserRepository>();
-			builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-			builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+			builder.Services.AddScoped<IUserRepo, UserRepo>();
+			builder.Services.AddScoped<IRoleRepo, RoleRepo>();
+			builder.Services.AddScoped<ISessionRepo, SessionRepo>();
+            builder.Services.AddScoped<IRestaurantRepo, RestaurantRepo>();
+            builder.Services.AddScoped<IReservationRepo, ReservationRepo>();
 
-			// TODO: Services Setup
-			builder.Services.AddScoped<IUserService, UserService>();
+            // TODO: Services Setup
+            builder.Services.AddScoped<IUserService, UserService>();
 			builder.Services.AddScoped<IRoleService, RoleService>();
 			builder.Services.AddScoped<IAuthTokenService, AuthTokenService>();
 			builder.Services.AddScoped<ISessionService, SessionService>();
-		}
+			builder.Services.AddScoped<IReservationService, ReservationService>();
+        }
 
 		private static void ConfigureApp(WebApplication app)
 		{

@@ -13,6 +13,10 @@ namespace Restaurant_API.Data
 
 		public DbSet<Session> Sessions { get; set; }
 
+		public DbSet<Restaurant> Restaurants { get; set; }
+
+		public DbSet<Reservation> Reservations { get; set; }
+
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);

@@ -2,7 +2,7 @@
 
 namespace Restaurant_API.Repositories.Interfaces
 {
-	public interface IRoleRepository
+	public interface IRoleRepo
 	{
 		Task<Role?> GetByNormalizedNameAsync(string normalizedName);
 	}

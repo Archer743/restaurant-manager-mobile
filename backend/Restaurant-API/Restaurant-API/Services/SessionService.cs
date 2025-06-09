@@ -8,7 +8,6 @@ using System.Security.Cryptography;
 using System.Text;
 using Restaurant_API.Constants;
 using Restaurant_API.Data.Models.Auth;
-using Restaurant_API.Repositories;
 
 namespace Restaurant_API.Services
 {
@@ -16,13 +15,13 @@ namespace Restaurant_API.Services
 	{
 		private readonly SessionSettings sessionSettings;
 		private readonly IAuthTokenService authTokenService;
-		private readonly ISessionRepository sessionRepository;
+		private readonly ISessionRepo sessionRepo;
 
-		public SessionService(IOptions<SessionSettings> settings, IAuthTokenService authTokenService, ISessionRepository sessionRepository)
+		public SessionService(IOptions<SessionSettings> settings, IAuthTokenService authTokenService, ISessionRepo sessionRepo)
 		{
 			sessionSettings = settings.Value;
 			this.authTokenService = authTokenService;
-			this.sessionRepository = sessionRepository;
+			this.sessionRepo = sessionRepo;
 		}
 
 		public async Task<UserAuthModel> CreateNewSessionAsync(Guid userId)
@@ -41,7 +40,7 @@ namespace Restaurant_API.Services
 			};
 
 			// Save the session in the database
-			await sessionRepository.AddSessionAsync(session);
+			await sessionRepo.AddAsync(session);
 
 			return tokens;
 		}
@@ -49,7 +48,7 @@ namespace Restaurant_API.Services
 		public async Task<UserAuthModel> RefreshSessionAsync(string refreshToken)
 		{
 			string hashedToken = GetHashedRefreshToken(refreshToken);
-			Session? session = await sessionRepository.GetSessionByHashedTokenAsync(hashedToken);
+			Session? session = await sessionRepo.GetByHashedTokenAsync(hashedToken);
 
 			// Session must be active - exists, isn't expired and isn't revoked
 			if (session == null || session.ExpiresAt < DateTime.UtcNow || session.IsRevoked)
@@ -63,7 +62,7 @@ namespace Restaurant_API.Services
 			// Update session's refresh token & extend the session
 			session.RefreshTokenHash = GetHashedRefreshToken(tokens.RefreshToken);
 			session.ExpiresAt = DateTime.UtcNow.Add(sessionSettings.SessionLifetime);
-			await sessionRepository.UpdateSessionAsync(session);
+			await sessionRepo.UpdateAsync(session);
 
 			return tokens;
 		}
@@ -71,7 +70,7 @@ namespace Restaurant_API.Services
 		public async Task EndSessionAsync(string refreshToken)
 		{
 			string hashedToken = GetHashedRefreshToken(refreshToken);
-			Session? session = await sessionRepository.GetSessionByHashedTokenAsync(hashedToken);
+			Session? session = await sessionRepo.GetByHashedTokenAsync(hashedToken);
 
 			// Session must be active - exists, isn't expired and isn't revoked
 			if (session == null || session.ExpiresAt < DateTime.UtcNow || session.IsRevoked)
@@ -81,13 +80,13 @@ namespace Restaurant_API.Services
 
 			// End session
 			session.IsRevoked = true;
-			await sessionRepository.UpdateSessionAsync(session);
+			await sessionRepo.UpdateAsync(session);
 		}
 
 		public async Task RemoveOldInactiveSessionsAsync()
 		{
-			var oldSessions = await sessionRepository.GetOldInactiveSessionsAsync(sessionSettings.RetentionDays);
-			await sessionRepository.RemoveSessionRangeAsync(oldSessions);
+			var oldSessions = await sessionRepo.GetOldInactiveSessionsAsync(sessionSettings.RetentionDays);
+			await sessionRepo.RemoveRangeAsync(oldSessions);
 		}
 
 		private string GetHashedRefreshToken(string refreshToken)

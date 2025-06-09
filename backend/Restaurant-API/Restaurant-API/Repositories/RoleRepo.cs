@@ -5,11 +5,11 @@ using Restaurant_API.Repositories.Interfaces;
 
 namespace Restaurant_API.Repositories
 {
-	public class RoleRepository : IRoleRepository
+	public class RoleRepo : IRoleRepo
 	{
 		private readonly AppDbContext context;
 
-		public RoleRepository(AppDbContext context)
+		public RoleRepo(AppDbContext context)
 		{
 			this.context = context;
 		}
