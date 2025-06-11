@@ -54,6 +54,9 @@ namespace Restaurant_API.Migrations
                     b.Property<Guid>("RestaurantId")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("State")
+                        .HasColumnType("integer");
+
                     b.Property<TimeOnly>("Time")
                         .HasColumnType("time without time zone");
 
@@ -78,6 +81,24 @@ namespace Restaurant_API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Restaurants");
+                });
+
+            modelBuilder.Entity("Restaurant_API.Data.Entities.RestaurantUser", b =>
+                {
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("MemberSince")
+                        .HasColumnType("date");
+
+                    b.HasKey("RestaurantId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RestaurantUsers");
                 });
 
             modelBuilder.Entity("Restaurant_API.Data.Entities.Role", b =>
@@ -180,6 +201,25 @@ namespace Restaurant_API.Migrations
                         .IsRequired();
 
                     b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("Restaurant_API.Data.Entities.RestaurantUser", b =>
+                {
+                    b.HasOne("Restaurant_API.Data.Entities.Restaurant", "Restaurant")
+                        .WithMany()
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Restaurant_API.Data.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Restaurant");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Restaurant_API.Data.Entities.Session", b =>

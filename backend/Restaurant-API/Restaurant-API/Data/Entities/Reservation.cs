@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Restaurant_API.Data.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Restaurant_API.Data.Entities
@@ -44,5 +45,9 @@ namespace Restaurant_API.Data.Entities
         // Optional comment
         [MaxLength(500)]
         public string? Comment { get; set; }
+
+
+        // The reservation is initially in Pending status and then an employee must confirm or reject it
+        public ReservationState State { get; set; }
     }
 }

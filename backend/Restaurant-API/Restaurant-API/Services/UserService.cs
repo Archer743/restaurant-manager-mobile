@@ -57,7 +57,15 @@ namespace Restaurant_API.Services
 			return tokens;
 		}
 
-		private async Task<bool> IsUsernameAvailableAsync(string username)
+		public async Task<User> GetCurrUserAsync(HttpContext ctx)
+		{
+			Guid userId = (Guid)ctx.Items["UserId"]!;
+			User? currUser = await userRepo.GetByIdAsync(userId);
+
+			return currUser ?? throw new UnauthorizedException(ErrorCodes.Auth.UserNotFound);
+        }
+
+        private async Task<bool> IsUsernameAvailableAsync(string username)
 		{
 			return (await userRepo.GetByUsernameAsync(username)) == null;
 		}

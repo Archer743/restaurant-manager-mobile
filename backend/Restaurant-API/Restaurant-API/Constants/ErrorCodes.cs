@@ -6,6 +6,7 @@
         {
             public const string InvalidAuthorization = "INVALID_AUTHORIZATION";
             public const string ForbiddenAccess = "FORBIDDEN_ACCESS";
+            public const string UserNotFound = "USER_NOT_FOUND";
         }
 
         public static class Session
@@ -17,7 +18,8 @@
 		{
 			public const string UsernameTaken = "USERNAME_TAKEN";
 			public const string InvalidCredentials = "INVALID_CREDENTIALS";
-		}
+            public const string NoAssociatedRestaurant = "NO_ASSOCIATED_RESTAURANT";
+        }
 
         public static class Restaurant
         {

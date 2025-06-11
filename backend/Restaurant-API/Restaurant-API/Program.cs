@@ -96,10 +96,11 @@ namespace Restaurant_API
 			builder.Services.AddScoped<IRoleRepo, RoleRepo>();
 			builder.Services.AddScoped<ISessionRepo, SessionRepo>();
             builder.Services.AddScoped<IRestaurantRepo, RestaurantRepo>();
+			builder.Services.AddScoped<IRestaurantUserRepo, RestaurantUserRepo>();
             builder.Services.AddScoped<IReservationRepo, ReservationRepo>();
 
-            // TODO: Services Setup
-            builder.Services.AddScoped<IUserService, UserService>();
+			// TODO: Services Setup
+			builder.Services.AddScoped<IUserService, UserService>();
 			builder.Services.AddScoped<IRoleService, RoleService>();
 			builder.Services.AddScoped<IAuthTokenService, AuthTokenService>();
 			builder.Services.AddScoped<ISessionService, SessionService>();
