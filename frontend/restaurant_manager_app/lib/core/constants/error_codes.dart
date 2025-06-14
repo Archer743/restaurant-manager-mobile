@@ -3,6 +3,7 @@ abstract class ErrorCodes {
   // Group: User
   static const String usernameTaken = 'USERNAME_TAKEN';
   static const String invalidCredentials = 'INVALID_CREDENTIALS';
+  static const String noAssociatedRestaurant = 'NO_ASSOCIATED_RESTAURANT';
 
   // Group: Auth
   static const String invalidAuthorization = 'INVALID_AUTHORIZATION';

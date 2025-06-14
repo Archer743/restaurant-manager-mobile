@@ -6,6 +6,7 @@ import 'package:restaurant_manager_app/features/auth/presentation/bloc/register/
 import 'package:restaurant_manager_app/features/auth/presentation/pages/login_page.dart';
 import 'package:restaurant_manager_app/features/auth/presentation/pages/register_page.dart';
 import 'package:restaurant_manager_app/features/auth/presentation/pages/welcome_page.dart';
+import 'package:restaurant_manager_app/features/home/presentation/home_page.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/bloc/splash_event.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/splash_page.dart';
@@ -18,15 +19,15 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.splash,
       builder: (_, __) {
         return BlocProvider<SplashBloc>(
-          create: (_) => sl()..add(CheckAuthEvent()),
+          create: (_) => sl()..add(CheckAuth()),
           child: const SplashPage(),
         );
       },
     ),
-    // GoRoute(
-    //   path: AppRoutes.home,
-    //   builder: (_, __) => const HomePage(),
-    // ),
+    GoRoute(
+      path: AppRoutes.home,
+      builder: (_, __) => const HomePage(),
+    ),
     GoRoute(
       path: AppRoutes.welcome,
       builder: (_, __) => const WelcomePage(),

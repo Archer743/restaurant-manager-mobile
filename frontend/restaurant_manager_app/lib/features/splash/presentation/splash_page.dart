@@ -53,7 +53,7 @@ class _SplashPageState extends State<SplashPage> {
                     SizedBox(height: spacingByHeight(context, 0.03)),
                     ElevatedButton(
                       onPressed: () {
-                        context.read<SplashBloc>().add(CheckAuthEvent());
+                        context.read<SplashBloc>().add(CheckAuth());
                       },
                       child: const Text('Опитай пак'),
                     ),

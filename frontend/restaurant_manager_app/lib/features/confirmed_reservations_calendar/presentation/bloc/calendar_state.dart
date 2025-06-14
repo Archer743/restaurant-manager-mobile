@@ -1,0 +1,24 @@
+import 'package:restaurant_manager_app/core/errors/failure.dart';
+import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/typedefs.dart';
+
+abstract class CalendarState {}
+
+class CalendarInitial extends CalendarState {}
+
+class CalendarLoading extends CalendarState {}
+
+class CalendarLoaded extends CalendarState {
+  final CalendarConfirmedReservations reservations;
+
+  CalendarLoaded(this.reservations);
+}
+
+class CalendarError extends CalendarState {
+  final Failure failure;
+  late final bool requiresReauthentication;
+
+  CalendarError(this.failure) {
+    requiresReauthentication =
+        (failure is AuthTokenFailure || failure is InvalidSessionFailure);
+  }
+}

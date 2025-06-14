@@ -19,3 +19,5 @@ class ServerFailure extends Failure {
 
 /// Auth tokens are invalid or null
 class AuthTokenFailure extends Failure {}
+
+class InvalidSessionFailure extends Failure {}

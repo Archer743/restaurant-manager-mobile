@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:restaurant_manager_app/features/auth/presentation/pages/welcome_page.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_bloc.dart';
+import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/pages/confirmed_reservations_calendar_page.dart';
+import 'package:restaurant_manager_app/injection_container.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -9,14 +12,27 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final _pageController = PageController(initialPage: 1);
-  int _currIndex = 1;
+  final _pageController = PageController(initialPage: 0);
+  int _currIndex = 0;
 
-  final List<Widget> _pages = const [
-    WelcomePage(),
-    WelcomePage(),
-    WelcomePage(),
-  ];
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _pages = [
+      BlocProvider<CalendarBloc>(
+        create: (_) => sl(),
+        child: const ConfirmedReservationsCalendarPage(),
+      ),
+      const Scaffold(body: Center(child: Text("2: Restaurant Tables"))),
+      const Scaffold(body: Center(child: Text("3: Pending Reservations"))),
+      const Scaffold(
+          body: Center(child: Text("4: Logs (Staff Activity History)"))),
+      const Scaffold(body: Center(child: Text("5: Profile"))),
+    ];
+  }
 
   @override
   void dispose() {
@@ -44,12 +60,12 @@ class _HomePageState extends State<HomePage> {
           );
         },
         destinations: const [
+          NavigationDestination(icon: Icon(Icons.event_note), label: ''),
           NavigationDestination(
-              icon: Icon(Icons.fitness_center_outlined), label: "Library"),
-          NavigationDestination(
-              icon: Icon(Icons.search_outlined), label: "Search"),
-          NavigationDestination(
-              icon: Icon(Icons.person_outline), label: "Profile")
+              icon: Icon(Icons.table_restaurant_sharp), label: ''),
+          NavigationDestination(icon: Icon(Icons.check_circle), label: ''),
+          NavigationDestination(icon: Icon(Icons.history), label: ''),
+          NavigationDestination(icon: Icon(Icons.person), label: ''),
         ],
       ),
     );

@@ -1,13 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:restaurant_manager_app/core/utils/future_utils.dart';
-import 'package:restaurant_manager_app/features/auth/domain/usecases/register_user.dart';
+import 'package:restaurant_manager_app/features/auth/domain/usecases/register_user_usecase.dart';
 import 'package:restaurant_manager_app/features/auth/presentation/bloc/auth_state.dart';
 import 'package:restaurant_manager_app/features/auth/presentation/bloc/register/register_event.dart';
 
 class RegisterBloc extends Bloc<RegisterEvent, AuthState> {
-  final RegisterUserUseCase registerUseCase;
+  final RegisterUserUseCase _registerUseCase;
 
-  RegisterBloc(this.registerUseCase) : super(AuthInitial()) {
+  RegisterBloc(this._registerUseCase) : super(AuthInitial()) {
     on<RegisterSubmitted>(_onRegisterSubmitted);
   }
 
@@ -17,7 +17,7 @@ class RegisterBloc extends Bloc<RegisterEvent, AuthState> {
   ) async {
     emit(AuthLoading());
 
-    final result = await minDelayRun(registerUseCase(event.getEntity()));
+    final result = await minDelayRun(_registerUseCase(event.getEntity()));
 
     result.fold(
       (failure) => emit(AuthFailure(failure)),

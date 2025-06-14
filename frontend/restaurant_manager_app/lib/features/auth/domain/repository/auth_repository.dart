@@ -6,6 +6,4 @@ import 'package:restaurant_manager_app/features/auth/domain/entities/user_regist
 abstract class AuthRepository {
   Future<Either<Failure, void>> login(UserLogin userLogin);
   Future<Either<Failure, void>> register(UserRegister userRegister);
-  Future<Either<Failure, void>> refresh();
-  Future<Either<Failure, void>> validateSession();
 }

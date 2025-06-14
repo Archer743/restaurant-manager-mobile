@@ -1,7 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:restaurant_manager_app/core/errors/exceptions.dart';
-import 'package:restaurant_manager_app/features/auth/data/models/auth_model.dart';
+import 'package:restaurant_manager_app/core/data/models/auth_model.dart';
 
 class TokenStorageService {
   final FlutterSecureStorage _storage;
