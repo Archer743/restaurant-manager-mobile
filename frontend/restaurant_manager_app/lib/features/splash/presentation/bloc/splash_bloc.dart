@@ -10,9 +10,13 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
 
   SplashBloc(this._authUseCase) : super(SplashInitial()) {
     on<CheckAuth>((event, emit) async {
+      if (isClosed) return;
       emit(SplashLoading());
 
+      if (isClosed) return;
       final status = await minDelayRun(_authUseCase(NoParams()));
+
+      if (isClosed) return;
       emit(SplashLoaded(status));
     });
   }

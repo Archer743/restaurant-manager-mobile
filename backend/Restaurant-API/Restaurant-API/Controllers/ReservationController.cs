@@ -16,19 +16,37 @@ namespace Restaurant_API.Controllers
             this.reservationService = reservationService;
         }
 
-        [HttpGet("confirmed"), AppAuthorize]
-        public async Task<IActionResult> GetConfirmedReservationsAsync([FromQuery] DateOnly start, [FromQuery] DateOnly end)
-        {
-            List<ReservationPreview> previews = await reservationService.GetConfirmedReservationsAsync(HttpContext, start, end);
-            return Ok(previews);
-        }
-
-
+        /* ======================================================================== POST */
         [HttpPost("create")]
         public async Task<IActionResult> CreateAsync(ReservationCreateModel createModel)
         {
             await reservationService.CreateAsync(createModel);
             return NoContent();
+        }
+
+
+        /* ======================================================================== GET */
+        [HttpGet("{reservationId}"), AppAuthorize]
+        public async Task<IActionResult> GetByIdAsync(Guid reservationId)
+        {
+            ReservationViewModel reservation = await reservationService.GetByIdAsync(HttpContext, reservationId);
+            return Ok(reservation);
+        }
+
+        [HttpGet("confirmed"), AppAuthorize]
+        public async Task<IActionResult> GetConfirmedReservationsAsync([FromQuery] DateOnly start, [FromQuery] DateOnly end)
+        {
+            var previews = await reservationService.GetConfirmedReservationsAsync(HttpContext, start, end);
+            return Ok(previews);
+        }
+
+
+        /* ======================================================================== PATCH */
+        [HttpPatch("{reservationId}"), AppAuthorize]
+        public async Task<IActionResult> UpdateAsync(Guid reservationId, ReservationUpdateModel updateModel)
+        {
+            ReservationViewModel reservation = await reservationService.UpdateAsync(HttpContext, reservationId, updateModel);
+            return Ok(reservation);
         }
     }
 }

@@ -1,9 +1,10 @@
-﻿using System.Net;
+﻿using Restaurant_API.Constants;
+using System.Net;
 
 namespace Restaurant_API.Exceptions
 {
 	public class ForbiddenException : HttpException
 	{
-		public ForbiddenException(string errorCode) : base(HttpStatusCode.Forbidden, errorCode) { }
+		public ForbiddenException() : base(HttpStatusCode.Forbidden, ErrorCodes.Auth.ForbiddenAccess) { }
 	}
 }

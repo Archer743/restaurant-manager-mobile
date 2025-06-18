@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:dartz/dartz.dart';
+import 'package:restaurant_manager_app/core/data/converters/app_dateonly_converter.dart';
 import 'package:restaurant_manager_app/core/data/data_sources/local/token_storage_service.dart';
 import 'package:restaurant_manager_app/core/domain/repository/auth_shared_repository.dart';
 import 'package:restaurant_manager_app/core/errors/failure.dart';
@@ -28,7 +28,6 @@ class ConfirmedReservationsRepositoryImpl
       _tokenService,
       _authSharedRepo,
       (authorization) async {
-        debugPrint(authorization);
         final response =
             await _confReservationsApiService.getConfirmedReservations(
                 authorization, dateRange.startDate, dateRange.endDate);
@@ -37,14 +36,11 @@ class ConfirmedReservationsRepositoryImpl
         final apiData = response.data;
 
         // Change map key to DateTime
+        const dateOnlyConverter = AppDateOnlyConverter();
+
         apiData.forEach(
           (dateString, models) {
-            final parts = dateString.split('-');
-            final DateTime dateKey = DateTime.utc(
-              int.parse(parts[0]),
-              int.parse(parts[1]),
-              int.parse(parts[2]),
-            );
+            final DateTime dateKey = dateOnlyConverter.fromJson(dateString);
             transformedMap[dateKey] = models;
           },
         );

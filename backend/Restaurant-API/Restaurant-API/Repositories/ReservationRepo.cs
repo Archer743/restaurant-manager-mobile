@@ -29,5 +29,17 @@ namespace Restaurant_API.Repositories
                                             r.Date >= start && r.Date <= end)
                                 .ToListAsync();
         }
+
+        public async Task<Reservation?> GetByIdAsync(Guid id)
+        {
+            return await context.Reservations
+                                .FirstOrDefaultAsync(r => r.Id == id);
+        }
+
+        public async Task UpdateAsync(Reservation reservation)
+        {
+            context.Reservations.Update(reservation);
+            await context.SaveChangesAsync();
+        }
     }
 }

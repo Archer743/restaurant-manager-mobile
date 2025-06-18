@@ -18,6 +18,12 @@ import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/repository/confirmed_reservations_repository.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/usecases/get_confirmed_reservations_usecase.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_bloc.dart';
+import 'package:restaurant_manager_app/features/reservation_management/data/data_sources/reservation_api_service.dart';
+import 'package:restaurant_manager_app/features/reservation_management/data/repository/reservation_repository._impl.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/repository/reservation_repository.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/get_reservation_details_usecase.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/update_reservation_usecase.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/reservation_bloc.dart';
 import 'package:restaurant_manager_app/features/splash/data/repository/session_repository_impl.dart';
 import 'package:restaurant_manager_app/features/splash/domain/repository/session_repository.dart';
 import 'package:restaurant_manager_app/features/splash/domain/usecases/check_auth_status_usecase.dart';
@@ -104,4 +110,33 @@ Future<void> initDependencies() async {
 
   // [Blocs]
   sl.registerFactory<CalendarBloc>(() => CalendarBloc(sl()));
+
+  // ---------------- Reservation Management Feature ----------------
+  // [Data Sources]
+  sl.registerSingleton<ReservationApiService>(
+      ReservationApiService(sl<Dio>(), baseUrl: reservationsBaseUrl));
+
+  // [Repositories]
+  sl.registerSingleton<ReservationRepository>(
+    ReservationRepositoryImpl(
+      sl<AuthSharedRepository>(),
+      sl<TokenStorageService>(),
+      sl<ReservationApiService>(),
+    ),
+  );
+
+  // [UseCases]
+  sl.registerSingleton<GetReservationDetailsUseCase>(
+      GetReservationDetailsUseCase(sl()));
+
+  sl.registerSingleton<UpdateReservationUseCase>(
+      UpdateReservationUseCase(sl()));
+
+  // [Blocs]
+  sl.registerFactory<ReservationBloc>(
+    () => ReservationBloc(
+      sl<GetReservationDetailsUseCase>(),
+      sl<UpdateReservationUseCase>(),
+    ),
+  );
 }

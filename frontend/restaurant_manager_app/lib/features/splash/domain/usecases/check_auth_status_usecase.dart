@@ -1,4 +1,3 @@
-import 'package:restaurant_manager_app/core/constants/error_codes.dart';
 import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/core/domain/usecases/usecase.dart';
 import 'package:restaurant_manager_app/features/splash/domain/entities/auth_status.dart';

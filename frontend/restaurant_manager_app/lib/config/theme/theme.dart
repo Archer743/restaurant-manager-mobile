@@ -162,6 +162,67 @@ final calendarStyle = CalendarStyle(
   markersAlignment: Alignment.bottomCenter,
 );
 
+// Date Picker
+final datePickerTheme = ThemeData(
+  dialogBackgroundColor: primaryColor, // Background of the entire dialog
+
+  colorScheme: const ColorScheme.dark().copyWith(
+    primary: secondaryColor, // Selected day + header
+    onPrimary: bgColor, // Text color on selected day/header
+    surface: primaryColor, // Dialog background surface
+    onSurface: textColor.toColor(), // Default text color (days, header title)
+  ),
+
+  textButtonTheme: TextButtonThemeData(
+    style: TextButton.styleFrom(
+      foregroundColor: secondaryColor, // Action buttons
+      textStyle: const TextStyle(fontWeight: FontWeight.w800),
+    ),
+  ),
+
+  // Customize the shape and background of the date picker dialog
+  dialogTheme: DialogTheme(
+    backgroundColor: primaryColor,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(borderRadius),
+    ),
+  ),
+);
+
+// Time Picker
+final timePickerTheme = ThemeData(
+  dialogBackgroundColor: primaryColor,
+  colorScheme: const ColorScheme.dark().copyWith(
+    primary: secondaryColor, // Dial hand, selected text
+    onPrimary: bgColor, // Text on primary color
+    surface: primaryColor, // Clock face background
+    onSurface: textColor.toColor(), // Labels & inactive text
+  ),
+  timePickerTheme: TimePickerThemeData(
+    backgroundColor: primaryColor,
+    hourMinuteColor: secondaryColor.withOpacity(0.2),
+    hourMinuteTextColor: textColor.toColor(),
+    dialHandColor: secondaryColor,
+    dialBackgroundColor: primaryColor,
+    entryModeIconColor: secondaryColor,
+    dayPeriodColor: primaryColor,
+    dayPeriodTextColor: textColor.toColor(),
+    helpTextStyle: TextStyle(
+      color: textColor.toColor(),
+      fontWeight: FontWeight.bold,
+    ),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(borderRadius),
+    ),
+  ),
+  textButtonTheme: TextButtonThemeData(
+    style: TextButton.styleFrom(
+      foregroundColor: secondaryColor,
+      textStyle: const TextStyle(fontWeight: FontWeight.w800),
+    ),
+  ),
+);
+
 ThemeData darkTheme = ThemeData.dark().copyWith(
   scaffoldBackgroundColor: bgColor,
   appBarTheme: darkAppBarTheme,

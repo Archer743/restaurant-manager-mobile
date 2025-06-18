@@ -15,10 +15,13 @@ class LoginBloc extends Bloc<LoginEvent, AuthState> {
     LoginSubmitted event,
     Emitter<AuthState> emit,
   ) async {
+    if (isClosed) return;
     emit(AuthLoading());
 
+    if (isClosed) return;
     final result = await minDelayRun(_loginUseCase(event.getEntity()));
 
+    if (isClosed) return;
     result.fold(
       (failure) => emit(AuthFailure(failure)),
       (_) => emit(AuthSuccess()),

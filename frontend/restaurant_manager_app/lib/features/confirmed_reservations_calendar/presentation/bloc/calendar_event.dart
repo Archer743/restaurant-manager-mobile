@@ -1,7 +1,9 @@
 abstract class CalendarEvent {}
 
-class FetchReservationsForMonth extends CalendarEvent {
+class GetReservationsForMonth extends CalendarEvent {
   final DateTime focusedDay;
 
-  FetchReservationsForMonth(this.focusedDay);
+  GetReservationsForMonth(this.focusedDay);
 }
+
+class RefreshCalendarForReservationUpdate extends CalendarEvent {}

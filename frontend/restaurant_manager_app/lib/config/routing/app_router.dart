@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:restaurant_manager_app/config/routing/app_routes.dart';
@@ -7,6 +8,9 @@ import 'package:restaurant_manager_app/features/auth/presentation/pages/login_pa
 import 'package:restaurant_manager_app/features/auth/presentation/pages/register_page.dart';
 import 'package:restaurant_manager_app/features/auth/presentation/pages/welcome_page.dart';
 import 'package:restaurant_manager_app/features/home/presentation/home_page.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/reservation_bloc.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/reservation_event.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/reservation_details_page.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/bloc/splash_event.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/splash_page.dart';
@@ -51,6 +55,22 @@ final GoRouter appRouter = GoRouter(
           },
         ),
       ],
+    ),
+    GoRoute(
+      path: '${AppRoutes.reservation}/:id',
+      builder: (context, state) {
+        final reservationId = state.pathParameters['id'];
+
+        // TODO: Navigate to an error page
+        if (reservationId == null) {
+          return const Text('Error: Reservation ID missing');
+        }
+
+        return BlocProvider<ReservationBloc>(
+          create: (_) => sl()..add(GetReservation(reservationId)),
+          child: ReservationDetailsPage(reservationId: reservationId),
+        );
+      },
     ),
   ],
 );

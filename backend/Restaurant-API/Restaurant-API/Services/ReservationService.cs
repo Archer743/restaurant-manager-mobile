@@ -46,7 +46,95 @@ namespace Restaurant_API.Services
             await reservationRepo.AddAsync(r);
         }
 
-        public async Task<List<ReservationPreview>> GetConfirmedReservationsAsync(HttpContext ctx, DateOnly start, DateOnly end)
+        public async Task<Dictionary<DateOnly, List<ReservationPreviewModel>>> GetConfirmedReservationsAsync(HttpContext ctx, DateOnly start, DateOnly end)
+        {
+            Guid restaurantId = await GetCurrUserAssociatedRestaurantIdAsync(ctx);
+
+            if (start > end)
+            {
+                (start, end) = (end, start);
+            }
+
+            // Fetch confirmed reservations for the user's restaurant within the specified date range
+            List<Reservation> reservations = await reservationRepo.GetConfirmedInPeriodAsync(restaurantId, start, end);
+
+            // Group reservations by Date and convert to ReservationPreview
+            var groupedReservations = reservations
+                .GroupBy(r => r.Date)
+                .ToDictionary(
+                    g => g.Key,      
+                    g => g.OrderBy(r => r.Time).Select(r => r.ToPreview()).ToList()
+                );
+
+            // Convert them to previews
+            return groupedReservations;
+        }
+
+        public async Task<ReservationViewModel> GetByIdAsync(HttpContext ctx, Guid reservationId)
+        {
+            // Retrieve the reservation and ensure it belongs to the current user's restaurant
+            Reservation reservation = await GetReservationIfOwnedAsync(ctx, reservationId);
+
+            // Convert the reservation entity to a view model
+            return reservation.ToView();
+        }
+
+        public async Task<ReservationViewModel> UpdateAsync(HttpContext ctx, Guid reservationId, ReservationUpdateModel updateModel)
+        {
+            // Retrieve the reservation and ensure it belongs to the current user's restaurant
+            Reservation reservation = await GetReservationIfOwnedAsync(ctx, reservationId);
+
+            // Track whether any field was actually modified
+            bool isModified = false;
+
+            // Apply updates only for fields that have been explicitly provided
+            if (updateModel.Date.HasValue && reservation.Date != updateModel.Date.Value)
+            {
+                reservation.Date = updateModel.Date.Value;
+                isModified = true;
+            }
+
+            if (updateModel.Time.HasValue && reservation.Time != updateModel.Time.Value)
+            {
+                reservation.Time = updateModel.Time.Value;
+                isModified = true;
+            }
+
+            if (updateModel.PeopleCount.HasValue && reservation.PeopleCount != updateModel.PeopleCount.Value)
+            {
+                reservation.PeopleCount = updateModel.PeopleCount.Value;
+                isModified = true;
+            }
+
+            if (updateModel.Comment != null)
+            {
+                // Treat empty or whitespace-only comments as null (i.e., remove the comment)
+                var sanitizedComment = string.IsNullOrWhiteSpace(updateModel.Comment) ? null : updateModel.Comment;
+
+
+                if (reservation.Comment != sanitizedComment)
+                {
+                    reservation.Comment = sanitizedComment;
+                    isModified = true;
+                }
+            }
+
+            // Save only if there were actual changes
+            if (isModified)
+            {
+                await reservationRepo.UpdateAsync(reservation);
+            }
+
+            // Return the updated view back to the client
+            return reservation.ToView();
+        }
+
+        private async Task<bool> RestaurantExistsAsync(Guid id)
+        {
+            return await restaurantRepo.GetByIdAsync(id) != null;
+        }
+
+        private async Task<Guid> GetCurrUserAssociatedRestaurantIdAsync(HttpContext ctx)
         {
             Guid userId = (Guid)ctx.Items["UserId"]!;
 
@@ -58,21 +146,24 @@ namespace Restaurant_API.Services
                 throw new BadRequestException(ErrorCodes.User.NoAssociatedRestaurant);
             }
 
-            if (start > end)
-            {
-                (start, end) = (end, start);
-            }
-
-            // Fetch confirmed reservations for the user's restaurant within the specified date range
-            List<Reservation> reservations = await reservationRepo.GetConfirmedInPeriodAsync(restaurantId, start, end);
-
-            // Convert them into previews
-            return reservations.Select(r => r.ToPreview()).ToList();
+            return restaurantId;
         }
 
-        private async Task<bool> RestaurantExistsAsync(Guid id)
+        private async Task<Reservation> GetReservationIfOwnedAsync(HttpContext ctx, Guid reservationId)
         {
-            return await restaurantRepo.GetByIdAsync(id) != null;
+            Guid restaurantId = await GetCurrUserAssociatedRestaurantIdAsync(ctx);
+
+            // Get reservation by id
+            Reservation reservation = await reservationRepo.GetByIdAsync(reservationId) ??
+                                            throw new NotFoundException(ErrorCodes.Reservation.NotFound);
+
+            // Validate that the user has access to that reservation
+            if (reservation.RestaurantId != restaurantId)
+            {
+                throw new ForbiddenException();
+            }
+
+            return reservation;
         }
     }
 }

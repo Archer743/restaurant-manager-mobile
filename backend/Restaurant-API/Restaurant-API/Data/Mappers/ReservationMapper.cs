@@ -1,6 +1,7 @@
 ﻿using Restaurant_API.Data.Entities;
 using Restaurant_API.Data.Models.Reservation;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Numerics;
 using System.Xml.Linq;
 
 namespace Restaurant_API.Data.Mappers
@@ -22,15 +23,29 @@ namespace Restaurant_API.Data.Mappers
             };
         }
 
-        public static ReservationPreview ToPreview(this Reservation reservation)
+        public static ReservationPreviewModel ToPreview(this Reservation reservation)
         {
-            return new ReservationPreview
+            return new ReservationPreviewModel
             {
                 Id = reservation.Id,
+                Time = reservation.Time,
+                PeopleCount = reservation.PeopleCount,
+                Name = reservation.Name,
+            };
+        }
+
+        public static ReservationViewModel ToView(this Reservation reservation)
+        {
+            return new ReservationViewModel
+            {
+                Id = reservation.Id,
+                Phone = reservation.Phone,
+                Email = reservation.Email,
                 Date = reservation.Date,
                 Time = reservation.Time,
                 PeopleCount = reservation.PeopleCount,
                 Name = reservation.Name,
+                Comment = reservation.Comment,
             };
         }
     }

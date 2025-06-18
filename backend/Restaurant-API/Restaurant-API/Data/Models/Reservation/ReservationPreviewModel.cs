@@ -1,10 +1,8 @@
 ﻿namespace Restaurant_API.Data.Models.Reservation
 {
-    public class ReservationPreview
+    public class ReservationPreviewModel
     {
         public Guid Id { get; set; }
-
-        public DateOnly Date { get; set; }
 
         public TimeOnly Time { get; set; }
 

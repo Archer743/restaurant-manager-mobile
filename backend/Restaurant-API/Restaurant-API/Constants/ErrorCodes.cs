@@ -26,6 +26,11 @@
             public const string NotFound = "RESTAURANT_NOT_FOUND";
         }
 
+        public static class Reservation
+        {
+            public const string NotFound = "RESERVATION_NOT_FOUND";
+        }
+
         public static class Data
 		{
             public const string InvalidModel = "INVALID_MODEL";

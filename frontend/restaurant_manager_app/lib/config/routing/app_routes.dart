@@ -6,4 +6,6 @@ abstract class AppRoutes {
   static const register = '/auth/register';
 
   static const home = '/home';
+
+  static const reservation = '/reservation';
 }

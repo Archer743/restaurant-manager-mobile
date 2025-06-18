@@ -6,6 +6,10 @@ namespace Restaurant_API.Services.Interfaces
     {
         Task CreateAsync(ReservationCreateModel createModel);
 
-        Task<List<ReservationPreview>> GetConfirmedReservationsAsync(HttpContext ctx, DateOnly start, DateOnly end);
+        Task<Dictionary<DateOnly, List<ReservationPreviewModel>>> GetConfirmedReservationsAsync(HttpContext ctx, DateOnly start, DateOnly end);
+
+        Task<ReservationViewModel> GetByIdAsync(HttpContext ctx, Guid reservationId);
+
+        Task<ReservationViewModel> UpdateAsync(HttpContext ctx, Guid reservationId, ReservationUpdateModel updateModel);
     }
 }

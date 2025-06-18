@@ -15,10 +15,13 @@ class RegisterBloc extends Bloc<RegisterEvent, AuthState> {
     RegisterSubmitted event,
     Emitter<AuthState> emit,
   ) async {
+    if (isClosed) return;
     emit(AuthLoading());
 
+    if (isClosed) return;
     final result = await minDelayRun(_registerUseCase(event.getEntity()));
 
+    if (isClosed) return;
     result.fold(
       (failure) => emit(AuthFailure(failure)),
       (_) => emit(AuthSuccess()),

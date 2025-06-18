@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:restaurant_manager_app/config/routing/app_routes.dart';
-import 'package:restaurant_manager_app/core/errors/error_mapper.dart';
-import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/entities/reservation_preview.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/typedefs.dart';
@@ -49,7 +47,7 @@ class _ConfirmedReservationsCalendarPageState
     // Dispatch the initial event to fetch reservations for the current month
     // WidgetsBinding.instance.addPostFrameCallback is used to ensure context is available
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CalendarBloc>().add(FetchReservationsForMonth(_focusedDay));
+      context.read<CalendarBloc>().add(GetReservationsForMonth(_focusedDay));
     });
   }
 
@@ -73,7 +71,7 @@ class _ConfirmedReservationsCalendarPageState
   void _onPageChanged(DateTime focusedDay) {
     setState(() => _focusedDay = focusedDay);
 
-    context.read<CalendarBloc>().add(FetchReservationsForMonth(focusedDay));
+    context.read<CalendarBloc>().add(GetReservationsForMonth(focusedDay));
   }
 
   @override
@@ -163,7 +161,11 @@ class _ConfirmedReservationsCalendarPageState
                 itemCount: reservations.length,
                 itemBuilder: (context, index) {
                   final r = reservations[index];
-                  return ReservationCard(reservation: r);
+                  return GestureDetector(
+                    child: ReservationCard(reservation: r),
+                    onTap: () =>
+                        context.push('${AppRoutes.reservation}/${r.id}'),
+                  );
                 }),
           );
         });

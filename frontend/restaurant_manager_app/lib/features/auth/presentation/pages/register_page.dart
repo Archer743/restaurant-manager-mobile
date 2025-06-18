@@ -5,7 +5,7 @@ import 'package:restaurant_manager_app/config/routing/app_routes.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
 import 'package:restaurant_manager_app/features/auth/presentation/bloc/auth_state.dart';
 import 'package:restaurant_manager_app/features/auth/presentation/bloc/register/register_bloc.dart';
-import 'package:restaurant_manager_app/features/auth/presentation/widgets/back_leading_app_bar.dart';
+import 'package:restaurant_manager_app/core/presentation/widgets/back_leading_app_bar.dart';
 import 'package:restaurant_manager_app/features/auth/presentation/widgets/forms/register_form.dart';
 
 class RegisterPage extends StatefulWidget {
