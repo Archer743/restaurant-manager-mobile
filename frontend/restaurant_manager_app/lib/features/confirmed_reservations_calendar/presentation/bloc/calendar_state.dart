@@ -13,6 +13,8 @@ class CalendarLoaded extends CalendarState {
   CalendarLoaded(this.reservations);
 }
 
+class CalendarReload extends CalendarState {}
+
 class CalendarError extends CalendarState {
   final Failure failure;
   late final bool requiresReauthentication;

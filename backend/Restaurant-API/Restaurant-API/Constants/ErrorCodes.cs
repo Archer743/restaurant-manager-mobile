@@ -5,8 +5,11 @@
         public static class Auth
         {
             public const string InvalidAuthorization = "INVALID_AUTHORIZATION";
-            public const string ForbiddenAccess = "FORBIDDEN_ACCESS";
             public const string UserNotFound = "USER_NOT_FOUND";
+
+            // Permissions
+            public const string ForbiddenAccess = "FORBIDDEN_ACCESS";
+            public const string CannotModifyToPast = "AUTH_CANNOT_SET_PAST_DATETIME";
         }
 
         public static class Session

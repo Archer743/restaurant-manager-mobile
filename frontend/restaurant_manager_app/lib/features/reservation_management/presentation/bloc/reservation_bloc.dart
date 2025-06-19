@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:restaurant_manager_app/core/utils/future_utils.dart';
-import 'package:restaurant_manager_app/features/reservation_management/data/models/reservation_update_model.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/get_reservation_details_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/update_reservation_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/reservation_event.dart';
@@ -53,7 +52,8 @@ class ReservationBloc extends Bloc<ReservationEvent, ReservationState> {
     if (isClosed) return;
     result.fold(
       (failure) => emit(ReservationError(failure)),
-      (reservation) => emit(ReservationUpdated(reservation)),
+      (reservation) =>
+          emit(ReservationUpdated(event.originalDate, reservation)),
     );
   }
 }

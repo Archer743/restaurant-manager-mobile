@@ -5,6 +5,6 @@ namespace Restaurant_API.Exceptions
 {
 	public class ForbiddenException : HttpException
 	{
-		public ForbiddenException() : base(HttpStatusCode.Forbidden, ErrorCodes.Auth.ForbiddenAccess) { }
+		public ForbiddenException(string errorCode = ErrorCodes.Auth.ForbiddenAccess) : base(HttpStatusCode.Forbidden, errorCode) { }
 	}
 }

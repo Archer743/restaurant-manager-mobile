@@ -9,6 +9,10 @@ const Map<String, String> errorMessages = {
   "INVALID_AUTHORIZATION": "Невалидна авторизация. Моля, влезте отново.",
   "FORBIDDEN_ACCESS": "Нямате достъп до тази операция.",
 
+  // Permissions
+  "AUTH_CANNOT_SET_PAST_DATETIME":
+      "Нямате необходимите права, за да местите резервации в минал момент.",
+
   // Session
   "INVALID_SESSION": "Сесията е невалидна или е изтекла. Моля, влезте отново.",
 

@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:restaurant_manager_app/core/utils/datetime_utils.dart';
 import 'package:restaurant_manager_app/core/utils/future_utils.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/entities/date_range.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/typedefs.dart';
@@ -18,14 +19,14 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
 
   CalendarBloc(this._getConfReservationsUsecase) : super(CalendarInitial()) {
     on<GetReservationsForMonth>(_onGetReservationsForMonth);
+    on<RefreshCalendar>(_onRefreshCalendar);
   }
 
   Future<void> _onGetReservationsForMonth(
     GetReservationsForMonth event,
     Emitter<CalendarState> emit,
   ) async {
-    final DateTime requestedMonthStart =
-        DateTime.utc(event.focusedDay.year, event.focusedDay.month, 1);
+    final DateTime requestedMonthStart = getFirstDayOfMonth(event.focusedDay);
 
     final bool isCached = _monthCache.containsKey(requestedMonthStart);
     final DateTime? expiry = _cacheExpiry[requestedMonthStart];
@@ -46,8 +47,7 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
     }
 
     // Fetch the current month's data if not cached or stale
-    final DateTime requestedMonthEnd =
-        DateTime.utc(event.focusedDay.year, event.focusedDay.month + 1, 0);
+    final DateTime requestedMonthEnd = getLastDayOfMonth(event.focusedDay);
 
     // Place dates in DateRange
     final DateRange dateRange =
@@ -68,5 +68,25 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
         emit(CalendarLoaded(reservations));
       },
     );
+  }
+
+  Future<void> _onRefreshCalendar(
+    RefreshCalendar event,
+    Emitter<CalendarState> emit,
+  ) async {
+    bool isCacheExpiryModified = false;
+
+    // Expire modified months so they are fetched again
+    for (var monthStart in event.affectedMonths) {
+      if (_cacheExpiry.containsKey(monthStart)) {
+        _cacheExpiry[monthStart] = DateTime.now();
+        isCacheExpiryModified = true;
+      }
+    }
+
+    // Trigger the reload proccess for the current month displayed
+    if (isCacheExpiryModified && !isClosed) {
+      emit(CalendarReload());
+    }
   }
 }

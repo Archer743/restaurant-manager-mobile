@@ -32,5 +32,19 @@ namespace Restaurant_API.Services
 			User? user = await userRepo.GetByIdAsync(userId);
 			return user?.Role.NormalizedName;
 		}
-	}
+
+        public bool HasCurrUserRole(HttpContext ctx, string normalizedRole)
+        {
+            // Attempt to retrieve the role set by the authentication middleware
+            string? currUserRole = ctx.Items["UserRole"] as string;
+
+            // If no role is present, this likely means the endpoint doesn't require authenticated access.
+            if (currUserRole == null)
+            {
+                throw new InvalidOperationException("User role is not set in the current context. This method should only be called on authenticated endpoints.");
+            }
+
+            return currUserRole == normalizedRole;
+        }
+    }
 }

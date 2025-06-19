@@ -11,12 +11,16 @@ namespace Restaurant_API.Services
 {
     public class ReservationService : IReservationService
     {
+        private readonly IRoleService roleService;
+
         private readonly IReservationRepo reservationRepo;
         private readonly IRestaurantRepo restaurantRepo;
         private readonly IRestaurantUserRepo restaurantUserRepo;
 
-        public ReservationService(IReservationRepo reservationRepo, IRestaurantRepo restaurantRepo, IRestaurantUserRepo restaurantUserRepo)
+        public ReservationService(IRoleService roleService, IReservationRepo reservationRepo, IRestaurantRepo restaurantRepo, IRestaurantUserRepo restaurantUserRepo)
         {
+            this.roleService = roleService;
+
             this.reservationRepo = reservationRepo;
             this.restaurantRepo = restaurantRepo;
             this.restaurantUserRepo = restaurantUserRepo;
@@ -87,30 +91,44 @@ namespace Restaurant_API.Services
             // Track whether any field was actually modified
             bool isModified = false;
 
-            // Apply updates only for fields that have been explicitly provided
+            // Determine the target final date and time (either updated or existing values)
+            var finalDate = updateModel.Date ?? reservation.Date;
+            var finalTime = updateModel.Time ?? reservation.Time;
+
+            // Check if the resulting datetime would fall in the past
+            var targetDateTimeUtc = new DateTime(finalDate.Year, finalDate.Month, finalDate.Day, finalTime.Hour, finalTime.Minute, 0);
+
+            if (targetDateTimeUtc < DateTime.UtcNow && !roleService.HasCurrUserRole(ctx, Roles.Admin))
+            {
+                // Disallow moving a reservation to a past date unless the user has the Admin role.
+                throw new ForbiddenException(ErrorCodes.Auth.CannotModifyToPast);
+            }
+
+            // Apply date update
             if (updateModel.Date.HasValue && reservation.Date != updateModel.Date.Value)
             {
                 reservation.Date = updateModel.Date.Value;
                 isModified = true;
             }
 
+            // Apply time update
             if (updateModel.Time.HasValue && reservation.Time != updateModel.Time.Value)
             {
                 reservation.Time = updateModel.Time.Value;
                 isModified = true;
             }
 
+            // Apply people count update
             if (updateModel.PeopleCount.HasValue && reservation.PeopleCount != updateModel.PeopleCount.Value)
             {
                 reservation.PeopleCount = updateModel.PeopleCount.Value;
                 isModified = true;
             }
 
+            // Apply comment update - treat empty or whitespace-only comments as null (i.e., remove the comment)
             if (updateModel.Comment != null)
             {
-                // Treat empty or whitespace-only comments as null (i.e., remove the comment)
                 var sanitizedComment = string.IsNullOrWhiteSpace(updateModel.Comment) ? null : updateModel.Comment;
-
 
                 if (reservation.Comment != sanitizedComment)
                 {
@@ -119,13 +137,13 @@ namespace Restaurant_API.Services
                 }
             }
 
-            // Save only if there were actual changes
+            // Persist changes if needed
             if (isModified)
             {
                 await reservationRepo.UpdateAsync(reservation);
             }
 
-            // Return the updated view back to the client
+            // Return the updated reservation to the client
             return reservation.ToView();
         }
 

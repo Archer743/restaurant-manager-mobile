@@ -12,6 +12,7 @@ class GetReservation extends ReservationEvent {
 
 class UpdateReservation extends ReservationEvent {
   late final String id;
+  late final DateTime originalDate; // Used for updating the calendar
   late final ReservationUpdate update;
 
   UpdateReservation({
@@ -22,6 +23,7 @@ class UpdateReservation extends ReservationEvent {
     required String commentString,
   }) {
     id = originalReservation.id;
+    originalDate = originalReservation.date;
     update = _buildUpdate(
       originalReservation,
       dateString,

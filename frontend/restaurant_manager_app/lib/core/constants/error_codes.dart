@@ -7,7 +7,10 @@ abstract class ErrorCodes {
 
   // Group: Auth
   static const String invalidAuthorization = 'INVALID_AUTHORIZATION';
+
+  // Permissions
   static const String forbiddenAccess = 'FORBIDDEN_ACCESS';
+  static const String cannotModifyToPast = 'AUTH_CANNOT_SET_PAST_DATETIME';
 
   // Group: Session
   static const String invalidSession = 'INVALID_SESSION';

@@ -30,10 +30,20 @@ class RreservationDetailsPageState extends State<ReservationDetailsPage> {
   ReservationView? _reservation;
   bool _editModeActivated = false;
 
+  // Prevents user actions while a request is in progress
+  bool _isLoading = false;
+
+  // Editable fields' controllers
   final _dateController = TextEditingController();
   final _timeController = TextEditingController();
   final _peopleCountController = TextEditingController();
   final _commentController = TextEditingController();
+
+  // Refresh Previous Page
+  late final CalendarBloc? _calendarBloc;
+  bool _refreshRequired = false;
+  DateTime? _originalDate;
+  DateTime? _updatedDate;
 
   void _setControllers() {
     if (_reservation == null) return;
@@ -45,8 +55,22 @@ class RreservationDetailsPageState extends State<ReservationDetailsPage> {
     _commentController.text = _reservation!.comment ?? '';
   }
 
+  // Runs after the widget is inserted into the widget tree and context is still valid.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _calendarBloc = context.read<CalendarBloc?>();
+  }
+
   @override
   void dispose() {
+    // Update Calendar Page
+    if (_refreshRequired && _calendarBloc != null) {
+      _calendarBloc.add(RefreshCalendar(
+        rawDatesAffected: [_originalDate!, _updatedDate!],
+      ));
+    }
+
     _dateController.dispose();
     _timeController.dispose();
     _peopleCountController.dispose();
@@ -57,40 +81,15 @@ class RreservationDetailsPageState extends State<ReservationDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: BackLeadingAppBar(
-        title: 'Резервация',
-        actions: [
-          IconButton(
-            icon: Icon(_editModeActivated ? Icons.check : Icons.edit),
-            tooltip: _editModeActivated ? 'Готово' : 'Редакция',
-            onPressed: _reservation != null
-                ? () {
-                    if (_editModeActivated) {
-                      // Submit changes when exiting edit mode
-                      context.read<ReservationBloc>().add(
-                            UpdateReservation(
-                              originalReservation: _reservation!,
-                              dateString: _dateController.text,
-                              timeString: _timeController.text,
-                              peopleCountString: _peopleCountController.text,
-                              commentString: _commentController.text,
-                            ),
-                          );
-                    }
-
-                    setState(() {
-                      _editModeActivated = !_editModeActivated;
-                    });
-                  }
-                : null,
-          ),
-        ],
-      ),
+      appBar: _buildAppBar(),
       body: BlocConsumer<ReservationBloc, ReservationState>(
         listener: (context, state) {
-          if (state is ReservationLoaded) {
+          if (state is ReservationLoading) {
+            setState(() => _isLoading = true);
+          } else if (state is ReservationLoaded) {
             setState(() {
               _reservation = state.reservation;
+              _isLoading = false;
               _setControllers();
             });
 
@@ -98,13 +97,21 @@ class RreservationDetailsPageState extends State<ReservationDetailsPage> {
               SnackBarService.showSuccess(
                   context, 'Резервацията беше обновена успешно');
 
-              // Dispatch refresh to CalendarBloc
-              context.read<CalendarBloc>().add(
-                    GetReservationsForMonth(
-                        state.reservation.date), // or _focusedDay
-                  );
+              if (mounted) {
+                setState(() {
+                  _refreshRequired = true;
+                  _originalDate = state.originalDate;
+                  _updatedDate = state.reservation.date;
+                });
+              }
             }
           } else if (state is ReservationError) {
+            // Reset fields with reservation's data
+            setState(() {
+              _isLoading = false;
+              _setControllers();
+            });
+
             SnackBarService.showFailure(context, state.failure);
 
             if (state.requiresReauthentication) {
@@ -113,7 +120,11 @@ class RreservationDetailsPageState extends State<ReservationDetailsPage> {
           }
         },
         builder: (context, state) {
-          if (state is ReservationLoaded) {
+          if (state is ReservationLoading || _reservation == null) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          } else {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 45),
@@ -131,12 +142,46 @@ class RreservationDetailsPageState extends State<ReservationDetailsPage> {
               ),
             );
           }
-
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
         },
       ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return BackLeadingAppBar(
+      title: 'Резервация',
+      actions: [
+        IconButton(
+          icon: Icon(_editModeActivated ? Icons.check : Icons.edit),
+          tooltip: _editModeActivated ? 'Готово' : 'Редакция',
+          onPressed: _reservation != null && !_isLoading
+              ? () {
+                  if (_editModeActivated) {
+                    final isValid = _formKey.currentState?.validate() ?? false;
+
+                    if (isValid) {
+                      // Submit changes
+                      context.read<ReservationBloc>().add(
+                            UpdateReservation(
+                              originalReservation: _reservation!,
+                              dateString: _dateController.text,
+                              timeString: _timeController.text,
+                              peopleCountString: _peopleCountController.text,
+                              commentString: _commentController.text,
+                            ),
+                          );
+
+                      // Exit edit mode only if valid
+                      setState(() => _editModeActivated = false);
+                    }
+                  } else {
+                    // Enter edit mode
+                    setState(() => _editModeActivated = true);
+                  }
+                }
+              : null,
+        ),
+      ],
     );
   }
 }

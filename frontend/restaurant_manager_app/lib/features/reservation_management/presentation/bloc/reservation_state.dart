@@ -14,7 +14,9 @@ class ReservationLoaded extends ReservationState {
 }
 
 class ReservationUpdated extends ReservationLoaded {
-  ReservationUpdated(super.reservation);
+  final DateTime originalDate;
+
+  ReservationUpdated(this.originalDate, super.reservation);
 }
 
 class ReservationError extends ReservationState {

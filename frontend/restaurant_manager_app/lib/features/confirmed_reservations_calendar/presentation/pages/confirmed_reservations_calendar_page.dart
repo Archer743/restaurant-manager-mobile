@@ -91,6 +91,11 @@ class _ConfirmedReservationsCalendarPageState
                 }
               },
             );
+          } else if (state is CalendarReload) {
+            // Reload Proccess
+            context
+                .read<CalendarBloc>()
+                .add(GetReservationsForMonth(_focusedDay));
           } else if (state is CalendarError) {
             SnackBarService.showFailure(context, state.failure);
 
@@ -162,10 +167,14 @@ class _ConfirmedReservationsCalendarPageState
                 itemBuilder: (context, index) {
                   final r = reservations[index];
                   return GestureDetector(
-                    child: ReservationCard(reservation: r),
-                    onTap: () =>
-                        context.push('${AppRoutes.reservation}/${r.id}'),
-                  );
+                      child: ReservationCard(reservation: r),
+                      onTap: () {
+                        final calendarBloc = context.read<CalendarBloc>();
+                        context.push(
+                          '${AppRoutes.reservation}/${r.id}',
+                          extra: calendarBloc,
+                        );
+                      });
                 }),
           );
         });
