@@ -21,12 +21,12 @@ namespace Restaurant_API.Repositories
             await context.SaveChangesAsync();
         }
 
-        public async Task<List<Reservation>> GetConfirmedInPeriodAsync(Guid restaurantId, DateOnly start, DateOnly end)
+        public async Task<List<Reservation>> GetConfirmedInPeriodAsync(Guid restaurantId, DateTime periodStartUtc, DateTime periodEndUtc)
         {
             return await context.Reservations
                                 .Where(r => r.RestaurantId == restaurantId &&
                                             r.State == ReservationState.Confirmed &&
-                                            r.Date >= start && r.Date <= end)
+                                            r.StartTimeUtc >= periodStartUtc && r.StartTimeUtc < periodEndUtc)
                                 .ToListAsync();
         }
 

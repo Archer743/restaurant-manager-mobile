@@ -32,9 +32,6 @@ namespace Restaurant_API.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
@@ -57,11 +54,11 @@ namespace Restaurant_API.Migrations
                     b.Property<Guid>("RestaurantId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("StartTimeUtc")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("State")
                         .HasColumnType("integer");
-
-                    b.Property<TimeOnly>("Time")
-                        .HasColumnType("time without time zone");
 
                     b.HasKey("Id");
 
@@ -80,6 +77,10 @@ namespace Restaurant_API.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<string>("TimeZoneId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

@@ -16,29 +16,25 @@ namespace Restaurant_API.Data.Entities
         public Restaurant Restaurant { get; set; }
 
 
-        [Required, Phone]
-        public string Phone { get; set; } = string.Empty;
+        // Required name of the client
+        [Required, MaxLength(100)]
+        public string Name { get; set; } = string.Empty;
 
 
         [Required, EmailAddress]
         public string Email { get; set; } = string.Empty;
 
 
-        [Required]
-        public DateOnly Date { get; set; }
+        [Required, Phone]
+        public string Phone { get; set; } = string.Empty;
 
 
         [Required]
-        public TimeOnly Time { get; set; }
+        public DateTime StartTimeUtc { get; set; }
 
 
         [Required, Range(1, 100)]
         public int PeopleCount { get; set; }
-
-
-        // Required name of the client
-        [Required, MaxLength(100)]
-        public string Name { get; set; } = string.Empty;
 
 
         // Optional comment

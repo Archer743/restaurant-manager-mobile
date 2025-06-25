@@ -8,9 +8,7 @@
 
         public string Email { get; set; } = string.Empty;
 
-        public DateOnly Date { get; set; }
-
-        public TimeOnly Time { get; set; }
+        public DateTime StartTimeUtc { get; set; }
 
         public int PeopleCount { get; set; }
 

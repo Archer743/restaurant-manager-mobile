@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Restaurant_API.Attributes;
+using System.ComponentModel.DataAnnotations;
 
 namespace Restaurant_API.Data.Models.Reservation
 {
@@ -10,9 +11,8 @@ namespace Restaurant_API.Data.Models.Reservation
         [EmailAddress]
         public string Email { get; set; }
 
-        public DateOnly Date { get; set; }
-
-        public TimeOnly Time { get; set; }
+        [MustBeUtc]
+        public DateTime StartTimeUtc { get; set; }
 
         [Range(1, 100)]
         public int PeopleCount { get; set; }

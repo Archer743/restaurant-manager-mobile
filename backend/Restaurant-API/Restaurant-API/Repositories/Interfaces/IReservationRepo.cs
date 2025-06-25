@@ -6,7 +6,7 @@ namespace Restaurant_API.Repositories.Interfaces
     {
         Task AddAsync(Reservation reservation);
 
-        Task<List<Reservation>> GetConfirmedInPeriodAsync(Guid restaurantId, DateOnly start, DateOnly end);
+        Task<List<Reservation>> GetConfirmedInPeriodAsync(Guid restaurantId, DateTime periodStartUtc, DateTime periodEndUtc);
 
         Task<Reservation?> GetByIdAsync(Guid id);
 

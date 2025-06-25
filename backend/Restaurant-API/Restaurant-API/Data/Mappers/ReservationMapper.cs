@@ -10,12 +10,11 @@ namespace Restaurant_API.Data.Mappers
             return new Reservation
             {
                 RestaurantId = createModel.RestaurantId,
-                Phone = createModel.Phone,
-                Email = createModel.Email,
-                Date = createModel.Date,
-                Time = createModel.Time,
-                PeopleCount = createModel.PeopleCount,
                 Name = createModel.Name,
+                Email = createModel.Email,
+                Phone = createModel.Phone,
+                StartTimeUtc = createModel.StartTimeUtc,
+                PeopleCount = createModel.PeopleCount,
                 Comment = createModel.Comment,
             };
         }
@@ -25,24 +24,24 @@ namespace Restaurant_API.Data.Mappers
             return new Reservation
             {
                 // RestaurantId is set in ReservationService based on the current user
-                Phone = createModel.Phone,
-                Email = createModel.Email,
-                Date = createModel.Date,
-                Time = createModel.Time,
-                PeopleCount = createModel.PeopleCount,
                 Name = createModel.Name,
+                Email = createModel.Email,
+                Phone = createModel.Phone,
+                StartTimeUtc = createModel.StartTimeUtc,
+                PeopleCount = createModel.PeopleCount,
                 Comment = createModel.Comment,
             };
         }
 
-        public static ReservationPreviewModel ToPreview(this Reservation reservation)
+        public static ReservationPreviewModel ToPreview(this Reservation reservation, TimeZoneInfo restaurantTimeZone)
         {
             return new ReservationPreviewModel
             {
                 Id = reservation.Id,
-                Time = reservation.Time,
-                PeopleCount = reservation.PeopleCount,
                 Name = reservation.Name,
+                // Converts StartTimeUtc to local time based on the restaurant time zone and extracts the time
+                Time = TimeOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(reservation.StartTimeUtc, restaurantTimeZone)),
+                PeopleCount = reservation.PeopleCount,
                 IsCreatedByStaff = reservation.IsCreatedByStaff,
             };
         }
@@ -54,8 +53,7 @@ namespace Restaurant_API.Data.Mappers
                 Id = reservation.Id,
                 Phone = reservation.Phone,
                 Email = reservation.Email,
-                Date = reservation.Date,
-                Time = reservation.Time,
+                StartTimeUtc = reservation.StartTimeUtc,
                 PeopleCount = reservation.PeopleCount,
                 Name = reservation.Name,
                 Comment = reservation.Comment,
