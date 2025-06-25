@@ -4,12 +4,14 @@ class ReadOnlyField extends StatelessWidget {
   final String label;
   final IconData icon;
   final String value;
+  final Widget? suffixIcon;
 
   const ReadOnlyField({
     super.key,
     required this.label,
-    required this.icon,
     required this.value,
+    required this.icon,
+    this.suffixIcon,
   });
 
   @override
@@ -19,6 +21,7 @@ class ReadOnlyField extends StatelessWidget {
       readOnly: true,
       decoration: InputDecoration(
         prefixIcon: Icon(icon),
+        suffixIcon: suffixIcon,
         labelText: label,
       ),
     );

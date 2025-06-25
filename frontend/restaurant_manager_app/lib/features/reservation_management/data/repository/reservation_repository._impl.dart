@@ -4,7 +4,9 @@ import 'package:restaurant_manager_app/core/domain/repository/auth_shared_reposi
 import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/core/network/auth_request_handler.dart';
 import 'package:restaurant_manager_app/features/reservation_management/data/data_sources/reservation_api_service.dart';
+import 'package:restaurant_manager_app/features/reservation_management/data/models/reservation_create_model.dart';
 import 'package:restaurant_manager_app/features/reservation_management/data/models/reservation_update_model.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_create.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_update.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_view.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/repository/reservation_repository.dart';
@@ -30,6 +32,24 @@ class ReservationRepositoryImpl implements ReservationRepository {
             await _reservationApiService.getReservation(authorization, id);
 
         return response.data.toEntity();
+      },
+    );
+  }
+
+  @override
+  Future<Either<Failure, void>> createReservation(
+    ReservationCreate data,
+  ) async {
+    return await handleAuthRequest<Null>(
+      _tokenService,
+      _authSharedRepo,
+      (authorization) async {
+        final createModel = ReservationCreateModel.fromEntity(data);
+
+        await _reservationApiService.createReservation(
+            authorization, createModel);
+
+        return null;
       },
     );
   }

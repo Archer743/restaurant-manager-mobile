@@ -9,5 +9,7 @@
         public int PeopleCount { get; set; }
 
         public string Name { get; set; }
+
+        public bool IsCreatedByStaff { get; set; }
     }
 }

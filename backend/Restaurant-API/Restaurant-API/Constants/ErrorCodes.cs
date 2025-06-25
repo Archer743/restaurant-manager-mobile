@@ -6,10 +6,7 @@
         {
             public const string InvalidAuthorization = "INVALID_AUTHORIZATION";
             public const string UserNotFound = "USER_NOT_FOUND";
-
-            // Permissions
             public const string ForbiddenAccess = "FORBIDDEN_ACCESS";
-            public const string CannotModifyToPast = "AUTH_CANNOT_SET_PAST_DATETIME";
         }
 
         public static class Session
@@ -32,6 +29,10 @@
         public static class Reservation
         {
             public const string NotFound = "RESERVATION_NOT_FOUND";
+
+            public const string CannotCreateInPast = "RESERVATION_CANNOT_CREATE_IN_PAST";
+            public const string CannotModifyToPast = "RESERVATION_CANNOT_MODIFY_TO_PAST";
+            public const string CannotModifyClientDetails = "RESERVATION_CANNOT_MODIFY_CLIENT_DETAILS";
         }
 
         public static class Data

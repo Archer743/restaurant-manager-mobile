@@ -115,6 +115,7 @@ class _ConfirmedReservationsCalendarPageState
           );
         },
       ),
+      floatingActionButton: _buildCreateReservationButton(),
     );
   }
 
@@ -178,5 +179,17 @@ class _ConfirmedReservationsCalendarPageState
                 }),
           );
         });
+  }
+
+  Widget _buildCreateReservationButton() {
+    return FloatingActionButton(
+      onPressed: () {
+        // Pre-fill the date with the selected day.
+        // final initialDateForNewReservation = _selectedDay ?? _focusedDay;
+        final calendarBloc = context.read<CalendarBloc>();
+        context.push(AppRoutes.reservation, extra: calendarBloc);
+      },
+      child: const Icon(Icons.add),
+    );
   }
 }

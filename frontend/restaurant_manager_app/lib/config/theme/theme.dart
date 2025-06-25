@@ -86,6 +86,15 @@ final darkElevatedButtonTheme = ElevatedButtonThemeData(
   ),
 );
 
+final floatingActionButtonTheme = FloatingActionButtonThemeData(
+  backgroundColor: secondaryColor,
+  foregroundColor: actionButtonTextColor.toColor(),
+  elevation: 0,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(borderRadius),
+  ),
+);
+
 // SnackBars
 final baseSnackBarTheme = SnackBarThemeData(
   behavior: SnackBarBehavior.floating,
@@ -229,5 +238,6 @@ ThemeData darkTheme = ThemeData.dark().copyWith(
   navigationBarTheme: navigationBarTheme,
   inputDecorationTheme: darkInputDecorationTheme,
   elevatedButtonTheme: darkElevatedButtonTheme,
+  floatingActionButtonTheme: floatingActionButtonTheme,
   snackBarTheme: baseSnackBarTheme,
 );

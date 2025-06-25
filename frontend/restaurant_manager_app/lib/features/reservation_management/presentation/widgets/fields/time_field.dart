@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:restaurant_manager_app/config/theme/theme.dart';
 import 'package:restaurant_manager_app/core/data/converters/app_timeofday_converter.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_form_mode.dart';
 
 class TimeField extends StatefulWidget {
   final TextEditingController rawController;
-  final bool isEditable;
+  final ReservationFormMode displayMode;
   late final AppTimeOfDayConverter timeOfDayConverter;
 
   TimeField({
     super.key,
     required this.rawController,
-    required this.isEditable,
+    required this.displayMode,
   }) {
     timeOfDayConverter = const AppTimeOfDayConverter();
+  }
+
+  bool get isEditable {
+    return displayMode == ReservationFormMode.create ||
+        displayMode == ReservationFormMode.edit;
   }
 
   @override
@@ -25,15 +31,21 @@ class _TimeFieldState extends State<TimeField> {
   @override
   void initState() {
     super.initState();
-    _displayController = TextEditingController(
-      text: widget.timeOfDayConverter.formatTime(widget.rawController.text),
-    );
+    _displayController =
+        TextEditingController(text: _format(widget.rawController.text));
     widget.rawController.addListener(_syncFormattedValue);
   }
 
   void _syncFormattedValue() {
-    _displayController.text =
-        widget.timeOfDayConverter.formatTime(widget.rawController.text);
+    _displayController.text = _format(widget.rawController.text);
+  }
+
+  String _format(String raw) {
+    try {
+      return widget.timeOfDayConverter.formatTime(raw);
+    } catch (_) {
+      return '';
+    }
   }
 
   @override
@@ -50,13 +62,22 @@ class _TimeFieldState extends State<TimeField> {
       readOnly: true,
       decoration: InputDecoration(
         prefixIcon: const Icon(Icons.access_time),
-        suffixIcon: widget.isEditable ? const Icon(Icons.edit) : null,
+        suffixIcon: widget.displayMode == ReservationFormMode.edit
+            ? const Icon(Icons.edit)
+            : null,
         labelText: 'Час',
+        hintText: 'Изберете час',
       ),
       onTap: widget.isEditable
           ? () async {
-              final initialTime =
-                  widget.timeOfDayConverter.fromJson(widget.rawController.text);
+              late final TimeOfDay initialTime;
+
+              if (widget.rawController.text.isEmpty) {
+                initialTime = TimeOfDay.now();
+              } else {
+                initialTime = widget.timeOfDayConverter
+                    .fromJson(widget.rawController.text);
+              }
 
               final picked = await showTimePicker(
                 context: context,

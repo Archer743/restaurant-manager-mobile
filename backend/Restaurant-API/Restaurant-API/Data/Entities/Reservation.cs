@@ -13,7 +13,6 @@ namespace Restaurant_API.Data.Entities
 
         [ForeignKey(nameof(Restaurant))]
         public Guid RestaurantId { get; set; }
-
         public Restaurant Restaurant { get; set; }
 
 
@@ -47,7 +46,10 @@ namespace Restaurant_API.Data.Entities
         public string? Comment { get; set; }
 
 
-        // The reservation is initially in Pending status and then an employee must confirm or reject it
         public ReservationState State { get; set; }
+
+
+        // Indicates if this reservation was created directly by a staff member
+        public bool IsCreatedByStaff { get; set; } = false;
     }
 }

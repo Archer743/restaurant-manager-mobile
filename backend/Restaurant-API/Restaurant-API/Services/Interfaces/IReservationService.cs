@@ -4,7 +4,9 @@ namespace Restaurant_API.Services.Interfaces
 {
     public interface IReservationService
     {
-        Task CreateAsync(ReservationCreateModel createModel);
+        Task CreateClientReservationAsync(ClientReservationCreateModel createModel);
+
+        Task CreateConfirmedReservationAsync(HttpContext ctx, ReservationCreateModel createModel);
 
         Task<Dictionary<DateOnly, List<ReservationPreviewModel>>> GetConfirmedReservationsAsync(HttpContext ctx, DateOnly start, DateOnly end);
 

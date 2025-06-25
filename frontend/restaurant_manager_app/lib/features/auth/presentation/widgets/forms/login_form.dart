@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:restaurant_manager_app/core/utils/spacing.dart';
 import 'package:restaurant_manager_app/features/auth/presentation/bloc/login/login_bloc.dart';
 import 'package:restaurant_manager_app/features/auth/presentation/bloc/login/login_event.dart';
-import 'package:restaurant_manager_app/features/auth/presentation/widgets/buttons/action_button.dart';
+import 'package:restaurant_manager_app/core/presentation/widgets/buttons/action_button.dart';
 import 'package:restaurant_manager_app/features/auth/presentation/widgets/fields/password_field.dart';
 import 'package:restaurant_manager_app/features/auth/presentation/widgets/fields/username_field.dart';
 

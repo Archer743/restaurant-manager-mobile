@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/fields/base_form_field.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/constants/input_constraints.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_form_mode.dart';
 
-class CommentField extends StatelessWidget {
-  final TextEditingController controller;
-  final bool isEditable;
-
+class CommentField extends BaseFormField {
   const CommentField({
     super.key,
-    required this.controller,
-    required this.isEditable,
+    required super.controller,
+    required super.displayMode,
   });
 
   @override
@@ -20,7 +19,9 @@ class CommentField extends StatelessWidget {
       readOnly: !isEditable,
       decoration: InputDecoration(
         prefixIcon: const Icon(Icons.comment),
-        suffixIcon: isEditable ? const Icon(Icons.edit) : null,
+        suffixIcon: displayMode == ReservationFormMode.edit
+            ? const Icon(Icons.edit)
+            : null,
         labelText: 'Коментар',
         hintText: isEditable ? 'Въведете коментар' : 'Няма коментар',
       ),

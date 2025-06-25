@@ -26,7 +26,11 @@ class ReservationCard extends StatelessWidget {
             _buildTimeBlock(context),
             const SizedBox(width: 16.0),
             _buildMiddleBlock(context),
-            Icon(Icons.arrow_forward_ios, size: 18, color: Colors.grey[400]),
+            if (reservation.isCreatedByStaff)
+              Tooltip(
+                message: 'Създадена от служител',
+                child: Icon(Icons.verified_user, color: Colors.grey[400]),
+              ),
           ],
         ),
       ),

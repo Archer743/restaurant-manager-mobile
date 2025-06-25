@@ -10,6 +10,7 @@ class ReservationPreviewModel extends ReservationPreview {
     required super.time,
     required super.peopleCount,
     required super.name,
+    required super.isCreatedByStaff,
   });
 
   factory ReservationPreviewModel.fromJson(Map<String, dynamic> json) =>

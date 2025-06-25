@@ -17,5 +17,7 @@
         public string Name { get; set; } = string.Empty;
 
         public string? Comment { get; set; }
+
+        public bool IsCreatedByStaff { get; set; }
     }
 }

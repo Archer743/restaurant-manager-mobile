@@ -4,8 +4,6 @@ namespace Restaurant_API.Data.Models.Reservation
 {
     public class ReservationCreateModel
     {
-        public Guid RestaurantId { get; set; }
-
         [Phone]
         public string Phone { get; set; }
 

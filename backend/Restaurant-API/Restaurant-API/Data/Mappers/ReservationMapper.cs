@@ -1,18 +1,30 @@
 ﻿using Restaurant_API.Data.Entities;
 using Restaurant_API.Data.Models.Reservation;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Numerics;
-using System.Xml.Linq;
 
 namespace Restaurant_API.Data.Mappers
 {
     public static class ReservationMapper
     {
-        public static Reservation ToEntity(this ReservationCreateModel createModel)
+        public static Reservation ToEntity(this ClientReservationCreateModel createModel)
         {
             return new Reservation
             {
                 RestaurantId = createModel.RestaurantId,
+                Phone = createModel.Phone,
+                Email = createModel.Email,
+                Date = createModel.Date,
+                Time = createModel.Time,
+                PeopleCount = createModel.PeopleCount,
+                Name = createModel.Name,
+                Comment = createModel.Comment,
+            };
+        }
+
+        public static Reservation ToEntity(this ReservationCreateModel createModel)
+        {
+            return new Reservation
+            {
+                // RestaurantId is set in ReservationService based on the current user
                 Phone = createModel.Phone,
                 Email = createModel.Email,
                 Date = createModel.Date,
@@ -31,6 +43,7 @@ namespace Restaurant_API.Data.Mappers
                 Time = reservation.Time,
                 PeopleCount = reservation.PeopleCount,
                 Name = reservation.Name,
+                IsCreatedByStaff = reservation.IsCreatedByStaff,
             };
         }
 
@@ -46,6 +59,7 @@ namespace Restaurant_API.Data.Mappers
                 PeopleCount = reservation.PeopleCount,
                 Name = reservation.Name,
                 Comment = reservation.Comment,
+                IsCreatedByStaff = reservation.IsCreatedByStaff,
             };
         }
     }

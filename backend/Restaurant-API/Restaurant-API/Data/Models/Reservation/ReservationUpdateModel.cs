@@ -4,6 +4,15 @@ namespace Restaurant_API.Data.Models.Reservation
 {
     public class ReservationUpdateModel
     {
+        [MaxLength(100)]
+        public string? Name { get; set; }
+
+        [EmailAddress]
+        public string? Email { get; set; }
+
+        [Phone]
+        public string? Phone { get; set; }
+
         public DateOnly? Date { get; set; }
 
         public TimeOnly? Time { get; set; }

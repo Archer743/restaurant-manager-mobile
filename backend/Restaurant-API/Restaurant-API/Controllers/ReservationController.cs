@@ -17,10 +17,17 @@ namespace Restaurant_API.Controllers
         }
 
         /* ======================================================================== POST */
-        [HttpPost("create")]
-        public async Task<IActionResult> CreateAsync(ReservationCreateModel createModel)
+        [HttpPost]
+        public async Task<IActionResult> CreateClientReservationAsync(ClientReservationCreateModel createModel)
         {
-            await reservationService.CreateAsync(createModel);
+            await reservationService.CreateClientReservationAsync(createModel);
+            return NoContent();
+        }
+
+        [HttpPost("confirmed"), AppAuthorize]
+        public async Task<IActionResult> CreateConfirmedReservationAsync(ReservationCreateModel createModel)
+        {
+            await reservationService.CreateConfirmedReservationAsync(HttpContext, createModel);
             return NoContent();
         }
 

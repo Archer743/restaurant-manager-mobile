@@ -2,18 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:restaurant_manager_app/config/theme/theme.dart';
 import 'package:restaurant_manager_app/core/data/converters/app_dateonly_converter.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_form_mode.dart';
 
 class DateField extends StatefulWidget {
   final TextEditingController rawController;
-  final bool isEditable;
+  final ReservationFormMode displayMode;
   late final AppDateOnlyConverter dateOnlyConverter;
 
   DateField({
     super.key,
     required this.rawController,
-    required this.isEditable,
+    required this.displayMode,
   }) {
     dateOnlyConverter = const AppDateOnlyConverter();
+  }
+
+  bool get isEditable {
+    return displayMode == ReservationFormMode.create ||
+        displayMode == ReservationFormMode.edit;
   }
 
   @override
@@ -59,8 +65,11 @@ class _DateFieldState extends State<DateField> {
       readOnly: true,
       decoration: InputDecoration(
         prefixIcon: const Icon(Icons.event_note),
+        suffixIcon: widget.displayMode == ReservationFormMode.edit
+            ? const Icon(Icons.edit)
+            : null,
         labelText: 'Дата',
-        suffixIcon: widget.isEditable ? const Icon(Icons.edit) : null,
+        hintText: 'Изберете дата',
       ),
       onTap: widget.isEditable
           ? () async {

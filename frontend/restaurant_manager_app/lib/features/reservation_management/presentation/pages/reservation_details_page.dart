@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:restaurant_manager_app/config/routing/app_routes.dart';
+import 'package:restaurant_manager_app/config/theme/theme.dart';
 import 'package:restaurant_manager_app/core/data/converters/app_dateonly_converter.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
 import 'package:restaurant_manager_app/core/presentation/widgets/back_leading_app_bar.dart';
@@ -11,7 +12,8 @@ import 'package:restaurant_manager_app/features/reservation_management/domain/en
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/reservation_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/reservation_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/reservation_state.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/forms/reservation_edit_form.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_form_mode.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/forms/reservation_form.dart';
 
 class ReservationDetailsPage extends StatefulWidget {
   final String reservationId;
@@ -28,12 +30,14 @@ class ReservationDetailsPage extends StatefulWidget {
 class RreservationDetailsPageState extends State<ReservationDetailsPage> {
   final _formKey = GlobalKey<FormState>();
   ReservationView? _reservation;
-  bool _editModeActivated = false;
+  ReservationFormMode _displayMode = ReservationFormMode.view;
 
   // Prevents user actions while a request is in progress
   bool _isLoading = false;
 
-  // Editable fields' controllers
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _dateController = TextEditingController();
   final _timeController = TextEditingController();
   final _peopleCountController = TextEditingController();
@@ -48,8 +52,11 @@ class RreservationDetailsPageState extends State<ReservationDetailsPage> {
   void _setControllers() {
     if (_reservation == null) return;
     const dateOnlyConverter = AppDateOnlyConverter();
-    _dateController.text = dateOnlyConverter.toJson(_reservation!.date);
 
+    _nameController.text = _reservation!.name;
+    _emailController.text = _reservation!.email;
+    _phoneController.text = _reservation!.phone;
+    _dateController.text = dateOnlyConverter.toJson(_reservation!.date);
     _timeController.text = _reservation!.time;
     _peopleCountController.text = _reservation!.peopleCount.toString();
     _commentController.text = _reservation!.comment ?? '';
@@ -71,6 +78,9 @@ class RreservationDetailsPageState extends State<ReservationDetailsPage> {
       ));
     }
 
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
     _dateController.dispose();
     _timeController.dispose();
     _peopleCountController.dispose();
@@ -94,16 +104,14 @@ class RreservationDetailsPageState extends State<ReservationDetailsPage> {
             });
 
             if (state is ReservationUpdated) {
+              setState(() {
+                _refreshRequired = true;
+                _originalDate = state.originalDate;
+                _updatedDate = state.reservation.date;
+              });
+
               SnackBarService.showSuccess(
                   context, 'Резервацията беше обновена успешно');
-
-              if (mounted) {
-                setState(() {
-                  _refreshRequired = true;
-                  _originalDate = state.originalDate;
-                  _updatedDate = state.reservation.date;
-                });
-              }
             }
           } else if (state is ReservationError) {
             // Reset fields with reservation's data
@@ -129,10 +137,13 @@ class RreservationDetailsPageState extends State<ReservationDetailsPage> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 45),
                 child: SingleChildScrollView(
-                  child: ReservationEditForm(
+                  child: ReservationForm(
                     formKey: _formKey,
-                    reservation: _reservation!,
-                    editModeActivated: _editModeActivated,
+                    displayMode: _displayMode,
+                    isCreatedByStaff: _reservation!.isCreatedByStaff,
+                    nameController: _nameController,
+                    emailController: _emailController,
+                    phoneController: _phoneController,
                     dateController: _dateController,
                     timeController: _timeController,
                     peopleCountController: _peopleCountController,
@@ -148,35 +159,43 @@ class RreservationDetailsPageState extends State<ReservationDetailsPage> {
   }
 
   PreferredSizeWidget _buildAppBar() {
+    bool editModeActivated = _displayMode == ReservationFormMode.edit;
+
     return BackLeadingAppBar(
       title: 'Резервация',
       actions: [
+        if (_reservation != null && _reservation!.isCreatedByStaff)
+          Tooltip(
+            message: 'Създадена от служител',
+            child: Icon(Icons.verified_user, color: Colors.grey[400]),
+          ),
         IconButton(
-          icon: Icon(_editModeActivated ? Icons.check : Icons.edit),
-          tooltip: _editModeActivated ? 'Готово' : 'Редакция',
+          icon: Icon(editModeActivated ? Icons.check : Icons.edit),
+          tooltip: editModeActivated ? 'Готово' : 'Редакция',
           onPressed: _reservation != null && !_isLoading
               ? () {
-                  if (_editModeActivated) {
-                    final isValid = _formKey.currentState?.validate() ?? false;
+                  final isValid = _formKey.currentState?.validate() ?? false;
 
-                    if (isValid) {
-                      // Submit changes
-                      context.read<ReservationBloc>().add(
-                            UpdateReservation(
-                              originalReservation: _reservation!,
-                              dateString: _dateController.text,
-                              timeString: _timeController.text,
-                              peopleCountString: _peopleCountController.text,
-                              commentString: _commentController.text,
-                            ),
-                          );
+                  if (editModeActivated && isValid) {
+                    // Submit changes
+                    context.read<ReservationBloc>().add(
+                          UpdateReservation(
+                            originalReservation: _reservation!,
+                            name: _nameController.text,
+                            email: _emailController.text,
+                            phone: _phoneController.text,
+                            dateString: _dateController.text,
+                            timeString: _timeController.text,
+                            peopleCountString: _peopleCountController.text,
+                            commentString: _commentController.text,
+                          ),
+                        );
 
-                      // Exit edit mode only if valid
-                      setState(() => _editModeActivated = false);
-                    }
+                    // Exit edit mode only if valid
+                    setState(() => _displayMode = ReservationFormMode.view);
                   } else {
                     // Enter edit mode
-                    setState(() => _editModeActivated = true);
+                    setState(() => _displayMode = ReservationFormMode.edit);
                   }
                 }
               : null,

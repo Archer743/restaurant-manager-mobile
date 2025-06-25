@@ -16,6 +16,7 @@ class ReservationViewModel {
   final String time;
   final int peopleCount;
   final String name;
+  final bool isCreatedByStaff;
   final String? comment;
 
   ReservationViewModel({
@@ -26,6 +27,7 @@ class ReservationViewModel {
     required this.time,
     required this.peopleCount,
     required this.name,
+    required this.isCreatedByStaff,
     this.comment,
   });
 
@@ -41,6 +43,7 @@ class ReservationViewModel {
       time: time,
       peopleCount: peopleCount,
       name: name,
+      isCreatedByStaff: isCreatedByStaff,
       comment: comment,
     );
   }

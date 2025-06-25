@@ -13,6 +13,7 @@ ReservationPreviewModel _$ReservationPreviewModelFromJson(
       time: json['time'] as String,
       peopleCount: (json['peopleCount'] as num).toInt(),
       name: json['name'] as String,
+      isCreatedByStaff: json['isCreatedByStaff'] as bool,
     );
 
 Map<String, dynamic> _$ReservationPreviewModelToJson(
@@ -22,4 +23,5 @@ Map<String, dynamic> _$ReservationPreviewModelToJson(
       'time': instance.time,
       'peopleCount': instance.peopleCount,
       'name': instance.name,
+      'isCreatedByStaff': instance.isCreatedByStaff,
     };

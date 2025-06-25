@@ -6,6 +6,7 @@ class ReservationView {
   final String time;
   final int peopleCount;
   final String name;
+  final bool isCreatedByStaff;
   final String? comment;
 
   ReservationView({
@@ -16,6 +17,7 @@ class ReservationView {
     required this.time,
     required this.peopleCount,
     required this.name,
+    required this.isCreatedByStaff,
     this.comment,
   });
 }

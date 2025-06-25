@@ -11,6 +11,7 @@ import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/
 import 'package:restaurant_manager_app/features/home/presentation/home_page.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/reservation_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/reservation_event.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/reservation_create_page.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/reservation_details_page.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/bloc/splash_event.dart';
@@ -57,28 +58,48 @@ final GoRouter appRouter = GoRouter(
         ),
       ],
     ),
+    // Route for creating a new reservation
     GoRoute(
-      path: '${AppRoutes.reservation}/:id',
+      path: AppRoutes.reservation,
       builder: (context, state) {
-        final reservationId = state.pathParameters['id'];
         final calendarBloc = state.extra as CalendarBloc?;
-
-        // TODO: Navigate to an error page
-        if (reservationId == null) {
-          return const Text('Error: Reservation ID missing');
-        }
+        // final String? initialDateIso = state.extra as String?;
 
         return MultiBlocProvider(
           providers: [
-            BlocProvider<ReservationBloc>(
-              create: (_) => sl()..add(GetReservation(reservationId)),
-            ),
+            BlocProvider<ReservationBloc>(create: (_) => sl()),
             if (calendarBloc != null)
               BlocProvider<CalendarBloc>.value(value: calendarBloc),
           ],
-          child: ReservationDetailsPage(reservationId: reservationId),
+          child: const ReservationCreatePage(),
         );
       },
+      routes: [
+        // Sub-route for viewing/editing an existing reservation
+        GoRoute(
+          path: ':id',
+          builder: (context, state) {
+            final reservationId = state.pathParameters['id'];
+            final calendarBloc = state.extra as CalendarBloc?;
+
+            // TODO: Navigate to an error page
+            if (reservationId == null) {
+              return const Text('Error: Reservation ID missing');
+            }
+
+            return MultiBlocProvider(
+              providers: [
+                BlocProvider<ReservationBloc>(
+                  create: (_) => sl()..add(GetReservation(reservationId)),
+                ),
+                if (calendarBloc != null)
+                  BlocProvider<CalendarBloc>.value(value: calendarBloc),
+              ],
+              child: ReservationDetailsPage(reservationId: reservationId),
+            );
+          },
+        ),
+      ],
     ),
   ],
 );

@@ -16,6 +16,7 @@ ReservationViewModel _$ReservationViewModelFromJson(
       time: json['time'] as String,
       peopleCount: (json['peopleCount'] as num).toInt(),
       name: json['name'] as String,
+      isCreatedByStaff: json['isCreatedByStaff'] as bool,
       comment: json['comment'] as String?,
     );
 
@@ -29,5 +30,6 @@ Map<String, dynamic> _$ReservationViewModelToJson(
       'time': instance.time,
       'peopleCount': instance.peopleCount,
       'name': instance.name,
+      'isCreatedByStaff': instance.isCreatedByStaff,
       'comment': instance.comment,
     };

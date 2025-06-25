@@ -19,6 +19,8 @@ class ReservationUpdated extends ReservationLoaded {
   ReservationUpdated(this.originalDate, super.reservation);
 }
 
+class ReservationSaved extends ReservationState {}
+
 class ReservationError extends ReservationState {
   final Failure failure;
   late final bool requiresReauthentication;
