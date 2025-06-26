@@ -62,17 +62,21 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.reservation,
       builder: (context, state) {
-        final calendarBloc = state.extra as CalendarBloc?;
-        // final String? initialDateIso = state.extra as String?;
+        try {
+          final extraData = state.extra as Map<String, dynamic>;
+          final DateTime initialDate = extraData['initialDate']!;
+          final CalendarBloc calendarBloc = extraData['calendarBloc']!;
 
-        return MultiBlocProvider(
-          providers: [
-            BlocProvider<ReservationBloc>(create: (_) => sl()),
-            if (calendarBloc != null)
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider<ReservationBloc>(create: (_) => sl()),
               BlocProvider<CalendarBloc>.value(value: calendarBloc),
-          ],
-          child: const ReservationCreatePage(),
-        );
+            ],
+            child: ReservationCreatePage(initialDate: initialDate),
+          );
+        } catch (_) {
+          return const Text('Error: Path ${AppRoutes.reservation}');
+        }
       },
       routes: [
         // Sub-route for viewing/editing an existing reservation

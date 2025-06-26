@@ -53,7 +53,9 @@ class _ConfirmedReservationsCalendarPageState
   // --- Table Calendar Event Loader ---
   List<ReservationPreview> _getReservationsForDay(DateTime day) {
     // 'day' from calendar is in UTC format
-    final normalizedDay = DateTime(day.year, day.month, day.day);
+    final localTime = day.toLocal();
+    final normalizedDay =
+        DateTime(localTime.year, localTime.month, localTime.day);
     return _currMonthReservations[normalizedDay] ?? [];
   }
 
@@ -209,9 +211,18 @@ class _ConfirmedReservationsCalendarPageState
     return FloatingActionButton(
       onPressed: () {
         // Pre-fill the date with the selected day.
-        // final initialDateForNewReservation = _selectedDay ?? _focusedDay;
-        final calendarBloc = context.read<CalendarBloc>();
-        context.push(AppRoutes.reservation, extra: calendarBloc);
+
+        // !!! NB: Focused day is in local time, selected day is in utc !!!
+        final DateTime initialDateTime = _selectedDay?.toLocal() ?? _focusedDay;
+        final normalizedDay = DateTime(
+            initialDateTime.year, initialDateTime.month, initialDateTime.day);
+
+        final Map<String, dynamic> extraData = {
+          'initialDate': normalizedDay,
+          'calendarBloc': context.read<CalendarBloc>(),
+        };
+
+        context.push(AppRoutes.reservation, extra: extraData);
       },
       child: const Icon(Icons.add),
     );

@@ -5,7 +5,9 @@ import 'package:restaurant_manager_app/config/routing/app_routes.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
 import 'package:restaurant_manager_app/core/presentation/widgets/back_leading_app_bar.dart';
 import 'package:restaurant_manager_app/core/presentation/widgets/buttons/action_button.dart';
+import 'package:restaurant_manager_app/core/utils/datetime_utils.dart';
 import 'package:restaurant_manager_app/core/utils/spacing.dart';
+import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_bloc.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_form_mode.dart';
@@ -15,7 +17,9 @@ import 'package:restaurant_manager_app/features/reservation_management/presentat
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/forms/reservation_form.dart';
 
 class ReservationCreatePage extends StatefulWidget {
-  const ReservationCreatePage({super.key});
+  final DateTime initialDate; // Local time
+
+  const ReservationCreatePage({super.key, required this.initialDate});
 
   @override
   State<ReservationCreatePage> createState() => _ReservationCreatePageState();
@@ -34,6 +38,13 @@ class _ReservationCreatePageState extends State<ReservationCreatePage> {
 
   late final CalendarBloc? _calendarBloc;
   bool _refreshRequired = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _dateController.text = widget.initialDate.toYYYYMMDDString();
+    _timeController.text = TimeOfDay.now().toHHMMSSString();
+  }
 
   // Runs after the widget is inserted into the widget tree and context is still valid.
   @override
