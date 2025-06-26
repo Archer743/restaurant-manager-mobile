@@ -77,7 +77,7 @@ class ReservationBloc extends Bloc<ReservationEvent, ReservationState> {
     result.fold(
       (failure) => emit(ReservationError(failure)),
       (reservation) =>
-          emit(ReservationUpdated(event.originalDate, reservation)),
+          emit(ReservationUpdated(event.originalStartTimeUtc, reservation)),
     );
   }
 }

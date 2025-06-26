@@ -19,7 +19,7 @@ import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/usecases/get_confirmed_reservations_usecase.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/data/data_sources/reservation_api_service.dart';
-import 'package:restaurant_manager_app/features/reservation_management/data/repository/reservation_repository._impl.dart';
+import 'package:restaurant_manager_app/features/reservation_management/data/repository/reservation_repository_impl.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/repository/reservation_repository.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/create_reservation_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/get_reservation_details_usecase.dart';

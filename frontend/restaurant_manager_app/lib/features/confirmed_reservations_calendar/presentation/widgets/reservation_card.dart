@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:restaurant_manager_app/config/theme/theme.dart';
-import 'package:restaurant_manager_app/core/data/converters/app_timeofday_converter.dart';
+import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/entities/reservation_preview.dart';
 
 class ReservationCard extends StatelessWidget {
@@ -38,12 +38,10 @@ class ReservationCard extends StatelessWidget {
   }
 
   Widget _buildTimeBlock(BuildContext context) {
-    const timeOfDayConverter = AppTimeOfDayConverter();
-
     return Container(
       padding: const EdgeInsets.all(8.0),
       child: Text(
-        timeOfDayConverter.formatTime(reservation.time),
+        reservation.time.toHHMMString(),
         style: Theme.of(context).textTheme.titleMedium!.copyWith(
               fontWeight: FontWeight.bold,
               letterSpacing: 0.3,

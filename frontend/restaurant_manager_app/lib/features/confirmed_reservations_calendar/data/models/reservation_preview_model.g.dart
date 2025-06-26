@@ -10,9 +10,9 @@ ReservationPreviewModel _$ReservationPreviewModelFromJson(
         Map<String, dynamic> json) =>
     ReservationPreviewModel(
       id: json['id'] as String,
-      time: json['time'] as String,
-      peopleCount: (json['peopleCount'] as num).toInt(),
       name: json['name'] as String,
+      time: const AppTimeOfDayConverter().fromJson(json['time'] as String),
+      peopleCount: (json['peopleCount'] as num).toInt(),
       isCreatedByStaff: json['isCreatedByStaff'] as bool,
     );
 
@@ -20,8 +20,8 @@ Map<String, dynamic> _$ReservationPreviewModelToJson(
         ReservationPreviewModel instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'time': instance.time,
-      'peopleCount': instance.peopleCount,
       'name': instance.name,
+      'peopleCount': instance.peopleCount,
       'isCreatedByStaff': instance.isCreatedByStaff,
+      'time': const AppTimeOfDayConverter().toJson(instance.time),
     };

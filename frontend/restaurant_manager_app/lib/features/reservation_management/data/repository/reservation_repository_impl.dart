@@ -31,7 +31,7 @@ class ReservationRepositoryImpl implements ReservationRepository {
         final response =
             await _reservationApiService.getReservation(authorization, id);
 
-        return response.data.toEntity();
+        return response.data;
       },
     );
   }
@@ -68,7 +68,7 @@ class ReservationRepositoryImpl implements ReservationRepository {
         final response = await _reservationApiService.updateReservation(
             authorization, id, updateModel);
 
-        return response.data.toEntity();
+        return response.data;
       },
     );
   }

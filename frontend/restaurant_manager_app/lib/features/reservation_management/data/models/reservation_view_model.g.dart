@@ -12,8 +12,8 @@ ReservationViewModel _$ReservationViewModelFromJson(
       id: json['id'] as String,
       phone: json['phone'] as String,
       email: json['email'] as String,
-      date: const AppDateOnlyConverter().fromJson(json['date'] as String),
-      time: json['time'] as String,
+      startTimeUtc: const AppDateTimeUtcConverter()
+          .fromJson(json['startTimeUtc'] as String),
       peopleCount: (json['peopleCount'] as num).toInt(),
       name: json['name'] as String,
       isCreatedByStaff: json['isCreatedByStaff'] as bool,
@@ -24,12 +24,12 @@ Map<String, dynamic> _$ReservationViewModelToJson(
         ReservationViewModel instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'phone': instance.phone,
-      'email': instance.email,
-      'date': const AppDateOnlyConverter().toJson(instance.date),
-      'time': instance.time,
-      'peopleCount': instance.peopleCount,
       'name': instance.name,
-      'isCreatedByStaff': instance.isCreatedByStaff,
+      'email': instance.email,
+      'phone': instance.phone,
+      'peopleCount': instance.peopleCount,
       'comment': instance.comment,
+      'isCreatedByStaff': instance.isCreatedByStaff,
+      'startTimeUtc':
+          const AppDateTimeUtcConverter().toJson(instance.startTimeUtc),
     };

@@ -10,6 +10,6 @@ typedef ApiConfirmedReservationsMap
 /// with DateTime objects as keys and domain entities as values.
 typedef CalendarConfirmedReservations = Map<DateTime, List<ReservationPreview>>;
 
-/// Represents cached confirmed reservations where the key is month
+/// Represents cached confirmed reservations where the key is first day of month
 typedef CachedConfirmedReservations
     = Map<DateTime, CalendarConfirmedReservations>;

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:restaurant_manager_app/config/routing/app_routes.dart';
-import 'package:restaurant_manager_app/config/theme/theme.dart';
-import 'package:restaurant_manager_app/core/data/converters/app_dateonly_converter.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
 import 'package:restaurant_manager_app/core/presentation/widgets/back_leading_app_bar.dart';
+import 'package:restaurant_manager_app/core/utils/datetime_utils.dart';
+import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_bloc.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_view.dart';
@@ -46,20 +46,22 @@ class RreservationDetailsPageState extends State<ReservationDetailsPage> {
   // Refresh Previous Page
   late final CalendarBloc? _calendarBloc;
   bool _refreshRequired = false;
-  DateTime? _originalDate;
-  DateTime? _updatedDate;
+  List<DateTime> rawDatesAffected = [];
 
   void _setControllers() {
     if (_reservation == null) return;
-    const dateOnlyConverter = AppDateOnlyConverter();
 
     _nameController.text = _reservation!.name;
     _emailController.text = _reservation!.email;
     _phoneController.text = _reservation!.phone;
-    _dateController.text = dateOnlyConverter.toJson(_reservation!.date);
-    _timeController.text = _reservation!.time;
     _peopleCountController.text = _reservation!.peopleCount.toString();
     _commentController.text = _reservation!.comment ?? '';
+
+    final (localDate, localTime) =
+        extractLocalComponentsFromUtc(_reservation!.startTimeUtc);
+
+    _dateController.text = localDate.toYYYYMMDDString();
+    _timeController.text = localTime.toHHMMSSString();
   }
 
   // Runs after the widget is inserted into the widget tree and context is still valid.
@@ -73,9 +75,7 @@ class RreservationDetailsPageState extends State<ReservationDetailsPage> {
   void dispose() {
     // Update Calendar Page
     if (_refreshRequired && _calendarBloc != null) {
-      _calendarBloc.add(RefreshCalendar(
-        rawDatesAffected: [_originalDate!, _updatedDate!],
-      ));
+      _calendarBloc.add(RefreshCalendar(rawDatesAffected: rawDatesAffected));
     }
 
     _nameController.dispose();
@@ -106,8 +106,10 @@ class RreservationDetailsPageState extends State<ReservationDetailsPage> {
             if (state is ReservationUpdated) {
               setState(() {
                 _refreshRequired = true;
-                _originalDate = state.originalDate;
-                _updatedDate = state.reservation.date;
+                rawDatesAffected = [
+                  state.originalStartTimeUtc.toLocal(), // Before update
+                  state.reservation.startTimeUtc.toLocal(), // After update
+                ];
               });
 
               SnackBarService.showSuccess(
@@ -164,7 +166,7 @@ class RreservationDetailsPageState extends State<ReservationDetailsPage> {
     return BackLeadingAppBar(
       title: 'Резервация',
       actions: [
-        if (_reservation != null && _reservation!.isCreatedByStaff)
+        if (_reservation?.isCreatedByStaff ?? false)
           Tooltip(
             message: 'Създадена от служител',
             child: Icon(Icons.verified_user, color: Colors.grey[400]),

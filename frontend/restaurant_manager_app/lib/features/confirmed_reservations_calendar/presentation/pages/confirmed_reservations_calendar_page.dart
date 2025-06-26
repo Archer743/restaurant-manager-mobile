@@ -22,11 +22,11 @@ class ConfirmedReservationsCalendarPage extends StatefulWidget {
 
 class _ConfirmedReservationsCalendarPageState
     extends State<ConfirmedReservationsCalendarPage> {
+  // Working with local time
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-
-  final DateTime _firstDay = DateTime.utc(2025, 1, 1);
-  late final DateTime _lastDay;
+  final DateTime _firstCalendarDay = DateTime(2025, 1, 1);
+  late final DateTime _lastCalendarDay;
 
   CalendarConfirmedReservations _currMonthReservations = {};
   final ValueNotifier<List<ReservationPreview>> _selectedDayReservations =
@@ -37,8 +37,7 @@ class _ConfirmedReservationsCalendarPageState
     super.initState();
     _selectedDay = _focusedDay;
 
-    // Calculate _lastDay: 5 years from now
-    _lastDay = DateTime.utc(
+    _lastCalendarDay = DateTime(
       DateTime.now().year + 5,
       DateTime.now().month,
       DateTime.now().day,
@@ -53,7 +52,8 @@ class _ConfirmedReservationsCalendarPageState
 
   // --- Table Calendar Event Loader ---
   List<ReservationPreview> _getReservationsForDay(DateTime day) {
-    final normalizedDay = DateTime.utc(day.year, day.month, day.day);
+    // 'day' from calendar is in UTC format
+    final normalizedDay = DateTime(day.year, day.month, day.day);
     return _currMonthReservations[normalizedDay] ?? [];
   }
 
@@ -69,7 +69,31 @@ class _ConfirmedReservationsCalendarPageState
   }
 
   void _onPageChanged(DateTime focusedDay) {
-    setState(() => _focusedDay = focusedDay);
+    setState(() {
+      _focusedDay = focusedDay;
+
+      if (_selectedDay != null) {
+        int targetDay = _selectedDay!.day;
+        int year = focusedDay.year;
+        int month = focusedDay.month;
+
+        // Try to create a DateTime with the same day in the new month.
+        // Dart's DateTime constructor for month automatically rolls over if the day doesn't exist.
+        // E.g., DateTime(2025, 4, 31) will create 2025-05-01.
+        DateTime potentialNewSelectedDay = DateTime(year, month, targetDay);
+
+        // Check if the created date's month matches the intended month.
+        // If it doesn't, it means the targetDay was too high for the 'month'.
+        if (potentialNewSelectedDay.month != month) {
+          _selectedDay = DateTime(year, month + 1, 0);
+        } else {
+          _selectedDay = potentialNewSelectedDay;
+        }
+      } else {
+        // If no day was selected initially, just select the focusedDay
+        _selectedDay = focusedDay;
+      }
+    });
 
     context.read<CalendarBloc>().add(GetReservationsForMonth(focusedDay));
   }
@@ -130,8 +154,8 @@ class _ConfirmedReservationsCalendarPageState
         clipBehavior: Clip.antiAlias, // Ensures content respects border radius
         color: primaryColor.withOpacity(0.1),
         child: TableCalendar(
-          firstDay: _firstDay,
-          lastDay: _lastDay,
+          firstDay: _firstCalendarDay,
+          lastDay: _lastCalendarDay,
           focusedDay: _focusedDay,
           locale: 'bg_BG',
           calendarFormat: CalendarFormat.month,

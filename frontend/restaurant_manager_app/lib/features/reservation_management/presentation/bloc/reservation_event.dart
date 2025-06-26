@@ -1,4 +1,6 @@
-import 'package:restaurant_manager_app/core/data/converters/app_dateonly_converter.dart';
+import 'package:flutter/material.dart';
+import 'package:restaurant_manager_app/core/utils/datetime_utils.dart';
+import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_create.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_update.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_view.dart';
@@ -23,12 +25,14 @@ class CreateReservation extends ReservationEvent {
     required String peopleCountString,
     required String comment,
   }) {
+    final DateTime date = DateTime.parse(dateString);
+    final TimeOfDay time = parseTimeOfDay(timeString);
+
     data = ReservationCreate(
       name: name,
       email: email,
       phone: phone,
-      date: dateString,
-      time: timeString,
+      startTimeUtc: buildUtcDateTimeFromLocalComponents(date, time),
       peopleCount: int.parse(peopleCountString),
       comment: comment,
     );
@@ -37,7 +41,8 @@ class CreateReservation extends ReservationEvent {
 
 class UpdateReservation extends ReservationEvent {
   late final String id;
-  late final DateTime originalDate; // Used for updating the calendar
+  // Used for updating the calendar
+  late final DateTime originalStartTimeUtc;
   late final ReservationUpdate update;
 
   UpdateReservation({
@@ -51,7 +56,7 @@ class UpdateReservation extends ReservationEvent {
     required String commentString,
   }) {
     id = originalReservation.id;
-    originalDate = originalReservation.date;
+    originalStartTimeUtc = originalReservation.startTimeUtc;
     update = _buildUpdate(
       originalReservation,
       name,
@@ -69,8 +74,7 @@ class UpdateReservation extends ReservationEvent {
     return update.name != null ||
         update.email != null ||
         update.phone != null ||
-        update.date != null ||
-        update.time != null ||
+        update.startTimeUtc != null ||
         update.peopleCount != null ||
         update.comment != null;
   }
@@ -85,18 +89,17 @@ class UpdateReservation extends ReservationEvent {
     String peopleCountString,
     String commentString,
   ) {
-    const dateOnlyConverter = AppDateOnlyConverter();
-
     final String? newName = name != original.name ? name : null;
     final String? newEmail = email != original.email ? email : null;
     final String? newPhone = phone != original.phone ? phone : null;
 
-    final String? newDate =
-        dateString != dateOnlyConverter.toJson(original.date)
-            ? dateString
-            : null;
+    final DateTime localDate = DateTime.parse(dateString);
+    final TimeOfDay localTime = parseTimeOfDay(timeString);
+    final DateTime startTimeUtc =
+        buildUtcDateTimeFromLocalComponents(localDate, localTime);
 
-    final String? newTime = timeString != original.time ? timeString : null;
+    final DateTime? newStartTimeUtc =
+        startTimeUtc != original.startTimeUtc ? startTimeUtc : null;
 
     final int? peopleCountInt = int.tryParse(peopleCountString);
     final int? newPeopleCount =
@@ -114,8 +117,7 @@ class UpdateReservation extends ReservationEvent {
       name: newName,
       email: newEmail,
       phone: newPhone,
-      date: newDate,
-      time: newTime,
+      startTimeUtc: newStartTimeUtc,
       peopleCount: newPeopleCount,
       comment: newComment,
     );

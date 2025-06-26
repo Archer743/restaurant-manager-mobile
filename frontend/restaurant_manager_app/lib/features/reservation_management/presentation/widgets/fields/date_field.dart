@@ -1,21 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:restaurant_manager_app/config/theme/theme.dart';
-import 'package:restaurant_manager_app/core/data/converters/app_dateonly_converter.dart';
+import 'package:restaurant_manager_app/core/utils/datetime_utils.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_form_mode.dart';
 
 class DateField extends StatefulWidget {
   final TextEditingController rawController;
   final ReservationFormMode displayMode;
-  late final AppDateOnlyConverter dateOnlyConverter;
 
-  DateField({
+  const DateField({
     super.key,
     required this.rawController,
     required this.displayMode,
-  }) {
-    dateOnlyConverter = const AppDateOnlyConverter();
-  }
+  });
 
   bool get isEditable {
     return displayMode == ReservationFormMode.create ||
@@ -33,19 +29,19 @@ class _DateFieldState extends State<DateField> {
   void initState() {
     super.initState();
     _displayController = TextEditingController(
-      text: _format(widget.rawController.text),
+      text: _formatForDisplay(widget.rawController.text),
     );
     widget.rawController.addListener(_syncFormattedValue);
   }
 
   void _syncFormattedValue() {
-    _displayController.text = _format(widget.rawController.text);
+    _displayController.text = _formatForDisplay(widget.rawController.text);
   }
 
-  String _format(String raw) {
+  String _formatForDisplay(String raw) {
     try {
-      final parsed = widget.dateOnlyConverter.fromJson(raw);
-      return DateFormat.yMMMMd('bg').format(parsed); // e.g., 17 юни 2025
+      final parsed = DateTime.parse(raw);
+      return parsed.toBulgarianDateString(); // e.g., 17 юни 2025
     } catch (_) {
       return '';
     }
@@ -73,19 +69,19 @@ class _DateFieldState extends State<DateField> {
       ),
       onTap: widget.isEditable
           ? () async {
-              DateTime initialDate;
+              late final DateTime initialDate;
 
               try {
                 initialDate = DateTime.parse(widget.rawController.text);
               } catch (_) {
-                initialDate = DateTime.now();
+                initialDate = DateTime.now(); // Local time
               }
 
               final picked = await showDatePicker(
                 context: context,
                 initialDate: initialDate,
-                firstDate: DateTime.utc(2025, 1, 1),
-                lastDate: DateTime.utc(
+                firstDate: DateTime(2025, 1, 1),
+                lastDate: DateTime(
                   DateTime.now().year + 5,
                   DateTime.now().month,
                   DateTime.now().day,
@@ -100,9 +96,9 @@ class _DateFieldState extends State<DateField> {
                 },
               );
 
+              // 'picked' also is in local time
               if (picked != null) {
-                widget.rawController.text =
-                    widget.dateOnlyConverter.toJson(picked);
+                widget.rawController.text = picked.toYYYYMMDDString();
               }
             }
           : null,

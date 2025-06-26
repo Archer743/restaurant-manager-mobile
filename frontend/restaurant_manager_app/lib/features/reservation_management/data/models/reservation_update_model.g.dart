@@ -12,8 +12,8 @@ ReservationUpdateModel _$ReservationUpdateModelFromJson(
       name: json['name'] as String?,
       email: json['email'] as String?,
       phone: json['phone'] as String?,
-      date: json['date'] as String?,
-      time: json['time'] as String?,
+      startTimeUtc: _$JsonConverterFromJson<String, DateTime>(
+          json['startTimeUtc'], const AppDateTimeUtcConverter().fromJson),
       peopleCount: (json['peopleCount'] as num?)?.toInt(),
       comment: json['comment'] as String?,
     );
@@ -24,8 +24,20 @@ Map<String, dynamic> _$ReservationUpdateModelToJson(
       'name': instance.name,
       'email': instance.email,
       'phone': instance.phone,
-      'date': instance.date,
-      'time': instance.time,
       'peopleCount': instance.peopleCount,
       'comment': instance.comment,
+      'startTimeUtc': _$JsonConverterToJson<String, DateTime>(
+          instance.startTimeUtc, const AppDateTimeUtcConverter().toJson),
     };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) =>
+    json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) =>
+    value == null ? null : toJson(value);

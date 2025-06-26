@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:restaurant_manager_app/core/data/converters/app_dateonly_converter.dart';
 import 'package:restaurant_manager_app/core/data/data_sources/local/token_storage_service.dart';
 import 'package:restaurant_manager_app/core/domain/repository/auth_shared_repository.dart';
 import 'package:restaurant_manager_app/core/errors/failure.dart';
@@ -36,11 +35,10 @@ class ConfirmedReservationsRepositoryImpl
         final apiData = response.data;
 
         // Change map key to DateTime
-        const dateOnlyConverter = AppDateOnlyConverter();
-
         apiData.forEach(
           (dateString, models) {
-            final DateTime dateKey = dateOnlyConverter.fromJson(dateString);
+            // Date in local time
+            final DateTime dateKey = DateTime.parse(dateString);
             transformedMap[dateKey] = models;
           },
         );

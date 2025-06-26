@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:restaurant_manager_app/config/routing/app_routes.dart';
-import 'package:restaurant_manager_app/core/data/converters/app_dateonly_converter.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
 import 'package:restaurant_manager_app/core/presentation/widgets/back_leading_app_bar.dart';
 import 'package:restaurant_manager_app/core/presentation/widgets/buttons/action_button.dart';
@@ -48,9 +47,7 @@ class _ReservationCreatePageState extends State<ReservationCreatePage> {
     // Update Calendar Page
     if (_refreshRequired && _calendarBloc != null) {
       _calendarBloc.add(RefreshCalendar(
-        rawDatesAffected: [
-          const AppDateOnlyConverter().fromJson(_dateController.text)
-        ],
+        rawDatesAffected: [DateTime.parse(_dateController.text)],
       ));
     }
 

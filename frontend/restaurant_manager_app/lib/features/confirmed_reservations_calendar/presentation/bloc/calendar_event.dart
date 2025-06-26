@@ -1,11 +1,20 @@
 import 'package:restaurant_manager_app/core/utils/datetime_utils.dart';
+import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/entities/date_range.dart';
 
 abstract class CalendarEvent {}
 
 class GetReservationsForMonth extends CalendarEvent {
-  final DateTime focusedDay;
+  late final DateTime monthStart;
+  late final DateTime monthEnd;
 
-  GetReservationsForMonth(this.focusedDay);
+  GetReservationsForMonth(DateTime focusedDay) {
+    monthStart = getFirstDayOfMonth(focusedDay);
+    monthEnd = getLastDayOfMonth(focusedDay);
+  }
+
+  DateRange toDateRange() {
+    return DateRange(startDate: monthStart, endDate: monthEnd);
+  }
 }
 
 class RefreshCalendar extends CalendarEvent {

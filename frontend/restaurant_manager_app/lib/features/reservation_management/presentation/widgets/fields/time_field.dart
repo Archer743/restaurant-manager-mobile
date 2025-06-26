@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:restaurant_manager_app/config/theme/theme.dart';
-import 'package:restaurant_manager_app/core/data/converters/app_timeofday_converter.dart';
+import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_form_mode.dart';
 
 class TimeField extends StatefulWidget {
   final TextEditingController rawController;
   final ReservationFormMode displayMode;
-  late final AppTimeOfDayConverter timeOfDayConverter;
 
-  TimeField({
+  const TimeField({
     super.key,
     required this.rawController,
     required this.displayMode,
-  }) {
-    timeOfDayConverter = const AppTimeOfDayConverter();
-  }
+  });
 
   bool get isEditable {
     return displayMode == ReservationFormMode.create ||
@@ -31,18 +28,19 @@ class _TimeFieldState extends State<TimeField> {
   @override
   void initState() {
     super.initState();
-    _displayController =
-        TextEditingController(text: _format(widget.rawController.text));
+    _displayController = TextEditingController(
+        text: _formatForDisplay(widget.rawController.text));
     widget.rawController.addListener(_syncFormattedValue);
   }
 
   void _syncFormattedValue() {
-    _displayController.text = _format(widget.rawController.text);
+    _displayController.text = _formatForDisplay(widget.rawController.text);
   }
 
-  String _format(String raw) {
+  String _formatForDisplay(String raw) {
     try {
-      return widget.timeOfDayConverter.formatTime(raw);
+      final TimeOfDay time = parseTimeOfDay(raw);
+      return time.toHHMMString();
     } catch (_) {
       return '';
     }
@@ -72,11 +70,10 @@ class _TimeFieldState extends State<TimeField> {
           ? () async {
               late final TimeOfDay initialTime;
 
-              if (widget.rawController.text.isEmpty) {
-                initialTime = TimeOfDay.now();
-              } else {
-                initialTime = widget.timeOfDayConverter
-                    .fromJson(widget.rawController.text);
+              try {
+                initialTime = parseTimeOfDay(widget.rawController.text);
+              } catch (_) {
+                initialTime = TimeOfDay.now(); // Local time
               }
 
               final picked = await showTimePicker(
@@ -90,9 +87,9 @@ class _TimeFieldState extends State<TimeField> {
                 },
               );
 
+              // 'picked' also is in local time
               if (picked != null) {
-                widget.rawController.text =
-                    widget.timeOfDayConverter.toJson(picked);
+                widget.rawController.text = picked.toHHMMSSString();
               }
             }
           : null,
