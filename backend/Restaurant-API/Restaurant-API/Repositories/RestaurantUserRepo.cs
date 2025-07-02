@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Restaurant_API.Data;
+using Restaurant_API.Data.Entities;
 using Restaurant_API.Repositories.Interfaces;
 
 namespace Restaurant_API.Repositories
@@ -13,13 +14,13 @@ namespace Restaurant_API.Repositories
             this.context = context;
         }
 
-        // Default value of Guid is Guid.Empty NOT null !!!
-        public async Task<Guid> GetRestaurantIdByUserIdAsync(Guid userId)
+        public async Task<Restaurant?> GetRestaurantByUserIdAsync(Guid userId)
         {
             return await context.RestaurantUsers
-                                .Where(ru => ru.UserId == userId)
-                                .Select(ru => ru.RestaurantId)
-                                .FirstOrDefaultAsync();
+                        .Where(ru => ru.UserId == userId)
+                        .Include(ru => ru.Restaurant)
+                        .Select(ru => ru.Restaurant)
+                        .FirstOrDefaultAsync();
         }
     }
 }

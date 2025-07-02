@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Restaurant_API.Data;
 using Restaurant_API.Data.Entities;
-using Restaurant_API.Data.Enums;
+using Restaurant_API.Data.Entities.Enums;
 using Restaurant_API.Repositories.Interfaces;
 
 namespace Restaurant_API.Repositories
@@ -28,6 +28,13 @@ namespace Restaurant_API.Repositories
                                             r.State == ReservationState.Confirmed &&
                                             r.StartTimeUtc >= periodStartUtc && r.StartTimeUtc < periodEndUtc)
                                 .ToListAsync();
+        }
+
+        public IQueryable<Reservation> GetPendingReservationsBaseQuery(Guid restaurantId)
+        {
+            return context.Reservations
+                          .Where(r => r.RestaurantId == restaurantId &&
+                                      r.State == ReservationState.Pending);
         }
 
         public async Task<Reservation?> GetByIdAsync(Guid id)

@@ -18,6 +18,11 @@ import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/repository/confirmed_reservations_repository.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/usecases/get_confirmed_reservations_usecase.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_bloc.dart';
+import 'package:restaurant_manager_app/features/pending_reservations_inbox/data/data_sources/pending_reservations_api_service.dart';
+import 'package:restaurant_manager_app/features/pending_reservations_inbox/data/repository/pending_reservations_repository_impl.dart';
+import 'package:restaurant_manager_app/features/pending_reservations_inbox/domain/repository/pending_reservations_repository.dart';
+import 'package:restaurant_manager_app/features/pending_reservations_inbox/domain/usecases/get_pending_reservations_usecase.dart';
+import 'package:restaurant_manager_app/features/pending_reservations_inbox/presentation/bloc/pending_inbox_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/data/data_sources/reservation_api_service.dart';
 import 'package:restaurant_manager_app/features/reservation_management/data/repository/reservation_repository_impl.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/repository/reservation_repository.dart';
@@ -143,5 +148,28 @@ Future<void> initDependencies() async {
       sl<CreateReservationUseCase>(),
       sl<UpdateReservationUseCase>(),
     ),
+  );
+
+  // ---------------- Pending Reservations Inbox Feature ----------------
+  // [Data Sources]
+  sl.registerSingleton<PendingReservationsApiService>(
+      PendingReservationsApiService(sl<Dio>(), baseUrl: reservationsBaseUrl));
+
+  // [Repositories]
+  sl.registerSingleton<PendingReservationsRepository>(
+    PendingReservationsRepositoryImpl(
+      sl<AuthSharedRepository>(),
+      sl<TokenStorageService>(),
+      sl<PendingReservationsApiService>(),
+    ),
+  );
+
+  // [UseCases]
+  sl.registerSingleton<GetPendingReservationsUsecase>(
+      GetPendingReservationsUsecase(sl()));
+
+  // [Blocs]
+  sl.registerFactory<PendingInboxBloc>(
+    () => PendingInboxBloc(sl()),
   );
 }

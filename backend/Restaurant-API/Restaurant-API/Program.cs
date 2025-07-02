@@ -104,6 +104,7 @@ namespace Restaurant_API
 			builder.Services.AddScoped<IRoleService, RoleService>();
 			builder.Services.AddScoped<IAuthTokenService, AuthTokenService>();
 			builder.Services.AddScoped<ISessionService, SessionService>();
+			builder.Services.AddScoped<IRestaurantService, RestaurantService>();
 			builder.Services.AddScoped<IReservationService, ReservationService>();
         }
 

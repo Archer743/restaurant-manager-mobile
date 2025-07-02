@@ -1,7 +1,9 @@
-﻿namespace Restaurant_API.Repositories.Interfaces
+﻿using Restaurant_API.Data.Entities;
+
+namespace Restaurant_API.Repositories.Interfaces
 {
     public interface IRestaurantUserRepo
     {
-        Task<Guid> GetRestaurantIdByUserIdAsync(Guid userId);
+        Task<Restaurant?> GetRestaurantByUserIdAsync(Guid userId);
     }
 }

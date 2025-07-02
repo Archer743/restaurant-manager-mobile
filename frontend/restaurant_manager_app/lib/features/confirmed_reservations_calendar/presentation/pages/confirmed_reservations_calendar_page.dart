@@ -125,7 +125,7 @@ class _ConfirmedReservationsCalendarPageState
           } else if (state is CalendarError) {
             SnackBarService.showFailure(context, state.failure);
 
-            if (state.requiresReauthentication) {
+            if (state.failure.requiresReauthentication) {
               context.go(AppRoutes.welcome);
             }
           }

@@ -17,10 +17,6 @@ class CalendarReload extends CalendarState {}
 
 class CalendarError extends CalendarState {
   final Failure failure;
-  late final bool requiresReauthentication;
 
-  CalendarError(this.failure) {
-    requiresReauthentication =
-        (failure is AuthTokenFailure || failure is InvalidSessionFailure);
-  }
+  CalendarError(this.failure);
 }

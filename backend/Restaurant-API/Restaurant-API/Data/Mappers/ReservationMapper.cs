@@ -5,7 +5,7 @@ namespace Restaurant_API.Data.Mappers
 {
     public static class ReservationMapper
     {
-        public static Reservation ToEntity(this ClientReservationCreateModel createModel)
+        public static Reservation ToEntity(this ClientCreateReservationModel createModel)
         {
             return new Reservation
             {
@@ -33,9 +33,9 @@ namespace Restaurant_API.Data.Mappers
             };
         }
 
-        public static ReservationPreviewModel ToPreview(this Reservation reservation, TimeZoneInfo restaurantTimeZone)
+        public static ReservationCalendarPreviewModel ToCalendarPreview(this Reservation reservation, TimeZoneInfo restaurantTimeZone)
         {
-            return new ReservationPreviewModel
+            return new ReservationCalendarPreviewModel
             {
                 Id = reservation.Id,
                 Name = reservation.Name,
@@ -43,6 +43,18 @@ namespace Restaurant_API.Data.Mappers
                 Time = TimeOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(reservation.StartTimeUtc, restaurantTimeZone)),
                 PeopleCount = reservation.PeopleCount,
                 IsCreatedByStaff = reservation.IsCreatedByStaff,
+            };
+        }
+
+        public static PendingReservationPreviewModel ToPendingPreview(this Reservation reservation)
+        {
+            return new PendingReservationPreviewModel
+            {
+                Id = reservation.Id,
+                Name = reservation.Name,
+                StartTimeUtc = reservation.StartTimeUtc,
+                CreatedAtUtc = reservation.CreatedAtUtc,
+                PeopleCount = reservation.PeopleCount,
             };
         }
 

@@ -103,7 +103,7 @@ class _ReservationCreatePageState extends State<ReservationCreatePage> {
           } else if (state is ReservationError) {
             SnackBarService.showFailure(context, state.failure);
 
-            if (state.requiresReauthentication) {
+            if (state.failure.requiresReauthentication) {
               context.go(AppRoutes.welcome);
             }
           }

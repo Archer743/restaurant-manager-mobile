@@ -124,7 +124,7 @@ class RreservationDetailsPageState extends State<ReservationDetailsPage> {
 
             SnackBarService.showFailure(context, state.failure);
 
-            if (state.requiresReauthentication) {
+            if (state.failure.requiresReauthentication) {
               context.go(AppRoutes.welcome);
             }
           }

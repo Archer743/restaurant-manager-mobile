@@ -1,4 +1,4 @@
-﻿using Restaurant_API.Data.Enums;
+﻿using Restaurant_API.Data.Entities.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -47,5 +47,8 @@ namespace Restaurant_API.Data.Entities
 
         // Indicates if this reservation was created directly by a staff member
         public bool IsCreatedByStaff { get; set; } = false;
+
+
+        public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     }
 }

@@ -67,4 +67,36 @@ extension DateTimeFormatter on DateTime {
   String toYYYYMMDDString() {
     return DateFormat('yyyy-MM-dd').format(this);
   }
+
+  /// Used for local time
+  String toSmartBulgarianDateString() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+
+    final localDateTime = toLocal();
+    final objectDate =
+        DateTime(localDateTime.year, localDateTime.month, localDateTime.day);
+
+    if (objectDate == today) {
+      return 'Днес';
+    } else if (objectDate == tomorrow) {
+      return 'Утре';
+    } else {
+      final startOfWeek = today.subtract(Duration(days: today.weekday - 1));
+      final endOfWeek = startOfWeek.add(const Duration(days: 6));
+
+      if (objectDate.isAfter(today) &&
+          objectDate.isBefore(endOfWeek.add(const Duration(days: 1)))) {
+        // This week
+        return DateFormat.E('bg_BG').format(this);
+      } else if (objectDate.year == today.year) {
+        // This year
+        return DateFormat('dd MMM', 'bg_BG').format(this);
+      } else {
+        // Different year
+        return DateFormat('dd.MM.yyyy', 'bg').format(this);
+      }
+    }
+  }
 }

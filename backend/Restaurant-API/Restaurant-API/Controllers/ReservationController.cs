@@ -18,7 +18,7 @@ namespace Restaurant_API.Controllers
 
         /* ======================================================================== POST */
         [HttpPost]
-        public async Task<IActionResult> CreateClientReservationAsync(ClientReservationCreateModel createModel)
+        public async Task<IActionResult> CreateClientReservationAsync(ClientCreateReservationModel createModel)
         {
             await reservationService.CreateClientReservationAsync(createModel);
             return NoContent();
@@ -41,9 +41,16 @@ namespace Restaurant_API.Controllers
         }
 
         [HttpGet("confirmed"), AppAuthorize]
-        public async Task<IActionResult> GetConfirmedReservationsAsync([FromQuery] DateOnly start, [FromQuery] DateOnly end)
+        public async Task<IActionResult> GetConfirmedReservationsInPeriodAsync([FromQuery] DateOnly start, [FromQuery] DateOnly end)
         {
-            var previews = await reservationService.GetConfirmedReservationsAsync(HttpContext, start, end);
+            var previews = await reservationService.GetConfirmedReservationsInPeriodAsync(HttpContext, start, end);
+            return Ok(previews);
+        }
+
+        [HttpGet("pending"), AppAuthorize]
+        public async Task<IActionResult> GetPendingReservationsAsync([FromQuery] PendingReservationsQueryParams queryParams)
+        {
+            var previews = await reservationService.GetPendingReservationsAsync(HttpContext, queryParams);
             return Ok(previews);
         }
 

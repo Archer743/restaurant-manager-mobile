@@ -1,4 +1,4 @@
-﻿namespace Restaurant_API.Data.Enums
+﻿namespace Restaurant_API.Data.Entities.Enums
 {
     public enum ReservationState
     {

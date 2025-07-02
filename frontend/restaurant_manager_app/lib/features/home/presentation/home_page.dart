@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_bloc.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/pages/confirmed_reservations_calendar_page.dart';
+import 'package:restaurant_manager_app/features/pending_reservations_inbox/presentation/bloc/pending_inbox_bloc.dart';
+import 'package:restaurant_manager_app/features/pending_reservations_inbox/presentation/bloc/pending_inbox_event.dart';
+import 'package:restaurant_manager_app/features/pending_reservations_inbox/presentation/pages/pending_reservations_inbox_page.dart';
 import 'package:restaurant_manager_app/injection_container.dart';
 
 class HomePage extends StatefulWidget {
@@ -27,7 +30,10 @@ class _HomePageState extends State<HomePage> {
         child: const ConfirmedReservationsCalendarPage(),
       ),
       const Scaffold(body: Center(child: Text("2: Restaurant Tables"))),
-      const Scaffold(body: Center(child: Text("3: Pending Reservations"))),
+      BlocProvider<PendingInboxBloc>(
+        create: (_) => sl()..add(GetPendingReservations()),
+        child: const PendingReservationsInboxPage(),
+      ),
       const Scaffold(
           body: Center(child: Text("4: Logs (Staff Activity History)"))),
       const Scaffold(body: Center(child: Text("5: Profile"))),

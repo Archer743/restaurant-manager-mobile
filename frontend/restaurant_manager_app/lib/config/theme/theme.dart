@@ -6,7 +6,7 @@ const Color bgColor = Color(0xFF082040);
 const Color primaryColor = Color(0xFF1B578C);
 const Color secondaryColor = Color(0xFF4AA2D9);
 const Color accentColor = Color(0xFF6DCCF2);
-const Color actionColor = Color(0xFFFFC107);
+const Color actionColor = Color(0xCCFFC107);
 const Color successColor = Color(0xFF34C759);
 const Color warningColor = Color(0xFFF25C54);
 

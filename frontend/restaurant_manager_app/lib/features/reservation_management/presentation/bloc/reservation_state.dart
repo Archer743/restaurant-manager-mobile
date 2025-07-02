@@ -23,10 +23,6 @@ class ReservationSaved extends ReservationState {}
 
 class ReservationError extends ReservationState {
   final Failure failure;
-  late final bool requiresReauthentication;
 
-  ReservationError(this.failure) {
-    requiresReauthentication =
-        (failure is AuthTokenFailure || failure is InvalidSessionFailure);
-  }
+  ReservationError(this.failure);
 }
