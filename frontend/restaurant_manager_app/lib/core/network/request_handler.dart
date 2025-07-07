@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:restaurant_manager_app/core/constants/error_codes.dart';
 import 'package:restaurant_manager_app/core/errors/exceptions.dart';
 import 'package:restaurant_manager_app/core/errors/failure.dart';
 
@@ -15,9 +16,9 @@ import 'package:restaurant_manager_app/core/errors/failure.dart';
 /// - `Right<T>` if the request completes successfully.
 /// - `Left<Failure>` if a known error occurs (e.g., network or server error).
 Future<Either<Failure, T>> handleRequest<T>(
-    Future<T> Function() request) async {
+    Future<T> Function() originalRequest) async {
   try {
-    final result = await request();
+    final result = await originalRequest();
     return Right(result);
   } on DioException catch (e) {
     if (e.type == DioExceptionType.connectionTimeout ||
@@ -34,6 +35,11 @@ Future<Either<Failure, T>> handleRequest<T>(
         errorCode.isEmpty ||
         statusCode == HttpStatus.internalServerError) {
       return Left(UnknownFailure());
+    }
+
+    // Returned when refresh / logout request failed
+    if (errorCode == ErrorCodes.invalidSession) {
+      return Left(InvalidSessionFailure());
     }
 
     return Left(ServerFailure(statusCode: statusCode, errorCode: errorCode));

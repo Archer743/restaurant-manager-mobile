@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:restaurant_manager_app/config/routing/app_routes.dart';
@@ -6,6 +7,12 @@ import 'package:restaurant_manager_app/features/auth/presentation/bloc/register/
 import 'package:restaurant_manager_app/features/auth/presentation/pages/login_page.dart';
 import 'package:restaurant_manager_app/features/auth/presentation/pages/register_page.dart';
 import 'package:restaurant_manager_app/features/auth/presentation/pages/welcome_page.dart';
+import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_bloc.dart';
+import 'package:restaurant_manager_app/features/home/presentation/home_page.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/reservation_bloc.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/reservation_event.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/reservation_create_page.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/reservation_details_page.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/bloc/splash_event.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/splash_page.dart';
@@ -18,15 +25,15 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.splash,
       builder: (_, __) {
         return BlocProvider<SplashBloc>(
-          create: (_) => sl()..add(CheckAuthEvent()),
+          create: (_) => sl()..add(CheckAuth()),
           child: const SplashPage(),
         );
       },
     ),
-    // GoRoute(
-    //   path: AppRoutes.home,
-    //   builder: (_, __) => const HomePage(),
-    // ),
+    GoRoute(
+      path: AppRoutes.home,
+      builder: (_, __) => const HomePage(),
+    ),
     GoRoute(
       path: AppRoutes.welcome,
       builder: (_, __) => const WelcomePage(),
@@ -46,6 +53,53 @@ final GoRouter appRouter = GoRouter(
             return BlocProvider<RegisterBloc>(
               create: (_) => sl(),
               child: const RegisterPage(),
+            );
+          },
+        ),
+      ],
+    ),
+    // Route for creating a new reservation
+    GoRoute(
+      path: AppRoutes.reservation,
+      builder: (context, state) {
+        try {
+          final extraData = state.extra as Map<String, dynamic>;
+          final DateTime initialDate = extraData['initialDate']!;
+          final CalendarBloc calendarBloc = extraData['calendarBloc']!;
+
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider<ReservationBloc>(create: (_) => sl()),
+              BlocProvider<CalendarBloc>.value(value: calendarBloc),
+            ],
+            child: ReservationCreatePage(initialDate: initialDate),
+          );
+        } catch (_) {
+          return const Text('Error: Path ${AppRoutes.reservation}');
+        }
+      },
+      routes: [
+        // Sub-route for viewing/editing an existing reservation
+        GoRoute(
+          path: ':id',
+          builder: (context, state) {
+            final reservationId = state.pathParameters['id'];
+            final calendarBloc = state.extra as CalendarBloc?;
+
+            // TODO: Navigate to an error page
+            if (reservationId == null) {
+              return const Text('Error: Reservation ID missing');
+            }
+
+            return MultiBlocProvider(
+              providers: [
+                BlocProvider<ReservationBloc>(
+                  create: (_) => sl()..add(GetReservation(reservationId)),
+                ),
+                if (calendarBloc != null)
+                  BlocProvider<CalendarBloc>.value(value: calendarBloc),
+              ],
+              child: ReservationDetailsPage(reservationId: reservationId),
             );
           },
         ),

@@ -13,13 +13,13 @@ namespace Restaurant_API.Services
 	{
 		private readonly IRoleService roleService;
 		private readonly ISessionService sessionService;
-		private readonly IUserRepository userRepository;
+		private readonly IUserRepo userRepo;
 
-		public UserService(IRoleService roleService, ISessionService sessionService, IUserRepository userRepository)
+		public UserService(IRoleService roleService, ISessionService sessionService, IUserRepo userRepo)
 		{
 			this.roleService = roleService;
 			this.sessionService = sessionService;
-			this.userRepository = userRepository;
+			this.userRepo = userRepo;
 		}
 
 		public async Task<UserAuthModel> RegisterAsync(UserRegisterModel registerModel)
@@ -36,7 +36,7 @@ namespace Restaurant_API.Services
 			user.RoleId = await roleService.GetRoleIdByNormalizedNameAsync(Roles.Staff);
 
 			// Save the user in the database
-			await userRepository.AddUserAsync(user);
+			await userRepo.AddAsync(user);
 
 			// Create a new session and retrieve the access & refresh tokens
 			UserAuthModel tokens = await sessionService.CreateNewSessionAsync(user.Id);
@@ -45,7 +45,7 @@ namespace Restaurant_API.Services
 
 		public async Task<UserAuthModel> LoginAsync(UserLoginModel loginModel)
 		{
-			User? user = await userRepository.GetUserByUsernameAsync(loginModel.Username);
+			User? user = await userRepo.GetByUsernameAsync(loginModel.Username);
 
 			if (user == null || !IsPasswordCorrect(loginModel.Password, user.PasswordHash))
 			{
@@ -57,9 +57,17 @@ namespace Restaurant_API.Services
 			return tokens;
 		}
 
-		private async Task<bool> IsUsernameAvailableAsync(string username)
+		public async Task<User> GetCurrUserAsync(HttpContext ctx)
 		{
-			return (await userRepository.GetUserByUsernameAsync(username)) == null;
+			Guid userId = (Guid)ctx.Items["UserId"]!;
+			User? currUser = await userRepo.GetByIdAsync(userId);
+
+			return currUser ?? throw new UnauthorizedException(ErrorCodes.Auth.UserNotFound);
+        }
+
+        private async Task<bool> IsUsernameAvailableAsync(string username)
+		{
+			return (await userRepo.GetByUsernameAsync(username)) == null;
 		}
 
 		private string GetHashedPassword(string password)

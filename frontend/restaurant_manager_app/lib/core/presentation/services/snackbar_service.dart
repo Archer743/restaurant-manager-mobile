@@ -14,8 +14,14 @@ class SnackBarService {
     _showSnackbar(context, Icons.close, message, warningColor);
   }
 
+  static void showFailureMessage(BuildContext context, String message) {
+    _showSnackbar(context, Icons.close, message, warningColor);
+  }
+
   static void _showSnackbar(
       BuildContext context, IconData icon, String message, Color color) {
+    if (!context.mounted) return;
+
     final snackBar = SnackBar(
       content: Row(
         children: [

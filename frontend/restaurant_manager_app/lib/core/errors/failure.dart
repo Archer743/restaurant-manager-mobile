@@ -1,4 +1,8 @@
-abstract class Failure {}
+abstract class Failure {
+  /// Determines whether this failure is due to an auth/session problem
+  bool get requiresReauthentication =>
+      this is AuthTokenFailure || this is InvalidSessionFailure;
+}
 
 /// No connection to the server
 class NetworkFailure extends Failure {}
@@ -19,3 +23,5 @@ class ServerFailure extends Failure {
 
 /// Auth tokens are invalid or null
 class AuthTokenFailure extends Failure {}
+
+class InvalidSessionFailure extends Failure {}

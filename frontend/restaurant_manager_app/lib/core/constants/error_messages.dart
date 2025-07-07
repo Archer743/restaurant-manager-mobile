@@ -2,13 +2,21 @@ const Map<String, String> errorMessages = {
   // User
   "USERNAME_TAKEN": "Потребителското име вече е заето.",
   "INVALID_CREDENTIALS": "Невалидно потребителско име или парола.",
+  "NO_ASSOCIATED_RESTAURANT":
+      "Профилът ви не е свързан с ресторант. Моля, свържете се с администратор.",
 
   // Auth
   "INVALID_AUTHORIZATION": "Невалидна авторизация. Моля, влезте отново.",
   "FORBIDDEN_ACCESS": "Нямате достъп до тази операция.",
 
+  // Reservation
+  "RESERVATION_CANNOT_CREATE_IN_PAST":
+      "Нямате необходимите права, за да създавате резервации в минал момент.",
+  "RESERVATION_CANNOT_MODIFY_TO_PAST":
+      "Нямате необходимите права, за да местите резервации в минал момент.",
+
   // Session
-  "INVALID_SESSION": "Сесията е невалидна или е изтекла. Влезте отново.",
+  "INVALID_SESSION": "Сесията е невалидна или е изтекла. Моля, влезте отново.",
 
   // General
   "INVALID_MODEL":

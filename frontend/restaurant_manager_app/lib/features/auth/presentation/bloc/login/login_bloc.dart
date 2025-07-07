@@ -1,13 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:restaurant_manager_app/core/utils/future_utils.dart';
-import 'package:restaurant_manager_app/features/auth/domain/usecases/login_user.dart';
+import 'package:restaurant_manager_app/features/auth/domain/usecases/login_user_usecase.dart';
 import 'package:restaurant_manager_app/features/auth/presentation/bloc/auth_state.dart';
 import 'package:restaurant_manager_app/features/auth/presentation/bloc/login/login_event.dart';
 
 class LoginBloc extends Bloc<LoginEvent, AuthState> {
-  final LoginUserUseCase loginUseCase;
+  final LoginUserUseCase _loginUseCase;
 
-  LoginBloc(this.loginUseCase) : super(AuthInitial()) {
+  LoginBloc(this._loginUseCase) : super(AuthInitial()) {
     on<LoginSubmitted>(_onLoginSubmitted);
   }
 
@@ -15,10 +15,13 @@ class LoginBloc extends Bloc<LoginEvent, AuthState> {
     LoginSubmitted event,
     Emitter<AuthState> emit,
   ) async {
+    if (isClosed) return;
     emit(AuthLoading());
 
-    final result = await minDelayRun(loginUseCase(event.getEntity()));
+    if (isClosed) return;
+    final result = await minDelayRun(_loginUseCase(event.getEntity()));
 
+    if (isClosed) return;
     result.fold(
       (failure) => emit(AuthFailure(failure)),
       (_) => emit(AuthSuccess()),

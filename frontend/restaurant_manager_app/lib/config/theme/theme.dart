@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 // Main UI Colors
 const Color bgColor = Color(0xFF082040);
 const Color primaryColor = Color(0xFF1B578C);
 const Color secondaryColor = Color(0xFF4AA2D9);
 const Color accentColor = Color(0xFF6DCCF2);
-const Color actionColor = Color(0xFFFFC107);
+const Color actionColor = Color(0xCCFFC107);
 const Color successColor = Color(0xFF34C759);
 const Color warningColor = Color(0xFFF25C54);
 
@@ -23,10 +24,12 @@ const Color inputIconColor = Color(0xFFEAEAEA);
 const Color actionIconColor = actionColor;
 
 // Text Styles
-const elevatedButtonTextStyle =
-    TextStyle(fontSize: 19, fontWeight: FontWeight.w700);
 final appBarTextStyle = TextStyle(
     color: textColor.toColor(), fontSize: 26, fontWeight: FontWeight.w600);
+final titleTextStyle = TextStyle(
+    color: textColor.toColor(), fontSize: 21, fontWeight: FontWeight.w600);
+const elevatedButtonTextStyle =
+    TextStyle(fontSize: 19, fontWeight: FontWeight.w700);
 final snackBarTextStyle = TextStyle(
     color: textColor.toColor(), fontSize: 16, fontWeight: FontWeight.w600);
 final defaultTextStyle = TextStyle(
@@ -83,6 +86,15 @@ final darkElevatedButtonTheme = ElevatedButtonThemeData(
   ),
 );
 
+final floatingActionButtonTheme = FloatingActionButtonThemeData(
+  backgroundColor: secondaryColor,
+  foregroundColor: actionButtonTextColor.toColor(),
+  elevation: 0,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(borderRadius),
+  ),
+);
+
 // SnackBars
 final baseSnackBarTheme = SnackBarThemeData(
   behavior: SnackBarBehavior.floating,
@@ -96,12 +108,136 @@ final darkAppBarTheme = AppBarTheme(
   centerTitle: true,
   titleTextStyle: appBarTextStyle,
   iconTheme: const IconThemeData(color: actionIconColor),
+
+  elevation: 0, // No shadow when not scrolled
+  scrolledUnderElevation: 0, // No shadow when content scrolls under it
+  shadowColor: Colors.transparent, // Ensure no shadow color is applied
+  surfaceTintColor: Colors.transparent,
+);
+
+// Home Navigation Bar
+final navigationBarTheme = NavigationBarThemeData(
+  backgroundColor: primaryColor,
+  indicatorColor: secondaryColor,
+  labelTextStyle: MaterialStateProperty.all(
+    const TextStyle(fontSize: 0), // effectively hides label
+  ),
+  iconTheme: MaterialStateProperty.resolveWith<IconThemeData>((states) {
+    // if (states.contains(MaterialState.selected)) {
+    //   return const IconThemeData(color: accentColor);
+    // }
+    return const IconThemeData(size: 28, color: bgColor);
+  }),
+);
+
+// Calendar
+final calendarHeaderStyle = HeaderStyle(
+  formatButtonVisible: false,
+  titleCentered: true,
+  titleTextStyle: titleTextStyle,
+  leftChevronIcon: const Icon(Icons.chevron_left, color: accentColor),
+  rightChevronIcon: const Icon(Icons.chevron_right, color: accentColor),
+  decoration: const BoxDecoration(
+    color: primaryColor, // Header background
+  ),
+);
+
+final calendarDaysOfWeekStyle = DaysOfWeekStyle(
+  weekdayStyle: TextStyle(color: textColor.toColor()),
+  weekendStyle: const TextStyle(color: warningColor),
+);
+
+final calendarStyle = CalendarStyle(
+  outsideDaysVisible: false,
+  defaultTextStyle: TextStyle(color: textColor.toColor()),
+  weekendTextStyle: const TextStyle(color: warningColor),
+  // Text color for today
+  todayTextStyle: const TextStyle(color: bgColor, fontWeight: FontWeight.bold),
+  // Text color for selected day
+  selectedTextStyle:
+      const TextStyle(color: bgColor, fontWeight: FontWeight.bold),
+
+  // Decorations for specific days
+  todayDecoration: BoxDecoration(
+      color: secondaryColor.withOpacity(0.6), shape: BoxShape.circle),
+  selectedDecoration:
+      const BoxDecoration(color: secondaryColor, shape: BoxShape.circle),
+  // Reservation marker color
+  markerDecoration:
+      const BoxDecoration(color: actionColor, shape: BoxShape.circle),
+  // Size of the reservation marker dot
+  markerSize: 6.0,
+  // Position markers at the bottom center of the day cell
+  markersAlignment: Alignment.bottomCenter,
+);
+
+// Date Picker
+final datePickerTheme = ThemeData(
+  dialogBackgroundColor: primaryColor, // Background of the entire dialog
+
+  colorScheme: const ColorScheme.dark().copyWith(
+    primary: secondaryColor, // Selected day + header
+    onPrimary: bgColor, // Text color on selected day/header
+    surface: primaryColor, // Dialog background surface
+    onSurface: textColor.toColor(), // Default text color (days, header title)
+  ),
+
+  textButtonTheme: TextButtonThemeData(
+    style: TextButton.styleFrom(
+      foregroundColor: secondaryColor, // Action buttons
+      textStyle: const TextStyle(fontWeight: FontWeight.w800),
+    ),
+  ),
+
+  // Customize the shape and background of the date picker dialog
+  dialogTheme: DialogTheme(
+    backgroundColor: primaryColor,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(borderRadius),
+    ),
+  ),
+);
+
+// Time Picker
+final timePickerTheme = ThemeData(
+  dialogBackgroundColor: primaryColor,
+  colorScheme: const ColorScheme.dark().copyWith(
+    primary: secondaryColor, // Dial hand, selected text
+    onPrimary: bgColor, // Text on primary color
+    surface: primaryColor, // Clock face background
+    onSurface: textColor.toColor(), // Labels & inactive text
+  ),
+  timePickerTheme: TimePickerThemeData(
+    backgroundColor: primaryColor,
+    hourMinuteColor: secondaryColor.withOpacity(0.2),
+    hourMinuteTextColor: textColor.toColor(),
+    dialHandColor: secondaryColor,
+    dialBackgroundColor: primaryColor,
+    entryModeIconColor: secondaryColor,
+    dayPeriodColor: primaryColor,
+    dayPeriodTextColor: textColor.toColor(),
+    helpTextStyle: TextStyle(
+      color: textColor.toColor(),
+      fontWeight: FontWeight.bold,
+    ),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(borderRadius),
+    ),
+  ),
+  textButtonTheme: TextButtonThemeData(
+    style: TextButton.styleFrom(
+      foregroundColor: secondaryColor,
+      textStyle: const TextStyle(fontWeight: FontWeight.w800),
+    ),
+  ),
 );
 
 ThemeData darkTheme = ThemeData.dark().copyWith(
   scaffoldBackgroundColor: bgColor,
   appBarTheme: darkAppBarTheme,
+  navigationBarTheme: navigationBarTheme,
   inputDecorationTheme: darkInputDecorationTheme,
   elevatedButtonTheme: darkElevatedButtonTheme,
+  floatingActionButtonTheme: floatingActionButtonTheme,
   snackBarTheme: baseSnackBarTheme,
 );

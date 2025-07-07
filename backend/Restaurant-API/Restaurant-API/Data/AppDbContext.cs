@@ -13,6 +13,12 @@ namespace Restaurant_API.Data
 
 		public DbSet<Session> Sessions { get; set; }
 
+		public DbSet<Restaurant> Restaurants { get; set; }
+
+        public DbSet<RestaurantUser> RestaurantUsers { get; set; }
+
+        public DbSet<Reservation> Reservations { get; set; }
+
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
@@ -26,6 +32,10 @@ namespace Restaurant_API.Data
 			modelBuilder.Entity<Role>()
 						.HasIndex(r => r.NormalizedName)
 						.IsUnique();
-		}
+
+            // Makes composite primary key (RestaurantId + UserId)
+            modelBuilder.Entity<RestaurantUser>()
+						.HasKey(ru => new { ru.RestaurantId, ru.UserId });
+        }
 	}
 }

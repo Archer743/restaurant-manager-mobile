@@ -1,4 +1,5 @@
-﻿using Restaurant_API.Data.Models.Auth;
+﻿using Restaurant_API.Data.Entities;
+using Restaurant_API.Data.Models.Auth;
 using Restaurant_API.Data.Models.User;
 
 namespace Restaurant_API.Services.Interfaces
@@ -8,5 +9,7 @@ namespace Restaurant_API.Services.Interfaces
 		Task<UserAuthModel> RegisterAsync(UserRegisterModel registerModel);
 
 		Task<UserAuthModel> LoginAsync(UserLoginModel loginModel);
+
+		Task<User> GetCurrUserAsync(HttpContext ctx);
 	}
 }

@@ -27,7 +27,7 @@ namespace Restaurant_API.Middlewares
 
 			if (!endpointAuth.Roles.Contains(userRole))
 			{
-				throw new ForbiddenException(ErrorCodes.Auth.ForbiddenAccess);
+				throw new ForbiddenException();
 			}
 
 			await next(context);

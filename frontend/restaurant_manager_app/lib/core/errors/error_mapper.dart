@@ -8,6 +8,8 @@ String getFailureMessage(Failure failure) {
     return errorMessages[failure.errorCode]!;
   } else if (failure is NetworkFailure) {
     return errorMessages[ErrorCodes.network]!;
+  } else if (failure is AuthTokenFailure || failure is InvalidSessionFailure) {
+    return errorMessages[ErrorCodes.invalidSession]!;
   }
 
   return errorMessages[ErrorCodes.unknown]!;

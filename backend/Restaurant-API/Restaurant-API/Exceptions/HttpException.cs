@@ -12,6 +12,6 @@ namespace Restaurant_API.Exceptions
 
 		public HttpStatusCode StatusCode { get; private set; }
 
-		public string? ErrorCode { get; private set; }  // All error codes are defined in Constants/ErrorCodes.cs
+		public string ErrorCode { get; private set; }  // All error codes are defined in Constants/ErrorCodes.cs
 	}
 }

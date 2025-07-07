@@ -2,26 +2,43 @@
 {
 	public static class ErrorCodes
 	{
-		public static class User
+        public static class Auth
+        {
+            public const string InvalidAuthorization = "INVALID_AUTHORIZATION";
+            public const string UserNotFound = "USER_NOT_FOUND";
+            public const string ForbiddenAccess = "FORBIDDEN_ACCESS";
+        }
+
+        public static class Session
+        {
+            public const string InvalidSession = "INVALID_SESSION";
+        }
+
+        public static class User
 		{
 			public const string UsernameTaken = "USERNAME_TAKEN";
 			public const string InvalidCredentials = "INVALID_CREDENTIALS";
-		}
+            public const string NoAssociatedRestaurant = "NO_ASSOCIATED_RESTAURANT";
+        }
 
-		public static class Auth
-		{
-			public const string InvalidAuthorization = "INVALID_AUTHORIZATION";
-			public const string ForbiddenAccess = "FORBIDDEN_ACCESS";
-		}
+        public static class Restaurant
+        {
+            public const string NotFound = "RESTAURANT_NOT_FOUND";
+        }
 
-		public static class Session
-		{
-			public const string InvalidSession = "INVALID_SESSION";
-		}
+        public static class Reservation
+        {
+            public const string NotFound = "RESERVATION_NOT_FOUND";
 
-		public static class General
+            public const string CannotCreateInPast = "RESERVATION_CANNOT_CREATE_IN_PAST";
+            public const string CannotModifyToPast = "RESERVATION_CANNOT_MODIFY_TO_PAST";
+            public const string CannotModifyClientDetails = "RESERVATION_CANNOT_MODIFY_CLIENT_DETAILS";
+        }
+
+        public static class Data
 		{
-			public const string InvalidModel = "INVALID_MODEL";
+            public const string InvalidModel = "INVALID_MODEL";
+            public const string InvalidDate = "INVALID_DATE";
 		}
 	}
 }

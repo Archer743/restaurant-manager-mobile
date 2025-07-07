@@ -1,3 +1,3 @@
 abstract class SplashEvent {}
 
-class CheckAuthEvent extends SplashEvent {}
+class CheckAuth extends SplashEvent {}
