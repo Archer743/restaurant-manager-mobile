@@ -53,7 +53,7 @@ class PendingReservationCard extends StatelessWidget {
               ),
               // const Divider(height: 24.0, thickness: 1.0),
               const SizedBox(height: 20), // Visual separator
-              _buildActionButtons(context), // Add action buttons
+              _buildActionButtons(context),
             ],
           ),
         ),
