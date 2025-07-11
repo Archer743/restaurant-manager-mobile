@@ -23,6 +23,7 @@ namespace Restaurant_API.Services
         {
             this.roleService = roleService;
             this.restaurantService = restaurantService;
+
             this.reservationRepo = reservationRepo;
 		}
 
@@ -43,6 +44,8 @@ namespace Restaurant_API.Services
             {
                 throw new BadRequestException(ErrorCodes.Data.InvalidDate);
             }
+
+            // TODO: Validate if StartTimeUtc is in a shift
 
             // TODO: Check if the datе is open for reservations
 
@@ -67,6 +70,8 @@ namespace Restaurant_API.Services
                 throw new ForbiddenException(ErrorCodes.Reservation.CannotCreateInPast);
             }
 
+            // TODO: Validate if StartTimeUtc is in a shift
+
             // TODO: Check if the datе is open for reservations
 
             // Reservation created by a restaurant member is automatically confirmed
@@ -77,12 +82,32 @@ namespace Restaurant_API.Services
             await reservationRepo.AddAsync(r);
         }
 
+        public async Task<Reservation> GetReservationIfOwnedAsync(HttpContext ctx, Guid reservationId, bool includeDetails = false)
+        {
+            Restaurant currUserRestaurant = await restaurantService.GetCurrUserAssociatedRestaurantAsync(ctx);
+
+            // Get reservation by id
+            Reservation? reservation = includeDetails ? await reservationRepo.GetByIdWithDetailsAsync(reservationId)
+                                                      : await reservationRepo.GetByIdAsync(reservationId);
+
+            // Validate that the user has access to that reservation
+            if (reservation == null)
+            {
+                throw new NotFoundException(ErrorCodes.Reservation.NotFound);
+            }
+            else if (reservation.RestaurantId != currUserRestaurant.Id)
+            {
+                throw new ForbiddenException();
+            }
+
+            return reservation;
+        }
+
         public async Task<ReservationViewModel> GetByIdAsync(HttpContext ctx, Guid reservationId)
         {
             // Retrieve the reservation and ensure it belongs to the current user's restaurant
             Reservation reservation = await GetReservationIfOwnedAsync(ctx, reservationId);
 
-            // Convert the reservation entity to a view model
             return reservation.ToView();
         }
 
@@ -121,6 +146,8 @@ namespace Restaurant_API.Services
                 reservation.Phone = updateModel.Phone;
                 isModified = true;
             }
+
+            // TODO: Validate if StartTimeUtc is in a shift
 
             // Apply StartTimeUtc update
             if (updateModel.StartTimeUtc.HasValue && reservation.StartTimeUtc != updateModel.StartTimeUtc.Value)
@@ -241,24 +268,6 @@ namespace Restaurant_API.Services
                     TotalPages = totalPages
                 }
             };
-        }
-
-        // ================================================== Private methods
-        private async Task<Reservation> GetReservationIfOwnedAsync(HttpContext ctx, Guid reservationId)
-        {
-            Restaurant currUserRestaurant = await restaurantService.GetCurrUserAssociatedRestaurantAsync(ctx);
-
-            // Get reservation by id
-            Reservation reservation = await reservationRepo.GetByIdAsync(reservationId) ??
-                                            throw new NotFoundException(ErrorCodes.Reservation.NotFound);
-
-            // Validate that the user has access to that reservation
-            if (reservation.RestaurantId != currUserRestaurant.Id)
-            {
-                throw new ForbiddenException();
-            }
-
-            return reservation;
         }
     }
 }

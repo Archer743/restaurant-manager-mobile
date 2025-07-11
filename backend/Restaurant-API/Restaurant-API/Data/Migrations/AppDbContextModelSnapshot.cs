@@ -22,6 +22,21 @@ namespace Restaurant_API.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("ReservationTable", b =>
+                {
+                    b.Property<Guid>("ReservationsId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TablesId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("ReservationsId", "TablesId");
+
+                    b.HasIndex("TablesId");
+
+                    b.ToTable("ReservationTables", (string)null);
+                });
+
             modelBuilder.Entity("Restaurant_API.Data.Entities.Reservation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -161,6 +176,56 @@ namespace Restaurant_API.Migrations
                     b.ToTable("Sessions");
                 });
 
+            modelBuilder.Entity("Restaurant_API.Data.Entities.Shift", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time without time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RestaurantId");
+
+                    b.ToTable("Shifts");
+                });
+
+            modelBuilder.Entity("Restaurant_API.Data.Entities.Table", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Capacity")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("TableNumber")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RestaurantId", "TableNumber")
+                        .IsUnique();
+
+                    b.ToTable("Tables");
+                });
+
             modelBuilder.Entity("Restaurant_API.Data.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -197,6 +262,21 @@ namespace Restaurant_API.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("ReservationTable", b =>
+                {
+                    b.HasOne("Restaurant_API.Data.Entities.Reservation", null)
+                        .WithMany()
+                        .HasForeignKey("ReservationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Restaurant_API.Data.Entities.Table", null)
+                        .WithMany()
+                        .HasForeignKey("TablesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Restaurant_API.Data.Entities.Reservation", b =>
@@ -238,6 +318,28 @@ namespace Restaurant_API.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Restaurant_API.Data.Entities.Shift", b =>
+                {
+                    b.HasOne("Restaurant_API.Data.Entities.Restaurant", "Restaurant")
+                        .WithMany()
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("Restaurant_API.Data.Entities.Table", b =>
+                {
+                    b.HasOne("Restaurant_API.Data.Entities.Restaurant", "Restaurant")
+                        .WithMany()
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Restaurant");
                 });
 
             modelBuilder.Entity("Restaurant_API.Data.Entities.User", b =>

@@ -21,6 +21,13 @@ namespace Restaurant_API.Repositories
             await context.SaveChangesAsync();
         }
 
+        public IQueryable<Reservation> GetPendingReservationsBaseQuery(Guid restaurantId)
+        {
+            return context.Reservations
+                          .Where(r => r.RestaurantId == restaurantId &&
+                                      r.State == ReservationState.Pending);
+        }
+
         public async Task<List<Reservation>> GetConfirmedInPeriodAsync(Guid restaurantId, DateTime periodStartUtc, DateTime periodEndUtc)
         {
             return await context.Reservations
@@ -30,16 +37,28 @@ namespace Restaurant_API.Repositories
                                 .ToListAsync();
         }
 
-        public IQueryable<Reservation> GetPendingReservationsBaseQuery(Guid restaurantId)
+        public async Task<HashSet<Guid>> GetReservedTableIdsInPeriodAsync(Guid restaurantId, DateTime periodStartUtc, DateTime periodEndUtc)
         {
-            return context.Reservations
-                          .Where(r => r.RestaurantId == restaurantId &&
-                                      r.State == ReservationState.Pending);
+            return await context.Reservations
+                                .Include(r => r.Tables)
+                                .Where(r => r.RestaurantId == restaurantId &&
+                                            r.State == ReservationState.Confirmed &&
+                                            r.StartTimeUtc >= periodStartUtc && r.StartTimeUtc < periodEndUtc)
+                                .SelectMany(r => r.Tables.Select(t => t.Id))
+                                .ToHashSetAsync();
         }
 
         public async Task<Reservation?> GetByIdAsync(Guid id)
         {
             return await context.Reservations
+                                .FirstOrDefaultAsync(r => r.Id == id);
+        }
+
+        public async Task<Reservation?> GetByIdWithDetailsAsync(Guid id)
+        {
+            return await context.Reservations
+                                .Include(r => r.Restaurant)
+                                .Include(r => r.Tables)
                                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 

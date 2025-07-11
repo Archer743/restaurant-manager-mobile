@@ -1,4 +1,5 @@
-﻿using Restaurant_API.Data.Models.Other;
+﻿using Restaurant_API.Data.Entities;
+using Restaurant_API.Data.Models.Other;
 using Restaurant_API.Data.Models.Reservation;
 
 namespace Restaurant_API.Services.Interfaces
@@ -8,6 +9,8 @@ namespace Restaurant_API.Services.Interfaces
         Task CreateClientReservationAsync(ClientCreateReservationModel createModel);
 
         Task CreateConfirmedReservationAsync(HttpContext ctx, ReservationCreateModel createModel);
+
+        Task<Reservation> GetReservationIfOwnedAsync(HttpContext ctx, Guid reservationId, bool includeDetails = false);
 
         Task<ReservationViewModel> GetByIdAsync(HttpContext ctx, Guid reservationId);
 

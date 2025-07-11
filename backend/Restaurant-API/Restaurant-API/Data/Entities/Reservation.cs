@@ -50,5 +50,8 @@ namespace Restaurant_API.Data.Entities
 
 
         public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+
+
+        public ICollection<Table> Tables { get; set; } = [];
     }
 }
