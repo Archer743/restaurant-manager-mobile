@@ -4,11 +4,11 @@ import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_view.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/repository/reservation_repository.dart';
 
-class GetReservationDetailsUseCase
+class GetReservationUseCase
     implements UseCase<Either<Failure, ReservationView>, String> {
   final ReservationRepository _reservationRepo;
 
-  GetReservationDetailsUseCase(this._reservationRepo);
+  GetReservationUseCase(this._reservationRepo);
 
   @override
   Future<Either<Failure, ReservationView>> call(String id) async {

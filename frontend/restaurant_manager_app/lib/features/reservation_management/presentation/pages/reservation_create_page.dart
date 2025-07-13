@@ -11,15 +11,15 @@ import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_bloc.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_form_mode.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/reservation_bloc.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/reservation_event.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/reservation_state.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/create/reservation_create_bloc.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/create/reservation_create_event.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/create/reservation_create_state.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/forms/reservation_form.dart';
 
 class ReservationCreatePage extends StatefulWidget {
-  final DateTime initialDate; // Local time
+  final DateTime initialDateLocal; // Local time
 
-  const ReservationCreatePage({super.key, required this.initialDate});
+  const ReservationCreatePage({super.key, required this.initialDateLocal});
 
   @override
   State<ReservationCreatePage> createState() => _ReservationCreatePageState();
@@ -36,13 +36,14 @@ class _ReservationCreatePageState extends State<ReservationCreatePage> {
   final _peopleCountController = TextEditingController();
   final _commentController = TextEditingController();
 
+  // Refresh Calendar Page
   late final CalendarBloc? _calendarBloc;
   bool _refreshRequired = false;
 
   @override
   void initState() {
     super.initState();
-    _dateController.text = widget.initialDate.toYYYYMMDDString();
+    _dateController.text = widget.initialDateLocal.toYYYYMMDDString();
     _timeController.text = TimeOfDay.now().toHHMMSSString();
   }
 
@@ -72,10 +73,10 @@ class _ReservationCreatePageState extends State<ReservationCreatePage> {
     super.dispose();
   }
 
-  void _saveNewReservation() {
+  void _submitForm() {
     if (_formKey.currentState?.validate() ?? false) {
       // Submit form
-      context.read<ReservationBloc>().add(
+      context.read<ReservationCreateBloc>().add(
             CreateReservation(
               name: _nameController.text,
               email: _emailController.text,
@@ -93,7 +94,7 @@ class _ReservationCreatePageState extends State<ReservationCreatePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const BackLeadingAppBar(title: 'Нова Резервация'),
-      body: BlocConsumer<ReservationBloc, ReservationState>(
+      body: BlocConsumer<ReservationCreateBloc, ReservationCreateState>(
         listener: (context, state) {
           if (state is ReservationSaved) {
             setState(() => _refreshRequired = true);
@@ -128,7 +129,7 @@ class _ReservationCreatePageState extends State<ReservationCreatePage> {
                     ),
                     ActionButton(
                       label: 'Запази',
-                      onPressed: _saveNewReservation,
+                      onPressed: _submitForm,
                       isLoading: state is ReservationLoading,
                     ),
                     SizedBox(height: spacingByHeight(context, 0.035)),
