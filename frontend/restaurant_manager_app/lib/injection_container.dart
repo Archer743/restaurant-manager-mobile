@@ -24,6 +24,7 @@ import 'package:restaurant_manager_app/features/pending_reservations_inbox/domai
 import 'package:restaurant_manager_app/features/pending_reservations_inbox/domain/usecases/get_pending_reservations_usecase.dart';
 import 'package:restaurant_manager_app/features/pending_reservations_inbox/presentation/bloc/pending_inbox_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/data/data_sources/reservation_api_service.dart';
+import 'package:restaurant_manager_app/features/reservation_management/data/data_sources/reservation_table_api_service.dart';
 import 'package:restaurant_manager_app/features/reservation_management/data/repository/reservation_repository_impl.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/repository/reservation_repository.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/create_reservation_usecase.dart';
@@ -123,12 +124,16 @@ Future<void> initDependencies() async {
   sl.registerSingleton<ReservationApiService>(
       ReservationApiService(sl<Dio>(), baseUrl: reservationsBaseUrl));
 
+  sl.registerSingleton<ReservationTableApiService>(
+      ReservationTableApiService(sl<Dio>(), baseUrl: reservationsBaseUrl));
+
   // [Repositories]
   sl.registerSingleton<ReservationRepository>(
     ReservationRepositoryImpl(
       sl<AuthSharedRepository>(),
       sl<TokenStorageService>(),
       sl<ReservationApiService>(),
+      sl<ReservationTableApiService>(),
     ),
   );
 
