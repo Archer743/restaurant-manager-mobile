@@ -12,6 +12,8 @@ import 'package:restaurant_manager_app/features/home/presentation/home_page.dart
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/create/reservation_create_bloc.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_bloc.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/reservation_create_page.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/reservation_view_page.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/bloc/splash_bloc.dart';
@@ -97,6 +99,10 @@ final GoRouter appRouter = GoRouter(
                 BlocProvider<ReservationDetailsBloc>(
                   create: (_) =>
                       sl()..add(GetReservationDetails(reservationId)),
+                ),
+                BlocProvider<ReservationTablesBloc>(
+                  create: (_) =>
+                      sl()..add(GetTablesAvailability(reservationId)),
                 ),
                 if (calendarBloc != null)
                   BlocProvider<CalendarBloc>.value(value: calendarBloc),

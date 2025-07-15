@@ -58,7 +58,7 @@ namespace Restaurant_API.Services
             var tables = await tableRepo.GetAllRestaurantTablesAsync(reservation.RestaurantId);
 
             // 8. Map each table to a DTO and set its status
-            var result = tables.Select(table =>
+            var tablesAvailability = tables.Select(table =>
             {
                 var dto = table.ToAvailabilityView();
 
@@ -72,10 +72,10 @@ namespace Restaurant_API.Services
                 return dto;
             }).ToList();
 
-            return new ShiftViewModel
-            {
-                Tables = result,
-            };
+            var shiftView = shift.ToView();
+            shiftView.Tables = tablesAvailability;
+
+            return shiftView;
         }
     }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:restaurant_manager_app/core/presentation/widgets/back_leading_app_bar.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/view_tabs/reservation_details_tab.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_form_mode.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/view_tabs/reservation_tables_tab.dart';
 
 class ReservationViewPage extends StatefulWidget {
   final String reservationId;
@@ -59,9 +60,7 @@ class _ReservationViewPageState extends State<ReservationViewPage>
           controller: _detailsTabController,
           displayMode: _displayMode,
         ),
-        const Scaffold(
-          body: Center(child: Text("Таб 2")),
-        ),
+        ReservationTablesTab(reservationId: widget.reservationId),
       ],
     );
   }

@@ -11,6 +11,8 @@ using Restaurant_API.Repositories.Interfaces;
 using Restaurant_API.Services;
 using Restaurant_API.Services.Interfaces;
 using Restaurant_API.Settings;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Restaurant_API
 {
@@ -32,12 +34,14 @@ namespace Restaurant_API
 		private static void ConfigureServices(WebApplicationBuilder builder)
 		{
             // Support for controllers, model binding, attribute routing, etc.
-            // By default, enums are serialized as integers. This config serializes them as strings instead,  
+            // By default, enums are serialized as integers. This config serializes them as strings instead (camelCase),  
             // which is safer because changing the enum order won’t affect the JSON output.
             builder.Services.AddControllers()
 							.AddJsonOptions(options =>
 							{
-								options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+								options.JsonSerializerOptions.Converters.Add(
+									new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
+								);
 							});
 
 			builder.Services.AddEndpointsApiExplorer();  // Swagger can find and display all API endpoints
