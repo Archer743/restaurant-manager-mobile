@@ -26,13 +26,21 @@
             public const string NotFound = "RESTAURANT_NOT_FOUND";
         }
 
+        public static class Table
+        {
+            public const string NotFound = "TABLE_NOT_FOUND";
+            public const string NotPartOfReservation = "TABLE_NOT_PART_OF_RESERVATION";
+            public const string BelongsToDifferentRestaurant = "TABLE_DIFFERENT_RESTAURANT";
+            public const string AlreadyReserved = "TABLE_ALREADY_RESERVED";
+        }
+
         public static class Reservation
         {
             public const string NotFound = "RESERVATION_NOT_FOUND";
-
             public const string CannotCreateInPast = "RESERVATION_CANNOT_CREATE_IN_PAST";
             public const string CannotModifyToPast = "RESERVATION_CANNOT_MODIFY_TO_PAST";
             public const string CannotModifyClientDetails = "RESERVATION_CANNOT_MODIFY_CLIENT_DETAILS";
+            public const string NoShiftFound = "RESERVATION_NO_SHIFT_FOUND";
         }
 
         public static class Data

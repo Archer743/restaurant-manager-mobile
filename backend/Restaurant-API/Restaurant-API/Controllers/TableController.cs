@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Restaurant_API.Attributes;
+using Restaurant_API.Data.Models.Table;
 using Restaurant_API.Services.Interfaces;
 
 namespace Restaurant_API.Controllers
@@ -19,8 +20,21 @@ namespace Restaurant_API.Controllers
         [HttpGet("r/{reservationId}/tables"), AppAuthorize]
         public async Task<IActionResult> GetTablesAvailabilityForReservationAsync(Guid reservationId)
         {
-            var tables = await tableService.GetTablesAvailabilityForReservationAsync(HttpContext, reservationId);
-            return Ok(tables);
+            var reservationShiftView = await tableService.GetTablesAvailabilityForReservationAsync(HttpContext, reservationId);
+            return Ok(reservationShiftView);
+        }
+
+        /* ======================================================================== PATCH */
+        [HttpPatch("r/{reservationId}/tables"), AppAuthorize]
+        public async Task<IActionResult> UpdateReservationTablesAsync(Guid reservationId, ReservationTablesUpdate updateModel)
+        {
+            var reservationShiftView = await tableService.UpdateReservationTablesAsync(HttpContext, reservationId, updateModel);
+
+            // No changes were made
+            if (reservationShiftView == null)
+                return NoContent();
+
+            return Ok(reservationShiftView);
         }
     }
 }

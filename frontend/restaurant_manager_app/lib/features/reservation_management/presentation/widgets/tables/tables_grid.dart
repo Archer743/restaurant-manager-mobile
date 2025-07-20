@@ -4,11 +4,13 @@ import 'package:restaurant_manager_app/features/reservation_management/presentat
 
 class TablesGrid extends StatelessWidget {
   final List<TableAvailability> tables;
+  final Set<String> selectedTableIds;
   final void Function(TableAvailability) onTableTap;
 
   const TablesGrid({
     super.key,
     required this.tables,
+    required this.selectedTableIds,
     required this.onTableTap,
   });
 
@@ -19,13 +21,20 @@ class TablesGrid extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
+        mainAxisSpacing: 10,
+        crossAxisSpacing: 10,
         childAspectRatio: 1,
       ),
       itemCount: tables.length,
       itemBuilder: (context, index) {
-        return TableCard(table: tables[index], onTableTap: onTableTap);
+        final table = tables[index];
+        final isSelected = selectedTableIds.contains(table.id);
+
+        return TableCard(
+          table: table,
+          onTableTap: onTableTap,
+          isSelected: isSelected,
+        );
       },
     );
   }

@@ -1,7 +1,9 @@
-﻿using Restaurant_API.Data.Entities;
+﻿using Restaurant_API.Constants;
+using Restaurant_API.Data.Entities;
 using Restaurant_API.Data.Mappers;
 using Restaurant_API.Data.Models.Shift;
 using Restaurant_API.Data.Models.Table;
+using Restaurant_API.Exceptions;
 using Restaurant_API.Repositories.Interfaces;
 using Restaurant_API.Services.Interfaces;
 
@@ -25,10 +27,92 @@ namespace Restaurant_API.Services
             this.reservationRepo = reservationRepo;
         }
 
-        public async Task<ShiftViewModel?> GetTablesAvailabilityForReservationAsync(HttpContext ctx, Guid reservationId)
+        public async Task<ShiftViewModel> GetTablesAvailabilityForReservationAsync(HttpContext ctx, Guid reservationId)
         {
+            // Load reservation and verify ownership
             Reservation reservation = await reservationService.GetReservationIfOwnedAsync(ctx, reservationId, includeDetails: true);
 
+            // Get reservations's shift and ids of all reserved tables in that shift
+            var reservationShiftCtx = await GetReservationShiftContextAsync(reservation);
+
+            return await BuildReservationShiftViewAsync(reservation, reservationShiftCtx);
+        }
+    
+        public async Task<ShiftViewModel?> UpdateReservationTablesAsync(HttpContext ctx, Guid reservationId, ReservationTablesUpdate updateModel)
+        {
+            // Load reservation and verify ownership
+            Reservation reservation = await reservationService.GetReservationIfOwnedAsync(ctx, reservationId, includeDetails: true);
+            List<Table> reservationTables = reservation.Tables.ToList();
+
+            bool hasAdds = updateModel.TablesToAdd?.Any() ?? false;
+            bool hasRemoves = updateModel.TablesToRemove?.Any() ?? false;
+
+            if (!hasAdds && !hasRemoves)
+                return null; // Nothing to update
+
+            ReservationShiftContext? reservationShiftCtx = null;
+
+            // Handle removal of tables
+            if (hasRemoves)
+            {
+                var currentIds = reservationTables.Select(t => t.Id).ToHashSet();
+                var toRemoveIds = updateModel.TablesToRemove!.ToHashSet();
+                var missing = toRemoveIds.Except(currentIds).ToList();
+
+                if (missing.Any())
+                {
+                    throw new BadRequestException(ErrorCodes.Table.NotPartOfReservation);
+                }
+
+                reservationTables.RemoveAll(t => toRemoveIds.Contains(t.Id));
+            }
+
+            // Handle adding new tables
+            if (hasAdds)
+            {
+                var toAddIds = updateModel.TablesToAdd!.ToHashSet();
+
+                var tablesToAdd = await tableRepo.GetTablesByIdsAsync(toAddIds);
+                var foundIds = tablesToAdd.Select(t => t.Id).ToHashSet();
+
+                var missing = toAddIds.Except(foundIds).ToList();
+
+                if (missing.Any())
+                {
+                    throw new NotFoundException(ErrorCodes.Table.NotFound);
+                }
+
+                // Ensure all tables belong to same restaurant
+                bool allSameRestaurant = tablesToAdd.All(t => t.RestaurantId == reservation.RestaurantId);
+                if (!allSameRestaurant)
+                {
+                    throw new ConflictException(ErrorCodes.Table.BelongsToDifferentRestaurant);
+                }
+
+                // Ensure no conflicts in shift period - table already assigned to another reservation
+                reservationShiftCtx = await GetReservationShiftContextAsync(reservation);
+
+                var conflictIds = toAddIds.Intersect(reservationShiftCtx.ReservedTableIds).ToList();
+                if (conflictIds.Any())
+                {
+                    throw new ConflictException(ErrorCodes.Table.AlreadyReserved);
+                }
+
+                reservationTables.AddRange(tablesToAdd);
+            }
+
+            // Apply the changes and persist
+            reservation.Tables = reservationTables;
+            await reservationRepo.UpdateAsync(reservation);
+
+            // If it wasn't assigned already (it is assigned when adding new tables) 
+            reservationShiftCtx ??= await GetReservationShiftContextAsync(reservation);
+
+            return await BuildReservationShiftViewAsync(reservation, reservationShiftCtx);
+        }
+
+        private async Task<ReservationShiftContext> GetReservationShiftContextAsync(Reservation reservation)
+        {
             // 1. Get the restaurant's time zone
             var restaurantTimeZone = restaurantService.GetTimeZoneInfo(reservation.Restaurant);
 
@@ -38,8 +122,8 @@ namespace Restaurant_API.Services
             var localDate = DateOnly.FromDateTime(reservationStartLocal);
 
             // 3. Find the shift that covers this local time
-            var shift = await shiftRepo.GetRestaurantShiftAtTimeAsync(reservation.RestaurantId, localTime);
-            if (shift == null) return null;
+            var shift = await shiftRepo.GetRestaurantShiftAtTimeAsync(reservation.RestaurantId, localTime) ??
+                        throw new BadRequestException(ErrorCodes.Reservation.NoShiftFound);
 
             // 4. Calculate shift start and end in UTC for that date
             var shiftStartUtc = TimeZoneInfo.ConvertTimeToUtc(localDate.ToDateTime(shift.StartTime), restaurantTimeZone);
@@ -51,20 +135,28 @@ namespace Restaurant_API.Services
                 shiftStartUtc,
                 shiftEndUtc);
 
-            // 6. Get table IDs for this specific reservation
-            var currReservationTableIds = reservation.Tables.Select(t => t.Id).ToHashSet();
-
-            // 7. Get all tables for the restaurant
+            return new ReservationShiftContext {
+                Shift = shift,
+                ReservedTableIds = reservedTableIds,
+            };
+        }
+    
+        private async Task<ShiftViewModel> BuildReservationShiftViewAsync(Reservation reservation, ReservationShiftContext reservationShiftCtx)
+        {
+            // Get all restaurant tables
             var tables = await tableRepo.GetAllRestaurantTablesAsync(reservation.RestaurantId);
 
-            // 8. Map each table to a DTO and set its status
+            // Get table IDs for this specific reservation
+            var currReservationTableIds = reservation.Tables.Select(t => t.Id).ToHashSet();
+
+            // Map each table to a DTO and set its status
             var tablesAvailability = tables.Select(table =>
             {
                 var dto = table.ToAvailabilityView();
 
                 if (currReservationTableIds.Contains(table.Id))
                     dto.Status = TableStatus.ReservedByCurrent;
-                else if (reservedTableIds.Contains(table.Id))
+                else if (reservationShiftCtx.ReservedTableIds.Contains(table.Id))
                     dto.Status = TableStatus.OccupiedByOther;
                 else
                     dto.Status = TableStatus.Available;
@@ -72,7 +164,7 @@ namespace Restaurant_API.Services
                 return dto;
             }).ToList();
 
-            var shiftView = shift.ToView();
+            var shiftView = reservationShiftCtx.Shift.ToView();
             shiftView.Tables = tablesAvailability;
 
             return shiftView;

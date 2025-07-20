@@ -9,7 +9,19 @@ class ReservationTablesLoading extends ReservationTablesState {}
 
 class ReservationTablesLoaded extends ReservationTablesState {
   final ShiftView shiftView;
-  ReservationTablesLoaded(this.shiftView);
+  final Set<String> selectedTableIds;
+
+  ReservationTablesLoaded(this.shiftView, {this.selectedTableIds = const {}});
+
+  ReservationTablesLoaded copyWith({
+    ShiftView? shiftView,
+    Set<String>? selectedTableIds,
+  }) {
+    return ReservationTablesLoaded(
+      shiftView ?? this.shiftView,
+      selectedTableIds: selectedTableIds ?? this.selectedTableIds,
+    );
+  }
 }
 
 class ReservationTablesError extends ReservationTablesState {

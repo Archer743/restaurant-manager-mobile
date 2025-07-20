@@ -14,12 +14,19 @@ class SnackBarService {
     _showSnackbar(context, Icons.close, message, warningColor);
   }
 
-  static void showFailureMessage(BuildContext context, String message) {
-    _showSnackbar(context, Icons.close, message, warningColor);
+  static void showFailureMessage(BuildContext context, String message,
+      {Duration? duration}) {
+    if (duration != null) {
+      _showSnackbar(context, Icons.close, message, warningColor,
+          duration: duration);
+    } else {
+      _showSnackbar(context, Icons.close, message, warningColor);
+    }
   }
 
   static void _showSnackbar(
-      BuildContext context, IconData icon, String message, Color color) {
+      BuildContext context, IconData icon, String message, Color color,
+      {Duration duration = const Duration(seconds: 4)}) {
     if (!context.mounted) return;
 
     final snackBar = SnackBar(
@@ -31,7 +38,7 @@ class SnackBarService {
         ],
       ),
       backgroundColor: color,
-      duration: const Duration(seconds: 4),
+      duration: duration,
       margin: const EdgeInsets.all(20),
     );
 

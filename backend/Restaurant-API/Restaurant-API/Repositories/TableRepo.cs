@@ -21,5 +21,12 @@ namespace Restaurant_API.Repositories
                                 .OrderBy(t => t.TableNumber)
                                 .ToListAsync();
         }
+
+        public async Task<List<Table>> GetTablesByIdsAsync(HashSet<Guid> tableIds)
+        {
+            return await context.Tables
+                                .Where(t => tableIds.Contains(t.Id))
+                                .ToListAsync();
+        }
     }
 }
