@@ -30,6 +30,7 @@ import 'package:restaurant_manager_app/features/reservation_management/domain/re
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/create_reservation_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/get_reservation_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/get_tables_availability_for_reservation_usecase.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/update_reservation_tables_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/update_reservation_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/create/reservation_create_bloc.dart';
@@ -151,6 +152,9 @@ Future<void> initDependencies() async {
   sl.registerSingleton<GetTablesAvailabilityForReservationUseCase>(
       GetTablesAvailabilityForReservationUseCase(sl()));
 
+  sl.registerSingleton<UpdateReservationTablesUseCase>(
+      UpdateReservationTablesUseCase(sl()));
+
   // [Blocs]
   sl.registerFactory<ReservationCreateBloc>(
     () => ReservationCreateBloc(sl<CreateReservationUseCase>()),
@@ -166,6 +170,7 @@ Future<void> initDependencies() async {
   sl.registerFactory<ReservationTablesBloc>(
     () => ReservationTablesBloc(
       sl<GetTablesAvailabilityForReservationUseCase>(),
+      sl<UpdateReservationTablesUseCase>(),
     ),
   );
 

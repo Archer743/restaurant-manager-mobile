@@ -1,36 +1,51 @@
+import 'package:restaurant_manager_app/core/constants/error_codes.dart';
+
 const Map<String, String> errorMessages = {
   // Auth
-  "INVALID_AUTHORIZATION": "Невалидна авторизация. Моля, влезте отново.",
-  "USER_NOT_FOUND": "Невалидна авторизация. Моля, влезте отново.",
-  "FORBIDDEN_ACCESS": "Нямате достъп до тази операция.",
+  ErrorCodes.invalidAuthorization:
+      "Невалидна авторизация. Моля, влезте отново.",
+  ErrorCodes.userNotFound: "Невалидна авторизация. Моля, влезте отново.",
+  ErrorCodes.forbiddenAccess: "Нямате достъп до тази операция.",
 
   // Session
-  "INVALID_SESSION": "Сесията е невалидна или е изтекла. Моля, влезте отново.",
+  ErrorCodes.invalidSession:
+      "Сесията е невалидна или е изтекла. Моля, влезте отново.",
 
   // User
-  "USERNAME_TAKEN": "Потребителското име вече е заето.",
-  "INVALID_CREDENTIALS": "Невалидно потребителско име или парола.",
-  "NO_ASSOCIATED_RESTAURANT":
+  ErrorCodes.usernameTaken: "Потребителското име вече е заето.",
+  ErrorCodes.invalidCredentials: "Невалидно потребителско име или парола.",
+  ErrorCodes.noAssociatedRestaurant:
       "Профилът ви не е свързан с ресторант. Моля, свържете се с администратор.",
 
   // Restaurant
-  "RESTAURANT_NOT_FOUND": "Вашият ресторант не е намерен.",
+  ErrorCodes.restaurantNotFound: "Вашият ресторант не е намерен.",
+
+  // Table
+  ErrorCodes.tableNotFound: "Някоя от избраните маси не беше намерена.",
+  ErrorCodes.tableNotPartOfReservation:
+      "Някоя от избраните маси вече не е част от резервацията.",
+  ErrorCodes.tableDifferentRestaurant:
+      "Избрана е маса, която принадлежи към друг ресторант.",
+  ErrorCodes.tableAlreadyReserved:
+      "Някоя от избраните маси вече е заета за този период.",
 
   // Reservation
-  "RESERVATION_NOT_FOUND": "Резервацията не е намерена или е изтрита.",
-  "RESERVATION_CANNOT_CREATE_IN_PAST":
+  ErrorCodes.reservationNotFound: "Резервацията не е намерена или е изтрита.",
+  ErrorCodes.reservationCannotCreateInPast:
       "Нямате необходимите права, за да създавате резервации в минал момент.",
-  "RESERVATION_CANNOT_MODIFY_TO_PAST":
+  ErrorCodes.reservationCannotModifyToPast:
       "Нямате необходимите права, за да местите резервации в минал момент.",
-  "RESERVATION_CANNOT_MODIFY_CLIENT_DETAILS":
+  ErrorCodes.reservationCannotModifyClientDetails:
       "Детайлите на клиента не могат да бъдат променени.",
+  ErrorCodes.reservationNoShiftFound:
+      "Резервацията не попада в работно време. Моля, проверете датата и часа.",
 
   // General
-  "INVALID_MODEL":
+  ErrorCodes.invalidModel:
       "Въведените данни са невалидни. Моля, проверете и опитайте отново.",
-  "INVALID_DATE": "Избрана е невалидна дата.",
+  ErrorCodes.invalidDate: "Избрана е невалидна дата.",
 
   // App Error Codes
-  "NETWORK": "Проблем с интернет връзката. Моля, опитайте отново.",
-  "UNKNOWN": "Нещо се обърка. Моля, опитайте по-късно.",
+  ErrorCodes.network: "Проблем с интернет връзката. Моля, опитайте отново.",
+  ErrorCodes.unknown: "Нещо се обърка. Моля, опитайте по-късно.",
 };

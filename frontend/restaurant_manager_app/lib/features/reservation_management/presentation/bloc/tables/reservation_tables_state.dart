@@ -24,6 +24,13 @@ class ReservationTablesLoaded extends ReservationTablesState {
   }
 }
 
+class ReservationTablesUpdated extends ReservationTablesLoaded {
+  ReservationTablesUpdated(
+    super.shiftView, {
+    super.selectedTableIds = const {},
+  });
+}
+
 class ReservationTablesError extends ReservationTablesState {
   final Failure failure;
   ReservationTablesError(this.failure);

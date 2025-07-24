@@ -50,7 +50,7 @@ namespace Restaurant_API.Services
             if (!hasAdds && !hasRemoves)
                 return null; // Nothing to update
 
-            ReservationShiftContext? reservationShiftCtx = null;
+            ReservationShiftContext reservationShiftCtx;
 
             // Handle removal of tables
             if (hasRemoves)
@@ -105,8 +105,8 @@ namespace Restaurant_API.Services
             reservation.Tables = reservationTables;
             await reservationRepo.UpdateAsync(reservation);
 
-            // If it wasn't assigned already (it is assigned when adding new tables) 
-            reservationShiftCtx ??= await GetReservationShiftContextAsync(reservation);
+            // Update shift context
+            reservationShiftCtx = await GetReservationShiftContextAsync(reservation);
 
             return await BuildReservationShiftViewAsync(reservation, reservationShiftCtx);
         }

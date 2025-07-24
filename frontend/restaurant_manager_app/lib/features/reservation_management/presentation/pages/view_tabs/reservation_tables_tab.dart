@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:restaurant_manager_app/config/routing/app_routes.dart';
 import 'package:restaurant_manager_app/config/theme/theme.dart';
+import 'package:restaurant_manager_app/core/constants/error_codes.dart';
+import 'package:restaurant_manager_app/core/errors/error_mapper.dart';
+import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
 import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/shift_view.dart';
@@ -38,6 +41,14 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
       builder: (context, state) {
         if (state is ReservationTablesLoaded) {
           return _buildLoadedContent(context, state);
+        } else if (state is ReservationTablesError) {
+          final failure = state.failure;
+
+          // Should show screen instead of snack bar
+          if (failure is ServerFailure &&
+              failure.errorCode == ErrorCodes.reservationNoShiftFound) {
+            return _buildEmptyContent(failure.errorCode);
+          }
         }
 
         return const Scaffold(
@@ -49,11 +60,21 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
 
   void _handleStateChanges(BuildContext context, ReservationTablesState state) {
     if (state is ReservationTablesError) {
+      final failure = state.failure;
+
+      // Should show screen instead of snack bar
+      if (failure is ServerFailure &&
+          failure.errorCode == ErrorCodes.reservationNoShiftFound) {
+        return;
+      }
+
       SnackBarService.showFailure(context, state.failure);
 
-      if (state.failure.requiresReauthentication) {
+      if (failure.requiresReauthentication) {
         context.go(AppRoutes.welcome);
       }
+    } else if (state is ReservationTablesUpdated) {
+      SnackBarService.showSuccess(context, 'Масите бяха обновени успешно');
     }
   }
 
@@ -92,7 +113,6 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
                 tables: shift.tables,
                 selectedTableIds: selectedTableIds,
                 onTableTap: (table) {
-                  debugPrint("\n${table.tableNumber} was clicked!\n");
                   if (table.status != TableStatus.occupiedByOther) {
                     context
                         .read<ReservationTablesBloc>()
@@ -133,8 +153,9 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
                         height: 50,
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            debugPrint('Save selected tables');
-                            // TODO: Add save logic here
+                            context
+                                .read<ReservationTablesBloc>()
+                                .add(SaveTablesSelection(widget.reservationId));
                           },
                           icon: const Icon(Icons.save),
                           label: const Text('Запази промените'),
@@ -170,6 +191,24 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
               ),
         ),
       ],
+    );
+  }
+
+  /// Build empty content screen when reservation is not in a shift
+  Widget _buildEmptyContent(String errorCode) {
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              getErrorMessage(errorCode),
+              style: defaultTextStyle,
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
