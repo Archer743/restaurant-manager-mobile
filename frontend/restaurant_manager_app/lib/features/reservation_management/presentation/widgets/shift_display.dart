@@ -5,12 +5,12 @@ import 'package:restaurant_manager_app/features/reservation_management/domain/en
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/table_availability.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/tables/tables_grid.dart';
 
-class ShiftInfo extends StatelessWidget {
+class ShiftDisplay extends StatelessWidget {
   final ShiftView shift;
   final Set<String> selectedTableIds;
   final void Function(TableAvailability) onTableTap;
 
-  const ShiftInfo({
+  const ShiftDisplay({
     super.key,
     required this.shift,
     required this.selectedTableIds,
@@ -19,25 +19,16 @@ class ShiftInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.only(
-          top: 30,
-          bottom: 100, // Leaves space for the save button
+    return Column(
+      children: [
+        _buildShiftInfoBlock(context),
+        const SizedBox(height: 24.0),
+        TablesGrid(
+          tables: shift.tables,
+          selectedTableIds: selectedTableIds,
+          onTableTap: onTableTap,
         ),
-        child: Column(
-          children: [
-            _buildShiftInfoBlock(context),
-            const SizedBox(height: 24.0),
-            TablesGrid(
-              tables: shift.tables,
-              selectedTableIds: selectedTableIds,
-              onTableTap: onTableTap,
-            ),
-          ],
-        ),
-      ),
+      ],
     );
   }
 

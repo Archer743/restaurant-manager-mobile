@@ -7,11 +7,12 @@ import 'package:restaurant_manager_app/core/constants/error_codes.dart';
 import 'package:restaurant_manager_app/core/errors/error_mapper.dart';
 import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
+import 'package:restaurant_manager_app/core/utils/spacing.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/table_availability.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_state.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/shift_info.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/shift_display.dart';
 
 class ReservationTablesTab extends StatefulWidget {
   final String reservationId;
@@ -89,7 +90,7 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       child: SizedBox(
-        height: MediaQuery.of(context).size.height,
+        height: spacingByHeight(context, 0.8),
         child: const Center(child: CircularProgressIndicator()),
       ),
     );
@@ -104,20 +105,29 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
     return Stack(
       children: [
         Positioned.fill(
-          child: ShiftInfo(
-            shift: shift,
-            selectedTableIds: selectedTableIds,
-            onTableTap: (table) {
-              if (table.status != TableStatus.occupiedByOther) {
-                context
-                    .read<ReservationTablesBloc>()
-                    .add(ToggleTableSelection(table.id));
-              } else {
-                SnackBarService.showFailureMessage(
-                    context, 'Тази маса е заета от друга резервация.',
-                    duration: const Duration(seconds: 2));
-              }
-            },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.only(
+                top: 30,
+                bottom: 100, // Leaves space for the save button
+              ),
+              child: ShiftDisplay(
+                shift: shift,
+                selectedTableIds: selectedTableIds,
+                onTableTap: (table) {
+                  if (table.status != TableStatus.occupiedByOther) {
+                    context
+                        .read<ReservationTablesBloc>()
+                        .add(ToggleTableSelection(table.id));
+                  } else {
+                    SnackBarService.showFailureMessage(
+                        context, 'Тази маса е заета от друга резервация.',
+                        duration: const Duration(seconds: 2));
+                  }
+                },
+              ),
+            ),
           ),
         ),
         Positioned(
@@ -170,15 +180,22 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
   /// Build empty content screen when reservation is not in a shift
   Widget _buildEmptyContent(String errorCode) {
     return SafeArea(
-      child: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Text(
-            getErrorMessage(errorCode),
-            style: defaultTextStyle,
-            textAlign: TextAlign.center,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        children: [
+          SizedBox(
+            height:
+                spacingByHeight(context, 0.8), // Enough to center vertically
+            child: Center(
+              child: Text(
+                getErrorMessage(errorCode),
+                style: defaultTextStyle,
+                textAlign: TextAlign.center,
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
