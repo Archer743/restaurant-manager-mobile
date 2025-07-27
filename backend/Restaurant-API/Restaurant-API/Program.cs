@@ -122,8 +122,9 @@ namespace Restaurant_API
 			builder.Services.AddScoped<ISessionService, SessionService>();
 
 			builder.Services.AddScoped<IRestaurantService, RestaurantService>();
+			builder.Services.AddScoped<IShiftService, ShiftService>();
+            builder.Services.AddScoped<ITableService, TableService>();
 			builder.Services.AddScoped<IReservationService, ReservationService>();
-			builder.Services.AddScoped<ITableService, TableService>();
         }
 
 		private static void ConfigureApp(WebApplication app)

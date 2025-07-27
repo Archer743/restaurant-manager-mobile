@@ -41,6 +41,7 @@
             public const string CannotModifyToPast = "RESERVATION_CANNOT_MODIFY_TO_PAST";
             public const string CannotModifyClientDetails = "RESERVATION_CANNOT_MODIFY_CLIENT_DETAILS";
             public const string NoShiftFound = "RESERVATION_NO_SHIFT_FOUND";
+            public const string StartTimeOutsideShift = "RESERVATION_START_OUTSIDE_SHIFT";
         }
 
         public static class Data

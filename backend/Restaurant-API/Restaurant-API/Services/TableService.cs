@@ -12,17 +12,15 @@ namespace Restaurant_API.Services
     public class TableService : ITableService
     {
         private readonly IReservationService reservationService;
-        private readonly IRestaurantService restaurantService;
-        private readonly IShiftRepo shiftRepo;
+        private readonly IShiftService shiftService;
         private readonly ITableRepo tableRepo;
         private readonly IReservationRepo reservationRepo;
 
-        public TableService(IReservationService reservationService, IRestaurantService restaurantService, IShiftRepo shiftRepo, ITableRepo tableRepo, IReservationRepo reservationRepo)
+        public TableService(IReservationService reservationService, IShiftService shiftService, ITableRepo tableRepo, IReservationRepo reservationRepo)
         {
             this.reservationService = reservationService;
-            this.restaurantService = restaurantService;
+            this.shiftService = shiftService;
 
-            this.shiftRepo = shiftRepo;
             this.tableRepo = tableRepo;
             this.reservationRepo = reservationRepo;
         }
@@ -33,7 +31,7 @@ namespace Restaurant_API.Services
             Reservation reservation = await reservationService.GetReservationIfOwnedAsync(ctx, reservationId, includeDetails: true);
 
             // Get reservations's shift and ids of all reserved tables in that shift
-            var reservationShiftCtx = await GetReservationShiftContextAsync(reservation);
+            var reservationShiftCtx = await shiftService.GetReservationShiftContextAsync(reservation);
 
             return await BuildReservationShiftViewAsync(reservation, reservationShiftCtx);
         }
@@ -106,39 +104,9 @@ namespace Restaurant_API.Services
             await reservationRepo.UpdateAsync(reservation);
 
             // Update shift context
-            reservationShiftCtx = await GetReservationShiftContextAsync(reservation);
+            reservationShiftCtx = await shiftService.GetReservationShiftContextAsync(reservation);
 
             return await BuildReservationShiftViewAsync(reservation, reservationShiftCtx);
-        }
-
-        private async Task<ReservationShiftContext> GetReservationShiftContextAsync(Reservation reservation)
-        {
-            // 1. Get the restaurant's time zone
-            var restaurantTimeZone = restaurantService.GetTimeZoneInfo(reservation.Restaurant);
-
-            // 2. Convert the reservation start time to local time
-            var reservationStartLocal = TimeZoneInfo.ConvertTimeFromUtc(reservation.StartTimeUtc, restaurantTimeZone);
-            var localTime = TimeOnly.FromDateTime(reservationStartLocal);
-            var localDate = DateOnly.FromDateTime(reservationStartLocal);
-
-            // 3. Find the shift that covers this local time
-            var shift = await shiftRepo.GetRestaurantShiftAtTimeAsync(reservation.RestaurantId, localTime) ??
-                        throw new BadRequestException(ErrorCodes.Reservation.NoShiftFound);
-
-            // 4. Calculate shift start and end in UTC for that date
-            var shiftStartUtc = TimeZoneInfo.ConvertTimeToUtc(localDate.ToDateTime(shift.StartTime), restaurantTimeZone);
-            var shiftEndUtc = TimeZoneInfo.ConvertTimeToUtc(localDate.ToDateTime(shift.EndTime), restaurantTimeZone);
-
-            // 5. Get all table IDs reserved in this shift
-            var reservedTableIds = await reservationRepo.GetReservedTableIdsInPeriodAsync(
-                reservation.RestaurantId,
-                shiftStartUtc,
-                shiftEndUtc);
-
-            return new ReservationShiftContext {
-                Shift = shift,
-                ReservedTableIds = reservedTableIds,
-            };
         }
     
         private async Task<ShiftViewModel> BuildReservationShiftViewAsync(Reservation reservation, ReservationShiftContext reservationShiftCtx)

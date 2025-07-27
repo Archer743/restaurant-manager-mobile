@@ -17,9 +17,10 @@ namespace Restaurant_API.Services
             this.restaurantUserRepo = restaurantUserRepo;
         }
 
-        public async Task<bool> RestaurantExistsAsync(Guid id)
+        public async Task<Restaurant> GetByIdAsync(Guid restaurantId)
         {
-            return await restaurantRepo.GetByIdAsync(id) != null;
+            return await restaurantRepo.GetByIdAsync(restaurantId) ??
+                                        throw new NotFoundException(ErrorCodes.Restaurant.NotFound);
         }
 
         public async Task<Restaurant> GetCurrUserAssociatedRestaurantAsync(HttpContext ctx)

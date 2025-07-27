@@ -4,7 +4,7 @@ namespace Restaurant_API.Services.Interfaces
 {
     public interface IRestaurantService
     {
-        Task<bool> RestaurantExistsAsync(Guid id);
+        Task<Restaurant> GetByIdAsync(Guid restaurantId);
 
         Task<Restaurant> GetCurrUserAssociatedRestaurantAsync(HttpContext ctx);
 
