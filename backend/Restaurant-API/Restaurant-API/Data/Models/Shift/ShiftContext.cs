@@ -2,7 +2,7 @@
 
 namespace Restaurant_API.Data.Models.Shift
 {
-    public class ReservationShiftContext
+    public class ShiftContext
     {
         public ShiftEntity Shift { get; set; }
 

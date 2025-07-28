@@ -154,8 +154,6 @@ namespace Restaurant_API.Services
                 isModified = true;
             }
 
-            // TODO: Validate if StartTimeUtc is in a shift
-
             // Apply StartTimeUtc update
             if (updateModel.StartTimeUtc.HasValue && reservation.StartTimeUtc != updateModel.StartTimeUtc.Value)
             {
@@ -164,6 +162,9 @@ namespace Restaurant_API.Services
                 {
                     throw new ForbiddenException(ErrorCodes.Reservation.CannotModifyToPast);
                 }
+
+                // Validate if new StartTimeUtc is in a shift
+                await shiftService.ValidateReservationShiftChangeAsync(reservation, updateModel.StartTimeUtc.Value);
 
                 reservation.StartTimeUtc = updateModel.StartTimeUtc.Value;
                 isModified = true;
