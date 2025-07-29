@@ -30,8 +30,7 @@ namespace Restaurant_API.Services
             // Load reservation and verify ownership
             Reservation reservation = await reservationService.GetReservationIfOwnedAsync(ctx, reservationId, includeDetails: true);
 
-            // Get reservations's shift and ids of all reserved tables in that shift
-            ShiftContext shiftCtx = await shiftService.GetShiftContextAsync(reservation);
+            ShiftContext shiftCtx = await shiftService.GetReservationShiftContextAsync(reservation);
 
             return await BuildReservationShiftViewAsync(reservation, shiftCtx);
         }
@@ -88,7 +87,7 @@ namespace Restaurant_API.Services
                 }
 
                 // Ensure no conflicts in shift period - table already assigned to another reservation
-                shiftCtx = await shiftService.GetShiftContextAsync(reservation);
+                shiftCtx = await shiftService.GetReservationShiftContextAsync(reservation);
 
                 var conflictIds = toAddIds.Intersect(shiftCtx.ReservedTableIds).ToList();
                 if (conflictIds.Any())
@@ -104,7 +103,7 @@ namespace Restaurant_API.Services
             await reservationRepo.UpdateAsync(reservation);
 
             // Update shift context
-            shiftCtx = await shiftService.GetShiftContextAsync(reservation);
+            shiftCtx = await shiftService.GetReservationShiftContextAsync(reservation);
 
             return await BuildReservationShiftViewAsync(reservation, shiftCtx);
         }

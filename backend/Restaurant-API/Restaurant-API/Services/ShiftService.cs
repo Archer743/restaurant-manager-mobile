@@ -22,31 +22,19 @@ namespace Restaurant_API.Services
             this.reservationRepo = reservationRepo;
         }
 
-        public async Task<ShiftContext> GetShiftContextAsync(Reservation reservation)
+        public async Task<ShiftContext?> GetShiftContextAsync(Restaurant restaurant, DateTime dateTimeUtc)
         {
-            return await GetShiftContextAsync(reservation.Restaurant, reservation.StartTimeUtc);
-        }
-
-        public async Task<ShiftContext> GetShiftContextAsync(Restaurant restaurant, DateTime dateTimeUtc)
-        {
-            // 1. Get the restaurant's time zone
             var restaurantTimeZone = restaurantService.GetTimeZoneInfo(restaurant);
+            var (localDate, localTime) = ConvertToLocalDateTimeParts(restaurantTimeZone, dateTimeUtc);
 
-            // 2. Convert the reservation start time to restaurant's local time
-            var dateTimeLocal = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, restaurantTimeZone);
-            var localTime = TimeOnly.FromDateTime(dateTimeLocal);
-            var localDate = DateOnly.FromDateTime(dateTimeLocal);
+            var shift = await shiftRepo.GetRestaurantShiftAtTimeAsync(restaurant.Id, localTime);
+            if (shift == null) return null;
 
-            // TODO: Fix Error Code
-            // 3. Find the shift that covers this local time
-            var shift = await shiftRepo.GetRestaurantShiftAtTimeAsync(restaurant.Id, localTime) ??
-                                        throw new NotFoundException(ErrorCodes.Reservation.NoShiftFound);
-
-            // 4. Calculate shift start and end in UTC for that date
+            // Calculate shift start and end in UTC for that date
             var shiftStartUtc = TimeZoneInfo.ConvertTimeToUtc(localDate.ToDateTime(shift.StartTime), restaurantTimeZone);
             var shiftEndUtc = TimeZoneInfo.ConvertTimeToUtc(localDate.ToDateTime(shift.EndTime), restaurantTimeZone);
 
-            // 5. Get all table IDs reserved in this shift
+            // Get all table IDs reserved in this shift
             var reservedTableIds = await reservationRepo.GetReservedTableIdsInPeriodAsync(
                 restaurant.Id,
                 shiftStartUtc,
@@ -59,32 +47,61 @@ namespace Restaurant_API.Services
             };
         }
 
+        public async Task<ShiftContext> GetReservationShiftContextAsync(Reservation reservation)
+        {
+            var ctx = await GetShiftContextAsync(reservation.Restaurant, reservation.StartTimeUtc);
+
+            if (ctx == null)
+            {
+                throw new NotFoundException(ErrorCodes.Reservation.OutsideShift);
+            }
+
+            return ctx;
+        }
+
         public async Task<bool> HasShiftAtTimeAsync(Restaurant restaurant, DateTime dateTimeUtc)
         {
-            // 1. Get the restaurant's time zone
-            var restaurantTimeZone = restaurantService.GetTimeZoneInfo(restaurant);
-
-            // 2. Convert Utc DateTime to restaurant's local time
-            var dateTimeLocal = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, restaurantTimeZone);
-            var localTime = TimeOnly.FromDateTime(dateTimeLocal);
-
-            // 3. Find the shift that covers this local time
-            var shift = await shiftRepo.GetRestaurantShiftAtTimeAsync(restaurant.Id, localTime);
-
-            return shift != null;
+            return await GetShiftAtTimeAsync(restaurant, dateTimeUtc) != null;
         }
 
         public async Task ValidateReservationShiftChangeAsync(Reservation reservation, DateTime newStartTimeUtc)
         {
-            var newShiftCtx = await GetShiftContextAsync(reservation.Restaurant, newStartTimeUtc);
+            Shift? currShift = await GetShiftAtTimeAsync(reservation.Restaurant, reservation.StartTimeUtc);
+            ShiftContext? newShiftCtx = await GetShiftContextAsync(reservation.Restaurant, newStartTimeUtc);
 
-            var currTableIds = reservation.Tables.Select(t => t.Id);
+            if (newShiftCtx == null)
+            {
+                throw new BadRequestException(ErrorCodes.Reservation.StartTimeOutsideShift);
+            }
+
+            // No need to check conflicts if it's the same shift
+            if (currShift != null && currShift.Id == newShiftCtx.Shift.Id && reservation.StartTimeUtc.Date == newStartTimeUtc.Date) return;
+
+            var currTableIds = reservation.Tables.Select(t => t.Id).ToHashSet();
             var conflicts = currTableIds.Intersect(newShiftCtx.ReservedTableIds).ToList();
 
             if (conflicts.Any())
             {
-                throw new ConflictException(ErrorCodes.Table.AlreadyReserved);
+                throw new ConflictException(ErrorCodes.Table.ReservedInNewShift);
             }
+        }
+    
+        private async Task<Shift?> GetShiftAtTimeAsync(Restaurant restaurant, DateTime dateTimeUtc)
+        {
+            var (_, localTime) = ConvertToLocalDateTimeParts(restaurant, dateTimeUtc);
+            return await shiftRepo.GetRestaurantShiftAtTimeAsync(restaurant.Id, localTime);
+        }
+
+        private (DateOnly localDate, TimeOnly localTime) ConvertToLocalDateTimeParts(Restaurant restaurant, DateTime dateTimeUtc)
+        {
+            var timeZone = restaurantService.GetTimeZoneInfo(restaurant);
+            return ConvertToLocalDateTimeParts(timeZone, dateTimeUtc);
+        }
+
+        private (DateOnly localDate, TimeOnly localTime) ConvertToLocalDateTimeParts(TimeZoneInfo timeZone, DateTime dateTimeUtc)
+        {
+            var dateTimeLocal = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, timeZone);
+            return (DateOnly.FromDateTime(dateTimeLocal), TimeOnly.FromDateTime(dateTimeLocal));
         }
     }
 }

@@ -28,6 +28,8 @@ const Map<String, String> errorMessages = {
       "Избрана е маса, която принадлежи към друг ресторант.",
   ErrorCodes.tableAlreadyReserved:
       "Някоя от избраните маси вече е заета за този период.",
+  ErrorCodes.tableReservedInNewShift:
+      "Не може да преместите резервацията – част от масите са вече заети в новата смяна.",
 
   // Reservation
   ErrorCodes.reservationNotFound: "Резервацията не е намерена или е изтрита.",
@@ -37,8 +39,10 @@ const Map<String, String> errorMessages = {
       "Нямате необходимите права, за да местите резервации в минал момент.",
   ErrorCodes.reservationCannotModifyClientDetails:
       "Детайлите на клиента не могат да бъдат променени.",
-  ErrorCodes.reservationNoShiftFound:
-      "Резервацията не попада в работно време. Моля, проверете датата и часа.",
+  ErrorCodes.reservationStartTimeOutsideShift:
+      "Избраните дата и час са извън работното време на ресторанта.",
+  ErrorCodes.reservationOutsideShift:
+      "Резервацията е извън работното време на ресторанта.",
 
   // General
   ErrorCodes.invalidModel:

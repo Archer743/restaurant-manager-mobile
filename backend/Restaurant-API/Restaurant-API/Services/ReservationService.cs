@@ -121,7 +121,7 @@ namespace Restaurant_API.Services
         public async Task<ReservationViewModel> UpdateAsync(HttpContext ctx, Guid reservationId, ReservationUpdateModel updateModel)
         {
             // Retrieve the reservation and ensure it belongs to the current user's restaurant
-            Reservation reservation = await GetReservationIfOwnedAsync(ctx, reservationId);
+            Reservation reservation = await GetReservationIfOwnedAsync(ctx, reservationId, includeDetails: true);
 
             // Track whether any field was actually modified
             bool isModified = false;
@@ -163,7 +163,7 @@ namespace Restaurant_API.Services
                     throw new ForbiddenException(ErrorCodes.Reservation.CannotModifyToPast);
                 }
 
-                // Validate if new StartTimeUtc is in a shift
+                // Ensure reservation can be moved to the new shift
                 await shiftService.ValidateReservationShiftChangeAsync(reservation, updateModel.StartTimeUtc.Value);
 
                 reservation.StartTimeUtc = updateModel.StartTimeUtc.Value;

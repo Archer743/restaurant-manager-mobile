@@ -32,6 +32,7 @@
             public const string NotPartOfReservation = "TABLE_NOT_PART_OF_RESERVATION";
             public const string BelongsToDifferentRestaurant = "TABLE_DIFFERENT_RESTAURANT";
             public const string AlreadyReserved = "TABLE_ALREADY_RESERVED";
+            public const string ReservedInNewShift = "TABLE_RESERVED_IN_NEW_SHIFT";
         }
 
         public static class Reservation
@@ -40,8 +41,10 @@
             public const string CannotCreateInPast = "RESERVATION_CANNOT_CREATE_IN_PAST";
             public const string CannotModifyToPast = "RESERVATION_CANNOT_MODIFY_TO_PAST";
             public const string CannotModifyClientDetails = "RESERVATION_CANNOT_MODIFY_CLIENT_DETAILS";
-            public const string NoShiftFound = "RESERVATION_NO_SHIFT_FOUND";
+            // Returned when trying to create or update a reservation with a start time that doesn't fall within any restaurant shift
             public const string StartTimeOutsideShift = "RESERVATION_START_OUTSIDE_SHIFT";
+            // Returned when trying to access reservation's shift context, but its current start time does not fall within a valid shift
+            public const string OutsideShift = "RESERVATION_OUTSIDE_SHIFT";
         }
 
         public static class Data

@@ -22,6 +22,7 @@ abstract class ErrorCodes {
       'TABLE_NOT_PART_OF_RESERVATION';
   static const String tableDifferentRestaurant = 'TABLE_DIFFERENT_RESTAURANT';
   static const String tableAlreadyReserved = 'TABLE_ALREADY_RESERVED';
+  static const String tableReservedInNewShift = 'TABLE_RESERVED_IN_NEW_SHIFT';
 
   // Reservation
   static const String reservationNotFound = 'RESERVATION_NOT_FOUND';
@@ -31,7 +32,9 @@ abstract class ErrorCodes {
       'RESERVATION_CANNOT_MODIFY_TO_PAST';
   static const String reservationCannotModifyClientDetails =
       'RESERVATION_CANNOT_MODIFY_CLIENT_DETAILS';
-  static const String reservationNoShiftFound = 'RESERVATION_NO_SHIFT_FOUND';
+  static const String reservationStartTimeOutsideShift =
+      'RESERVATION_START_OUTSIDE_SHIFT';
+  static const String reservationOutsideShift = 'RESERVATION_OUTSIDE_SHIFT';
 
   // Data
   static const String invalidModel = 'INVALID_MODEL';

@@ -60,7 +60,7 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
 
       // Should show screen instead of snack bar
       if (failure is ServerFailure &&
-          failure.errorCode == ErrorCodes.reservationNoShiftFound) {
+          failure.errorCode == ErrorCodes.reservationOutsideShift) {
         return;
       }
 
@@ -81,7 +81,7 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
       final failure = state.failure;
 
       if (failure is ServerFailure &&
-          failure.errorCode == ErrorCodes.reservationNoShiftFound) {
+          failure.errorCode == ErrorCodes.reservationOutsideShift) {
         return _buildEmptyContent(failure.errorCode);
       }
     }

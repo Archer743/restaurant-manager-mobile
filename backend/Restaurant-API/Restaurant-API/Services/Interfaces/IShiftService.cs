@@ -5,9 +5,9 @@ namespace Restaurant_API.Services.Interfaces
 {
     public interface IShiftService
     {
-        Task<ShiftContext> GetShiftContextAsync(Reservation reservation);
+        Task<ShiftContext?> GetShiftContextAsync(Restaurant restaurant, DateTime dateTimeUtc);
 
-        Task<ShiftContext> GetShiftContextAsync(Restaurant restaurant, DateTime dateTimeUtc);
+        Task<ShiftContext> GetReservationShiftContextAsync(Reservation reservation);
 
         Task<bool> HasShiftAtTimeAsync(Restaurant restaurant, DateTime dateTimeUtc);
 
