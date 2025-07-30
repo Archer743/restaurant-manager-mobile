@@ -62,5 +62,14 @@ namespace Restaurant_API.Controllers
             ReservationViewModel reservation = await reservationService.UpdateAsync(HttpContext, reservationId, updateModel);
             return Ok(reservation);
         }
+
+
+        /* ======================================================================== DELETE */
+        [HttpDelete("{reservationId}"), AppAuthorize]
+        public async Task<IActionResult> RemoveAsync(Guid reservationId)
+        {
+            await reservationService.RemoveAsync(HttpContext, reservationId);
+            return NoContent();
+        }
     }
 }

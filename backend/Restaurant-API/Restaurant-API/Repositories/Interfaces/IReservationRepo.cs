@@ -17,5 +17,7 @@ namespace Restaurant_API.Repositories.Interfaces
         Task<Reservation?> GetByIdWithDetailsAsync(Guid id);
 
         Task UpdateAsync(Reservation reservation);
+
+        Task RemoveAsync(Reservation reservation);
     }
 }

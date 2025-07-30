@@ -67,5 +67,11 @@ namespace Restaurant_API.Repositories
             context.Reservations.Update(reservation);
             await context.SaveChangesAsync();
         }
+
+        public async Task RemoveAsync(Reservation reservation)
+        {
+            context.Reservations.Remove(reservation);
+            await context.SaveChangesAsync();
+        }
     }
 }
