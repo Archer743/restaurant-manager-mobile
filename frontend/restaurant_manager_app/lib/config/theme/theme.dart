@@ -103,6 +103,7 @@ final baseSnackBarTheme = SnackBarThemeData(
   contentTextStyle: snackBarTextStyle,
 );
 
+// App Bar
 final darkAppBarTheme = AppBarTheme(
   backgroundColor: bgColor,
   centerTitle: true,
@@ -113,6 +114,18 @@ final darkAppBarTheme = AppBarTheme(
   scrolledUnderElevation: 0, // No shadow when content scrolls under it
   shadowColor: Colors.transparent, // Ensure no shadow color is applied
   surfaceTintColor: Colors.transparent,
+);
+
+// Tab Bar
+final tabBarTheme = TabBarTheme(
+  labelColor: accentColor, // Active tab text color
+  unselectedLabelColor: hintTextColor.toColor(),
+  labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+  unselectedLabelStyle:
+      const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+  indicator: const UnderlineTabIndicator(
+    borderSide: BorderSide(width: 3, color: accentColor),
+  ),
 );
 
 // Home Navigation Bar
@@ -240,4 +253,5 @@ ThemeData darkTheme = ThemeData.dark().copyWith(
   elevatedButtonTheme: darkElevatedButtonTheme,
   floatingActionButtonTheme: floatingActionButtonTheme,
   snackBarTheme: baseSnackBarTheme,
+  tabBarTheme: tabBarTheme,
 );

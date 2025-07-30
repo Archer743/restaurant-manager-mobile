@@ -24,12 +24,17 @@ import 'package:restaurant_manager_app/features/pending_reservations_inbox/domai
 import 'package:restaurant_manager_app/features/pending_reservations_inbox/domain/usecases/get_pending_reservations_usecase.dart';
 import 'package:restaurant_manager_app/features/pending_reservations_inbox/presentation/bloc/pending_inbox_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/data/data_sources/reservation_api_service.dart';
+import 'package:restaurant_manager_app/features/reservation_management/data/data_sources/reservation_table_api_service.dart';
 import 'package:restaurant_manager_app/features/reservation_management/data/repository/reservation_repository_impl.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/repository/reservation_repository.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/create_reservation_usecase.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/get_reservation_details_usecase.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/get_reservation_usecase.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/get_tables_availability_for_reservation_usecase.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/update_reservation_tables_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/update_reservation_usecase.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/reservation_bloc.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_bloc.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/create/reservation_create_bloc.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_bloc.dart';
 import 'package:restaurant_manager_app/features/splash/data/repository/session_repository_impl.dart';
 import 'package:restaurant_manager_app/features/splash/domain/repository/session_repository.dart';
 import 'package:restaurant_manager_app/features/splash/domain/usecases/check_auth_status_usecase.dart';
@@ -122,31 +127,50 @@ Future<void> initDependencies() async {
   sl.registerSingleton<ReservationApiService>(
       ReservationApiService(sl<Dio>(), baseUrl: reservationsBaseUrl));
 
+  sl.registerSingleton<ReservationTableApiService>(
+      ReservationTableApiService(sl<Dio>(), baseUrl: reservationsBaseUrl));
+
   // [Repositories]
   sl.registerSingleton<ReservationRepository>(
     ReservationRepositoryImpl(
       sl<AuthSharedRepository>(),
       sl<TokenStorageService>(),
       sl<ReservationApiService>(),
+      sl<ReservationTableApiService>(),
     ),
   );
 
   // [UseCases]
-  sl.registerSingleton<GetReservationDetailsUseCase>(
-      GetReservationDetailsUseCase(sl()));
-
   sl.registerSingleton<CreateReservationUseCase>(
       CreateReservationUseCase(sl()));
+
+  sl.registerSingleton<GetReservationUseCase>(GetReservationUseCase(sl()));
 
   sl.registerSingleton<UpdateReservationUseCase>(
       UpdateReservationUseCase(sl()));
 
+  sl.registerSingleton<GetTablesAvailabilityForReservationUseCase>(
+      GetTablesAvailabilityForReservationUseCase(sl()));
+
+  sl.registerSingleton<UpdateReservationTablesUseCase>(
+      UpdateReservationTablesUseCase(sl()));
+
   // [Blocs]
-  sl.registerFactory<ReservationBloc>(
-    () => ReservationBloc(
-      sl<GetReservationDetailsUseCase>(),
-      sl<CreateReservationUseCase>(),
+  sl.registerFactory<ReservationCreateBloc>(
+    () => ReservationCreateBloc(sl<CreateReservationUseCase>()),
+  );
+
+  sl.registerFactory<ReservationDetailsBloc>(
+    () => ReservationDetailsBloc(
+      sl<GetReservationUseCase>(),
       sl<UpdateReservationUseCase>(),
+    ),
+  );
+
+  sl.registerFactory<ReservationTablesBloc>(
+    () => ReservationTablesBloc(
+      sl<GetTablesAvailabilityForReservationUseCase>(),
+      sl<UpdateReservationTablesUseCase>(),
     ),
   );
 

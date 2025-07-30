@@ -17,9 +17,13 @@ namespace Restaurant_API.Data
 
         public DbSet<RestaurantUser> RestaurantUsers { get; set; }
 
+        public DbSet<Shift> Shifts { get; set; }
+
         public DbSet<Reservation> Reservations { get; set; }
 
-		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		public DbSet<Table> Tables { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
 
@@ -36,6 +40,17 @@ namespace Restaurant_API.Data
             // Makes composite primary key (RestaurantId + UserId)
             modelBuilder.Entity<RestaurantUser>()
 						.HasKey(ru => new { ru.RestaurantId, ru.UserId });
+
+            // Makes Table.TableNumber Unique for a restaurant
+            modelBuilder.Entity<Table>()
+                        .HasIndex(t => new { t.RestaurantId, t.TableNumber })
+						.IsUnique();
+
+			// Many-to-many relation between Reservation and Table entities
+            modelBuilder.Entity<Reservation>()
+						.HasMany(r => r.Tables)
+						.WithMany(t => t.Reservations)
+						.UsingEntity(j => j.ToTable("ReservationTables"));
         }
 	}
 }

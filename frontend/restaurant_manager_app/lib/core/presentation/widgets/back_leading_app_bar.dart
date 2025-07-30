@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class BackLeadingAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final List<Widget>? actions;
+  final PreferredSizeWidget? bottom;
 
   const BackLeadingAppBar({
     super.key,
     required this.title,
     this.actions,
+    this.bottom,
   });
 
   @override
@@ -22,9 +24,14 @@ class BackLeadingAppBar extends StatelessWidget implements PreferredSizeWidget {
         icon: const Icon(Icons.arrow_back_ios_new_rounded),
       ),
       actions: actions,
+      bottom: bottom,
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize {
+    return Size.fromHeight(
+      kToolbarHeight + (bottom?.preferredSize.height ?? 0),
+    );
+  }
 }

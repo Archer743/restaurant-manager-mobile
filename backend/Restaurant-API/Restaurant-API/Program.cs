@@ -11,6 +11,8 @@ using Restaurant_API.Repositories.Interfaces;
 using Restaurant_API.Services;
 using Restaurant_API.Services.Interfaces;
 using Restaurant_API.Settings;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Restaurant_API
 {
@@ -27,11 +29,21 @@ namespace Restaurant_API
 
 			builder.Services.AddOptions<SessionSettings>().BindConfiguration("SessionSettings")
 							.ValidateDataAnnotations().ValidateOnStart();
-		}
+        }
 
 		private static void ConfigureServices(WebApplicationBuilder builder)
 		{
-			builder.Services.AddControllers();  // Support for controllers, model binding, attribute routing, etc.
+            // Support for controllers, model binding, attribute routing, etc.
+            // By default, enums are serialized as integers. This config serializes them as strings instead (camelCase),  
+            // which is safer because changing the enum order won’t affect the JSON output.
+            builder.Services.AddControllers()
+							.AddJsonOptions(options =>
+							{
+								options.JsonSerializerOptions.Converters.Add(
+									new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
+								);
+							});
+
 			builder.Services.AddEndpointsApiExplorer();  // Swagger can find and display all API endpoints
 			builder.Services.AddSwaggerGen();  // Swagger UI to test the API in the browser
 
@@ -91,20 +103,27 @@ namespace Restaurant_API
 			builder.Services.AddHangfireServer();  // Adds a background worker that processes jobs
 
 
-			// TODO: Repositories Setup
+			// Repositories Setup
 			builder.Services.AddScoped<IUserRepo, UserRepo>();
 			builder.Services.AddScoped<IRoleRepo, RoleRepo>();
 			builder.Services.AddScoped<ISessionRepo, SessionRepo>();
+
             builder.Services.AddScoped<IRestaurantRepo, RestaurantRepo>();
 			builder.Services.AddScoped<IRestaurantUserRepo, RestaurantUserRepo>();
+            builder.Services.AddScoped<IShiftRepo, ShiftRepo>();
+            builder.Services.AddScoped<ITableRepo, TableRepo>();
+
             builder.Services.AddScoped<IReservationRepo, ReservationRepo>();
 
-			// TODO: Services Setup
-			builder.Services.AddScoped<IUserService, UserService>();
+            // Services Setup
+            builder.Services.AddScoped<IUserService, UserService>();
 			builder.Services.AddScoped<IRoleService, RoleService>();
 			builder.Services.AddScoped<IAuthTokenService, AuthTokenService>();
 			builder.Services.AddScoped<ISessionService, SessionService>();
+
 			builder.Services.AddScoped<IRestaurantService, RestaurantService>();
+			builder.Services.AddScoped<IShiftService, ShiftService>();
+            builder.Services.AddScoped<ITableService, TableService>();
 			builder.Services.AddScoped<IReservationService, ReservationService>();
         }
 

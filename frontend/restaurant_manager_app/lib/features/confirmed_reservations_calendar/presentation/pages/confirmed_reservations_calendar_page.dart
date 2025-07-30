@@ -218,7 +218,7 @@ class _ConfirmedReservationsCalendarPageState
             initialDateTime.year, initialDateTime.month, initialDateTime.day);
 
         final Map<String, dynamic> extraData = {
-          'initialDate': normalizedDay,
+          'initialDateLocal': normalizedDay,
           'calendarBloc': context.read<CalendarBloc>(),
         };
 

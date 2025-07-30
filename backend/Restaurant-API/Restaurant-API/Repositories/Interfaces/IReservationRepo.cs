@@ -6,11 +6,15 @@ namespace Restaurant_API.Repositories.Interfaces
     {
         Task AddAsync(Reservation reservation);
 
-        Task<List<Reservation>> GetConfirmedInPeriodAsync(Guid restaurantId, DateTime periodStartUtc, DateTime periodEndUtc);
-
         IQueryable<Reservation> GetPendingReservationsBaseQuery(Guid restaurantId);
 
+        Task<List<Reservation>> GetConfirmedInPeriodAsync(Guid restaurantId, DateTime periodStartUtc, DateTime periodEndUtc);
+
+        Task<HashSet<Guid>> GetReservedTableIdsInPeriodAsync(Guid restaurantId, DateTime periodStartUtc, DateTime periodEndUtc);
+
         Task<Reservation?> GetByIdAsync(Guid id);
+
+        Task<Reservation?> GetByIdWithDetailsAsync(Guid id);
 
         Task UpdateAsync(Reservation reservation);
     }

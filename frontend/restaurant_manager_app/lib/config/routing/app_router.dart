@@ -9,10 +9,13 @@ import 'package:restaurant_manager_app/features/auth/presentation/pages/register
 import 'package:restaurant_manager_app/features/auth/presentation/pages/welcome_page.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_bloc.dart';
 import 'package:restaurant_manager_app/features/home/presentation/home_page.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/reservation_bloc.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/reservation_event.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_bloc.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_event.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/create/reservation_create_bloc.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_bloc.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/reservation_create_page.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/reservation_details_page.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/reservation_view_page.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/bloc/splash_event.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/splash_page.dart';
@@ -64,15 +67,15 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) {
         try {
           final extraData = state.extra as Map<String, dynamic>;
-          final DateTime initialDate = extraData['initialDate']!;
+          final DateTime initialDateLocal = extraData['initialDateLocal']!;
           final CalendarBloc calendarBloc = extraData['calendarBloc']!;
 
           return MultiBlocProvider(
             providers: [
-              BlocProvider<ReservationBloc>(create: (_) => sl()),
+              BlocProvider<ReservationCreateBloc>(create: (_) => sl()),
               BlocProvider<CalendarBloc>.value(value: calendarBloc),
             ],
-            child: ReservationCreatePage(initialDate: initialDate),
+            child: ReservationCreatePage(initialDateLocal: initialDateLocal),
           );
         } catch (_) {
           return const Text('Error: Path ${AppRoutes.reservation}');
@@ -93,13 +96,18 @@ final GoRouter appRouter = GoRouter(
 
             return MultiBlocProvider(
               providers: [
-                BlocProvider<ReservationBloc>(
-                  create: (_) => sl()..add(GetReservation(reservationId)),
+                BlocProvider<ReservationDetailsBloc>(
+                  create: (_) =>
+                      sl()..add(GetReservationDetails(reservationId)),
+                ),
+                BlocProvider<ReservationTablesBloc>(
+                  create: (_) =>
+                      sl()..add(GetTablesAvailability(reservationId)),
                 ),
                 if (calendarBloc != null)
                   BlocProvider<CalendarBloc>.value(value: calendarBloc),
               ],
-              child: ReservationDetailsPage(reservationId: reservationId),
+              child: ReservationViewPage(reservationId: reservationId),
             );
           },
         ),
