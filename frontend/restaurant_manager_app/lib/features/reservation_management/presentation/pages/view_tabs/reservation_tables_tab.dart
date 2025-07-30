@@ -16,10 +16,12 @@ import 'package:restaurant_manager_app/features/reservation_management/presentat
 
 class ReservationTablesTab extends StatefulWidget {
   final String reservationId;
+  final Future<void> Function() onRefresh;
 
   const ReservationTablesTab({
     super.key,
     required this.reservationId,
+    required this.onRefresh,
   });
 
   @override
@@ -31,12 +33,6 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
   @override
   bool get wantKeepAlive => true;
 
-  Future<void> _reloadTables() async {
-    context
-        .read<ReservationTablesBloc>()
-        .add(GetTablesAvailability(widget.reservationId));
-  }
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -46,7 +42,7 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
       builder: (context, state) {
         return Scaffold(
           body: RefreshIndicator(
-            onRefresh: _reloadTables,
+            onRefresh: widget.onRefresh,
             child: _buildContent(context, state),
           ),
         );

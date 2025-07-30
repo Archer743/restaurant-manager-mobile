@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:restaurant_manager_app/config/routing/app_routes.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
 import 'package:restaurant_manager_app/core/utils/datetime_utils.dart';
+import 'package:restaurant_manager_app/core/utils/spacing.dart';
 import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_bloc.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_event.dart';
@@ -12,6 +13,8 @@ import 'package:restaurant_manager_app/features/reservation_management/presentat
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_state.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_form_mode.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_bloc.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/forms/reservation_form.dart';
 
 /// Acts as a bridge between the ReservationDetailsTab widget and the ReservationViewPage.
@@ -53,12 +56,14 @@ class ReservationDetailsTab extends StatefulWidget {
   final String reservationId;
   final ReservationDetailsTabController controller;
   final ReservationFormMode displayMode;
+  final Future<void> Function() onRefresh;
 
   const ReservationDetailsTab({
     super.key,
     required this.reservationId,
     required this.controller,
     required this.displayMode,
+    required this.onRefresh,
   });
 
   @override
@@ -155,60 +160,80 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
   Widget build(BuildContext context) {
     super.build(context); // Required by AutomaticKeepAliveClientMixin
     return BlocConsumer<ReservationDetailsBloc, ReservationDetailsState>(
-      listener: (context, state) {
-        if (state is ReservationDetailsLoading) {
-          widget.controller.updateLoadingState(isLoading: true);
-        } else if (state is ReservationDetailsUpdated) {
-          widget.controller.updateLoadingState(isLoading: false);
-
-          setState(() {
-            _refreshRequired = true;
-            rawDatesAffected = [
-              state.originalStartTimeUtc.toLocal(), // Before update
-              state.reservation.startTimeUtc.toLocal(), // After update
-            ];
-            _setControllers(state.reservation);
-          });
-
-          SnackBarService.showSuccess(
-              context, 'Резервацията беше обновена успешно');
-        } else if (state is ReservationDetailsLoaded) {
-          widget.controller.updateLoadingState(isLoading: false);
-          widget.controller
-              .updateCreatedByStaff(state.reservation.isCreatedByStaff);
-
-          setState(() {
-            _isCreatedByStaff = state.reservation.isCreatedByStaff;
-            _setControllers(state.reservation);
-          });
-        } else if (state is ReservationDetailsError) {
-          setState(() {
-            // Reset fields if originalReservation is available
-            // It's not available if the state came by result of GetReservationDetails event
-            if (state.hasReservation) {
-              widget.controller.updateLoadingState(isLoading: false);
-              _setControllers(state.originalReservation!);
-            }
-          });
-
-          SnackBarService.showFailure(context, state.failure);
-
-          if (state.failure.requiresReauthentication) {
-            context.go(AppRoutes.welcome);
-          }
-        }
-      },
+      listener: _handleStateChanges,
       builder: (context, state) {
-        if (state is ReservationDetailsLoading ||
-            (state is ReservationDetailsError && !state.hasReservation)) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        } else {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 45),
-              child: SingleChildScrollView(
+        return Scaffold(
+          body: RefreshIndicator(
+            onRefresh: widget.onRefresh,
+            child: _buildContent(context, state),
+          ),
+        );
+      },
+    );
+  }
+
+  void _handleStateChanges(
+      BuildContext context, ReservationDetailsState state) {
+    if (state is ReservationDetailsLoading) {
+      widget.controller.updateLoadingState(isLoading: true);
+    } else if (state is ReservationDetailsUpdated) {
+      widget.controller.updateLoadingState(isLoading: false);
+
+      setState(() {
+        _refreshRequired = true;
+        rawDatesAffected = [
+          state.originalStartTimeUtc.toLocal(), // Before update
+          state.reservation.startTimeUtc.toLocal(), // After update
+        ];
+        _setControllers(state.reservation);
+      });
+
+      // Reload tables tab
+      context
+          .read<ReservationTablesBloc>()
+          .add(GetTablesAvailability(widget.reservationId));
+
+      SnackBarService.showSuccess(
+          context, 'Резервацията беше обновена успешно');
+    } else if (state is ReservationDetailsLoaded) {
+      widget.controller.updateLoadingState(isLoading: false);
+      widget.controller
+          .updateCreatedByStaff(state.reservation.isCreatedByStaff);
+
+      setState(() {
+        _isCreatedByStaff = state.reservation.isCreatedByStaff;
+        _setControllers(state.reservation);
+      });
+    } else if (state is ReservationDetailsError) {
+      setState(() {
+        // Reset fields if originalReservation is available
+        // It's not available if the state came by result of GetReservationDetails event
+        if (state.hasReservation) {
+          widget.controller.updateLoadingState(isLoading: false);
+          _setControllers(state.originalReservation!);
+        }
+      });
+
+      SnackBarService.showFailure(context, state.failure);
+
+      if (state.failure.requiresReauthentication) {
+        context.go(AppRoutes.welcome);
+      }
+    }
+  }
+
+  Widget _buildContent(BuildContext context, ReservationDetailsState state) {
+    if (state is ReservationDetailsLoaded ||
+        (state is ReservationDetailsError && state.hasReservation)) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 45, vertical: 16),
                 child: ReservationForm(
                   formKey: _formKey,
                   displayMode: widget.displayMode,
@@ -224,8 +249,17 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
               ),
             ),
           );
-        }
-      },
+        },
+      );
+    }
+
+    // Always scrollable to allow pull-to-refresh while loading
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: SizedBox(
+        height: spacingByHeight(context, 0.8),
+        child: const Center(child: CircularProgressIndicator()),
+      ),
     );
   }
 }

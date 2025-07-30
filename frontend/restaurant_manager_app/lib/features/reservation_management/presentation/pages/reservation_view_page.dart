@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:restaurant_manager_app/core/presentation/widgets/back_leading_app_bar.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_bloc.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_event.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_bloc.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/view_tabs/reservation_details_tab.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_form_mode.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/view_tabs/reservation_tables_tab.dart';
@@ -38,6 +43,18 @@ class _ReservationViewPageState extends State<ReservationViewPage>
     super.dispose();
   }
 
+  Future<void> _handleRefresh() async {
+    // Refresh Details Tab
+    context
+        .read<ReservationDetailsBloc>()
+        .add(GetReservationDetails(widget.reservationId));
+
+    // Refresh Tables Tab
+    context
+        .read<ReservationTablesBloc>()
+        .add(GetTablesAvailability(widget.reservationId));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,8 +76,12 @@ class _ReservationViewPageState extends State<ReservationViewPage>
           reservationId: widget.reservationId,
           controller: _detailsTabController,
           displayMode: _displayMode,
+          onRefresh: _handleRefresh,
         ),
-        ReservationTablesTab(reservationId: widget.reservationId),
+        ReservationTablesTab(
+          reservationId: widget.reservationId,
+          onRefresh: _handleRefresh,
+        ),
       ],
     );
   }
