@@ -156,7 +156,7 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
                         onPressed: () {
                           context
                               .read<ReservationTablesBloc>()
-                              .add(SaveTablesSelection(widget.reservationId));
+                              .add(SaveTableSelection(widget.reservationId));
                         },
                         icon: const Icon(Icons.save),
                         label: const Text('Запази промените'),

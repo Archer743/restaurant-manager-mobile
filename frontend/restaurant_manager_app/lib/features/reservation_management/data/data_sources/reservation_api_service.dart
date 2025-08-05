@@ -11,16 +11,16 @@ abstract class ReservationApiService {
   factory ReservationApiService(Dio dio, {String baseUrl}) =
       _ReservationApiService;
 
-  @GET("/{id}")
-  Future<HttpResponse<ReservationViewModel>> getReservation(
-    @Header('Authorization') String authorization,
-    @Path() String id,
-  );
-
   @POST("/confirmed")
   Future<HttpResponse<void>> createReservation(
     @Header('Authorization') String authorization,
     @Body() ReservationCreateModel body,
+  );
+
+  @GET("/{id}")
+  Future<HttpResponse<ReservationViewModel>> getReservation(
+    @Header('Authorization') String authorization,
+    @Path() String id,
   );
 
   @PATCH("/{id}")
@@ -28,5 +28,11 @@ abstract class ReservationApiService {
     @Header('Authorization') String authorization,
     @Path() String id,
     @Body() ReservationUpdateModel body,
+  );
+
+  @DELETE("/{id}")
+  Future<HttpResponse<void>> removeReservation(
+    @Header('Authorization') String authorization,
+    @Path() String id,
   );
 }

@@ -10,7 +10,7 @@ class ToggleTableSelection extends ReservationTablesEvent {
   ToggleTableSelection(this.tableId);
 }
 
-class SaveTablesSelection extends ReservationTablesEvent {
+class SaveTableSelection extends ReservationTablesEvent {
   final String reservationId;
-  SaveTablesSelection(this.reservationId);
+  SaveTableSelection(this.reservationId);
 }

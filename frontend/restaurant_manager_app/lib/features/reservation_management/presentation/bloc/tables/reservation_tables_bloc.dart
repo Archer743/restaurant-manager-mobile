@@ -21,7 +21,7 @@ class ReservationTablesBloc
   ) : super(ReservationTablesInitial()) {
     on<GetTablesAvailability>(_onGetTablesAvailability);
     on<ToggleTableSelection>(_onToggleTableSelection);
-    on<SaveTablesSelection>(_onSaveTablesSelection);
+    on<SaveTableSelection>(_onSaveTableSelection);
   }
 
   Future<void> _onGetTablesAvailability(
@@ -56,8 +56,8 @@ class ReservationTablesBloc
     }
   }
 
-  Future<void> _onSaveTablesSelection(
-    SaveTablesSelection event,
+  Future<void> _onSaveTableSelection(
+    SaveTableSelection event,
     Emitter<ReservationTablesState> emit,
   ) async {
     final currState = state;
