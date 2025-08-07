@@ -86,6 +86,21 @@ final darkElevatedButtonTheme = ElevatedButtonThemeData(
   ),
 );
 
+final darkOutlinedButtonTheme = OutlinedButtonThemeData(
+  style: OutlinedButton.styleFrom(
+    foregroundColor: textColor.toColor(),
+    backgroundColor: Colors.transparent,
+    side: BorderSide(
+        color: textColor.toColor().withOpacity(0.5), width: borderWidth),
+    elevation: 0,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(borderRadius),
+    ),
+    minimumSize: const Size(double.infinity, 50),
+    textStyle: elevatedButtonTextStyle.copyWith(color: textColor.toColor()),
+  ),
+);
+
 final floatingActionButtonTheme = FloatingActionButtonThemeData(
   backgroundColor: secondaryColor,
   foregroundColor: actionButtonTextColor.toColor(),
@@ -93,6 +108,16 @@ final floatingActionButtonTheme = FloatingActionButtonThemeData(
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(borderRadius),
   ),
+);
+
+// PopupMenuButton
+final darkPopupMenuTheme = PopupMenuThemeData(
+  color: primaryColor,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(borderRadius),
+  ),
+  position: PopupMenuPosition.under,
+  textStyle: defaultTextStyle,
 );
 
 // SnackBars
@@ -251,7 +276,9 @@ ThemeData darkTheme = ThemeData.dark().copyWith(
   navigationBarTheme: navigationBarTheme,
   inputDecorationTheme: darkInputDecorationTheme,
   elevatedButtonTheme: darkElevatedButtonTheme,
+  outlinedButtonTheme: darkOutlinedButtonTheme,
   floatingActionButtonTheme: floatingActionButtonTheme,
+  popupMenuTheme: darkPopupMenuTheme,
   snackBarTheme: baseSnackBarTheme,
   tabBarTheme: tabBarTheme,
 );

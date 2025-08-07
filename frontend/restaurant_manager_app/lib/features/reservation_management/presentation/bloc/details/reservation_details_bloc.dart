@@ -91,13 +91,25 @@ class ReservationDetailsBloc
     RemoveReservation event,
     Emitter<ReservationDetailsState> emit,
   ) async {
+    final currState = state;
+    late final DateTime affectedDateUtc;
+
+    if (currState is ReservationDetailsLoaded) {
+      affectedDateUtc = currState.reservation.startTimeUtc;
+    } else if (currState is ReservationDetailsError &&
+        currState.hasReservation) {
+      affectedDateUtc = currState.originalReservation!.startTimeUtc;
+    } else {
+      return;
+    }
+
     emit(ReservationDetailsLoading());
 
     final result = await minDelayRun(_removeReservationUseCase(event.id));
 
     result.fold(
       (failure) => emit(ReservationDetailsError(failure)),
-      (_) => emit(ReservationRemoved()),
+      (_) => emit(ReservationRemoved(affectedDateUtc)),
     );
   }
 

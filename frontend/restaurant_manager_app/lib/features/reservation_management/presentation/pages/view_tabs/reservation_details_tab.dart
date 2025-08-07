@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -8,43 +9,25 @@ import 'package:restaurant_manager_app/core/utils/spacing.dart';
 import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_bloc.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_event.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_form_mode.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_view.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_state.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_form_mode.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_event.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/buttons/reservation_actions_menu.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/forms/reservation_form.dart';
 
-/// Acts as a bridge between the ReservationDetailsTab widget and the ReservationViewPage.
-/// Holds shared state and callbacks that allow:
-/// - Controlling when editing/submitting is allowed (isReservationLoadedNotifier)
-/// - Indicating if the reservation was created by staff
-/// - Registering and calling a submit callback from the tab
-///
-/// This decouples the tab’s internal logic from the parent page,
-/// so the page can manage buttons and actions consistently.
+/// Acts as a bridge between the ReservationDetailsTab and the ReservationViewPage
+/// by holding shared state
 class ReservationDetailsTabController {
-  bool Function()? _submitCallback;
-
-  // Prevents user actions while a request is in progress
-  final ValueNotifier<bool> isReservationLoadedNotifier = ValueNotifier(false);
+  final ValueNotifier<ReservationFormMode> displayModeNotifier =
+      ValueNotifier(ReservationFormMode.view);
   final ValueNotifier<bool> isCreatedByStaffNotifier = ValueNotifier(false);
 
-  bool submit() {
-    if (_submitCallback != null) {
-      return _submitCallback!();
-    }
-    return false;
-  }
-
-  void registerSubmitCallback(bool Function() callback) {
-    _submitCallback = callback;
-  }
-
-  void updateLoadingState({required bool isLoading}) {
-    isReservationLoadedNotifier.value = !isLoading;
+  void updateDisplayMode(ReservationFormMode newMode) {
+    displayModeNotifier.value = newMode;
   }
 
   void updateCreatedByStaff(bool isCreatedByStaff) {
@@ -55,14 +38,12 @@ class ReservationDetailsTabController {
 class ReservationDetailsTab extends StatefulWidget {
   final String reservationId;
   final ReservationDetailsTabController controller;
-  final ReservationFormMode displayMode;
   final Future<void> Function() onRefresh;
 
   const ReservationDetailsTab({
     super.key,
     required this.reservationId,
     required this.controller,
-    required this.displayMode,
     required this.onRefresh,
   });
 
@@ -73,7 +54,10 @@ class ReservationDetailsTab extends StatefulWidget {
 class _ReservationDetailsTabState extends State<ReservationDetailsTab>
     with AutomaticKeepAliveClientMixin {
   final _formKey = GlobalKey<FormState>();
+  ReservationFormMode _displayMode = ReservationFormMode.view;
   bool _isCreatedByStaff = false;
+  ReservationView? _originalReservation;
+  final _hasChangesNotifier = ValueNotifier(false);
 
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -87,6 +71,11 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
   late final CalendarBloc? _calendarBloc;
   bool _refreshRequired = false;
   List<DateTime> rawDatesAffected = [];
+
+  bool _isReservationDataAvailable(ReservationDetailsState state) {
+    return state is ReservationDetailsLoaded ||
+        (state is ReservationDetailsError && state.hasReservation);
+  }
 
   void _setControllers(ReservationView reservation) {
     _nameController.text = reservation.name;
@@ -102,23 +91,49 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
     _timeController.text = localTime.toHHMMSSString();
   }
 
-  bool _submitForm() {
-    final isValid = _formKey.currentState?.validate() ?? false;
-    if (!isValid) return false;
+  void _onFormChanged() {
+    if (_originalReservation == null) return;
 
-    context.read<ReservationDetailsBloc>().add(
-          UpdateReservationDetails(
-            name: _nameController.text,
-            email: _emailController.text,
-            phone: _phoneController.text,
-            dateString: _dateController.text,
-            timeString: _timeController.text,
-            peopleCountString: _peopleCountController.text,
-            commentString: _commentController.text,
-          ),
-        );
+    final (originalLocalDate, originalLocalTime) =
+        extractLocalComponentsFromUtc(_originalReservation!.startTimeUtc);
 
-    return true;
+    final hasChanges = _nameController.text != _originalReservation!.name ||
+        _emailController.text != _originalReservation!.email ||
+        _phoneController.text != _originalReservation!.phone ||
+        _peopleCountController.text !=
+            _originalReservation!.peopleCount.toString() ||
+        _dateController.text != originalLocalDate.toYYYYMMDDString() ||
+        _timeController.text != originalLocalTime.toHHMMSSString() ||
+        _commentController.text != (_originalReservation!.comment ?? '');
+
+    _hasChangesNotifier.value = hasChanges;
+  }
+
+  void _onSavePressed() {
+    if (_formKey.currentState?.validate() ?? false) {
+      context.read<ReservationDetailsBloc>().add(
+            UpdateReservationDetails(
+              name: _nameController.text,
+              email: _emailController.text,
+              phone: _phoneController.text,
+              dateString: _dateController.text,
+              timeString: _timeController.text,
+              peopleCountString: _peopleCountController.text,
+              commentString: _commentController.text,
+            ),
+          );
+    }
+  }
+
+  void _onDiscardPressed() {
+    if (_originalReservation != null) {
+      _formKey.currentState?.reset(); // Resets the visual errors of the form
+      _setControllers(_originalReservation!);
+      setState(() {
+        _displayMode = ReservationFormMode.view;
+        widget.controller.updateDisplayMode(_displayMode);
+      });
+    }
   }
 
   // By switching tabs unactive tabs are disposed by default.
@@ -129,10 +144,16 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
   @override
   void initState() {
     super.initState();
-    widget.controller.registerSubmitCallback(_submitForm);
+    _nameController.addListener(_onFormChanged);
+    _emailController.addListener(_onFormChanged);
+    _phoneController.addListener(_onFormChanged);
+    _dateController.addListener(_onFormChanged);
+    _timeController.addListener(_onFormChanged);
+    _peopleCountController.addListener(_onFormChanged);
+    _commentController.addListener(_onFormChanged);
   }
 
-  // Runs after the widget is inserted into the widget tree and context is still valid.
+  // Runs after the widget is inserted into the widget tree and context is still valid
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -146,6 +167,8 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
       _calendarBloc.add(RefreshCalendar(rawDatesAffected: rawDatesAffected));
     }
 
+    _hasChangesNotifier.dispose();
+
     _nameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
@@ -153,6 +176,7 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
     _timeController.dispose();
     _peopleCountController.dispose();
     _commentController.dispose();
+
     super.dispose();
   }
 
@@ -162,11 +186,23 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
     return BlocConsumer<ReservationDetailsBloc, ReservationDetailsState>(
       listener: _handleStateChanges,
       builder: (context, state) {
+        final body = Stack(
+          children: [
+            _buildContent(context, state),
+            if (_isReservationDataAvailable(state)) ...[
+              if (_displayMode == ReservationFormMode.view)
+                _buildActions(context),
+              if (_displayMode == ReservationFormMode.edit)
+                _buildEditActions(context),
+            ],
+          ],
+        );
+
+        // Allow pull-to-refresh only in view mode
         return Scaffold(
-          body: RefreshIndicator(
-            onRefresh: widget.onRefresh,
-            child: _buildContent(context, state),
-          ),
+          body: _displayMode == ReservationFormMode.view
+              ? RefreshIndicator(onRefresh: widget.onRefresh, child: body)
+              : body,
         );
       },
     );
@@ -174,18 +210,20 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
 
   void _handleStateChanges(
       BuildContext context, ReservationDetailsState state) {
-    if (state is ReservationDetailsLoading) {
-      widget.controller.updateLoadingState(isLoading: true);
-    } else if (state is ReservationDetailsUpdated) {
-      widget.controller.updateLoadingState(isLoading: false);
-
+    if (state is ReservationDetailsUpdated) {
       setState(() {
         _refreshRequired = true;
-        rawDatesAffected = [
+        rawDatesAffected.addAll([
           state.originalStartTimeUtc.toLocal(), // Before update
           state.reservation.startTimeUtc.toLocal(), // After update
-        ];
+        ]);
+
+        _originalReservation = state.reservation;
         _setControllers(state.reservation);
+        _hasChangesNotifier.value = false;
+
+        _displayMode = ReservationFormMode.view;
+        widget.controller.updateDisplayMode(_displayMode);
       });
 
       // Reload tables tab
@@ -196,20 +234,31 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
       SnackBarService.showSuccess(
           context, 'Резервацията беше обновена успешно');
     } else if (state is ReservationDetailsLoaded) {
-      widget.controller.updateLoadingState(isLoading: false);
       widget.controller
           .updateCreatedByStaff(state.reservation.isCreatedByStaff);
 
       setState(() {
         _isCreatedByStaff = state.reservation.isCreatedByStaff;
+        _originalReservation = state.reservation;
         _setControllers(state.reservation);
       });
+    } else if (state is ReservationRemoved) {
+      setState(() {
+        _refreshRequired = true;
+        rawDatesAffected.add(state.affectedDateUtc.toLocal());
+      });
+
+      SnackBarService.showSuccess(context, 'Резервацията беше изтрита успешно');
+
+      context.pop(); // Go back to prev page
     } else if (state is ReservationDetailsError) {
+      // TODO: Handle error codes when reservation is not accessible - update prev page
+
       setState(() {
         // Reset fields if originalReservation is available
         // It's not available if the state came by result of GetReservationDetails event
         if (state.hasReservation) {
-          widget.controller.updateLoadingState(isLoading: false);
+          _originalReservation = state.originalReservation;
           _setControllers(state.originalReservation!);
         }
       });
@@ -223,8 +272,10 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
   }
 
   Widget _buildContent(BuildContext context, ReservationDetailsState state) {
-    if (state is ReservationDetailsLoaded ||
-        (state is ReservationDetailsError && state.hasReservation)) {
+    if (_isReservationDataAvailable(state)) {
+      final double bottomPadding =
+          _displayMode == ReservationFormMode.edit ? 70.0 : 16.0;
+
       return LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
@@ -232,11 +283,10 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 45, vertical: 16),
+                padding: EdgeInsets.fromLTRB(45, 0, 45, bottomPadding),
                 child: ReservationForm(
                   formKey: _formKey,
-                  displayMode: widget.displayMode,
+                  displayMode: _displayMode,
                   isCreatedByStaff: _isCreatedByStaff,
                   nameController: _nameController,
                   emailController: _emailController,
@@ -262,4 +312,90 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
       ),
     );
   }
+
+  Widget _buildActions(BuildContext context) {
+    return Positioned(
+      top: 6,
+      right: 6,
+      child: ReservationActionsMenu(
+        onEdit: () {
+          setState(() {
+            _displayMode = ReservationFormMode.edit;
+            widget.controller.updateDisplayMode(_displayMode);
+          });
+        },
+        onRemove: () {
+          // showDeleteConfirmationDialog(context, () => debugPrint("DELETE"));
+          context
+              .read<ReservationDetailsBloc>()
+              .add(RemoveReservation(widget.reservationId));
+        },
+      ),
+    );
+  }
+
+  Widget _buildEditActions(BuildContext context) {
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: ValueListenableBuilder<bool>(
+        valueListenable: _hasChangesNotifier,
+        builder: (context, hasChanges, _) {
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: hasChanges ? _onSavePressed : null,
+                    child: const Text('Запази'),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: _onDiscardPressed,
+                    child: const Text('Отказ'),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+/*
+  void showDeleteConfirmationDialog(
+      BuildContext context, VoidCallback onDelete) {
+    showCupertinoDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: const Text('Потвърдете изтриването'),
+          content: const Text(
+              'Сигурни ли сте, че искате да изтриете тази резервация?'),
+          actions: <CupertinoDialogAction>[
+            CupertinoDialogAction(
+              child: const Text('Отказ'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              onPressed: () {
+                Navigator.of(context).pop();
+                onDelete();
+              },
+              child: const Text('Изтриване'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  */
 }
