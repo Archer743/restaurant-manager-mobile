@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:restaurant_manager_app/config/theme/theme.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/dialogs/remove_confirmation_dialog.dart';
 
 enum _ReservationAction { edit, remove }
 
@@ -23,7 +24,7 @@ class ReservationActionsMenu extends StatelessWidget {
             onEdit();
             break;
           case _ReservationAction.remove:
-            onRemove();
+            showRemoveConfirmationDialog(context: context, onRemove: onRemove);
             break;
         }
       },

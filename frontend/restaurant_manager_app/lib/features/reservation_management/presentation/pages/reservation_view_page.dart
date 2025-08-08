@@ -93,6 +93,7 @@ class _ReservationViewPageState extends State<ReservationViewPage>
   }
 
   Widget _buildCreatedByStaffIndicator() {
+    // TODO: Fix possition
     return ValueListenableBuilder<bool>(
       valueListenable: _detailsTabController.isCreatedByStaffNotifier,
       builder: (context, isCreatedByStaff, _) {

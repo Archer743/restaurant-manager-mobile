@@ -325,7 +325,6 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
           });
         },
         onRemove: () {
-          // showDeleteConfirmationDialog(context, () => debugPrint("DELETE"));
           context
               .read<ReservationDetailsBloc>()
               .add(RemoveReservation(widget.reservationId));
@@ -366,36 +365,4 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
       ),
     );
   }
-
-/*
-  void showDeleteConfirmationDialog(
-      BuildContext context, VoidCallback onDelete) {
-    showCupertinoDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: const Text('Потвърдете изтриването'),
-          content: const Text(
-              'Сигурни ли сте, че искате да изтриете тази резервация?'),
-          actions: <CupertinoDialogAction>[
-            CupertinoDialogAction(
-              child: const Text('Отказ'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            CupertinoDialogAction(
-              isDestructiveAction: true,
-              onPressed: () {
-                Navigator.of(context).pop();
-                onDelete();
-              },
-              child: const Text('Изтриване'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-  */
 }
