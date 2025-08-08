@@ -16,6 +16,11 @@ namespace Restaurant_API.Data.Entities
         public Restaurant Restaurant { get; set; }
 
 
+        // A user-friendly, unique identifier for a reservation within a specific restaurant
+        [Required]
+        public string Tag { get; set; }
+
+
         // Required name of the client
         [Required, MaxLength(100)]
         public string Name { get; set; } = string.Empty;

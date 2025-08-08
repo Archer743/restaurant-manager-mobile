@@ -46,7 +46,12 @@ namespace Restaurant_API.Data
                         .HasIndex(t => new { t.RestaurantId, t.TableNumber })
 						.IsUnique();
 
-			// Many-to-many relation between Reservation and Table entities
+			// Makes Reservation.Tag Unique for a restaurant
+			modelBuilder.Entity<Reservation>()
+						.HasIndex(r => new { r.RestaurantId, r.Tag })
+						.IsUnique();
+
+            // Many-to-many relation between Reservation and Table entities
             modelBuilder.Entity<Reservation>()
 						.HasMany(r => r.Tables)
 						.WithMany(t => t.Reservations)
