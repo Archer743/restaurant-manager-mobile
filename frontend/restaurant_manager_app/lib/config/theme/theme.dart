@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -126,6 +127,16 @@ final baseSnackBarTheme = SnackBarThemeData(
   shape:
       RoundedRectangleBorder(borderRadius: BorderRadius.circular(borderRadius)),
   contentTextStyle: snackBarTextStyle,
+);
+
+// Dialogs
+final darkCupertinoDialogTheme = CupertinoThemeData(
+  primaryColor: secondaryColor,
+  scaffoldBackgroundColor: bgColor,
+  barBackgroundColor: primaryColor,
+  textTheme: CupertinoTextThemeData(
+    textStyle: defaultTextStyle.copyWith(color: textColor.toColor()),
+  ),
 );
 
 // App Bar
