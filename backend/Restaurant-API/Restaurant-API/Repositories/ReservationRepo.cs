@@ -62,6 +62,13 @@ namespace Restaurant_API.Repositories
                                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 
+        public async Task<Reservation?> GetByTagAsync(Guid restaurantId, string tag)
+        {
+            return await context.Reservations
+                                .FirstOrDefaultAsync(r => r.RestaurantId == restaurantId &&
+                                                          r.Tag == tag);
+        }
+
         public async Task UpdateAsync(Reservation reservation)
         {
             context.Reservations.Update(reservation);

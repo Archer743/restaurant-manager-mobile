@@ -76,7 +76,8 @@ class _ReservationViewPageState extends State<ReservationViewPage>
 
           // When editing, lock the tab bar so the user can’t switch tabs.
           return BackLeadingAppBar(
-            title: 'Резервация',
+            // title: 'Резервация',
+            title: '№ T6X9ZK',
             bottom: displayMode == ReservationFormMode.edit
                 ? PreferredSize(
                     preferredSize: const Size.fromHeight(kTextTabBarHeight),
