@@ -12,6 +12,7 @@ class ReservationViewModel extends ReservationView {
 
   ReservationViewModel({
     required super.id,
+    required super.tag,
     required super.phone,
     required super.email,
     required this.startTimeUtc,

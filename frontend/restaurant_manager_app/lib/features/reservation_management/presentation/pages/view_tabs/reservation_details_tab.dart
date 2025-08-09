@@ -25,6 +25,7 @@ class ReservationDetailsTabController {
   final ValueNotifier<ReservationFormMode> displayModeNotifier =
       ValueNotifier(ReservationFormMode.view);
   final ValueNotifier<bool> isCreatedByStaffNotifier = ValueNotifier(false);
+  final ValueNotifier<String> tagNotifier = ValueNotifier("");
 
   void updateDisplayMode(ReservationFormMode newMode) {
     displayModeNotifier.value = newMode;
@@ -32,6 +33,10 @@ class ReservationDetailsTabController {
 
   void updateCreatedByStaff(bool isCreatedByStaff) {
     isCreatedByStaffNotifier.value = isCreatedByStaff;
+  }
+
+  void updateTag(String tag) {
+    tagNotifier.value = tag;
   }
 }
 
@@ -236,6 +241,8 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
     } else if (state is ReservationDetailsLoaded) {
       widget.controller
           .updateCreatedByStaff(state.reservation.isCreatedByStaff);
+
+      widget.controller.updateTag(state.reservation.tag);
 
       setState(() {
         _isCreatedByStaff = state.reservation.isCreatedByStaff;

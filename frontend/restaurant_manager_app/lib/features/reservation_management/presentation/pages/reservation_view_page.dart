@@ -66,27 +66,35 @@ class _ReservationViewPageState extends State<ReservationViewPage>
       child: ValueListenableBuilder<ReservationFormMode>(
         valueListenable: _detailsTabController.displayModeNotifier,
         builder: (context, displayMode, _) {
-          final tabBar = TabBar(
-            controller: _tabController,
-            tabs: const [
-              Tab(text: 'Детайли'),
-              Tab(text: 'Маси'),
-            ],
-          );
+          return ValueListenableBuilder<String>(
+            valueListenable: _detailsTabController.tagNotifier,
+            builder: (context, tag, __) {
+              final tabBar = TabBar(
+                controller: _tabController,
+                tabs: const [
+                  Tab(text: 'Детайли'),
+                  Tab(text: 'Маси'),
+                ],
+              );
 
-          // When editing, lock the tab bar so the user can’t switch tabs.
-          return BackLeadingAppBar(
-            // title: 'Резервация',
-            title: '№ T6X9ZK',
-            bottom: displayMode == ReservationFormMode.edit
-                ? PreferredSize(
-                    preferredSize: const Size.fromHeight(kTextTabBarHeight),
-                    child: AbsorbPointer(child: tabBar),
-                  )
-                : tabBar,
-            actions: [
-              _buildCreatedByStaffIndicator(),
-            ],
+              final tagText = tag.isNotEmpty ? '№ $tag' : 'Резервация';
+              final titleText = displayMode == ReservationFormMode.view
+                  ? tagText
+                  : 'Редакция';
+
+              return BackLeadingAppBar(
+                title: titleText,
+                bottom: displayMode == ReservationFormMode.edit
+                    ? PreferredSize(
+                        preferredSize: const Size.fromHeight(kTextTabBarHeight),
+                        child: AbsorbPointer(child: tabBar),
+                      )
+                    : tabBar,
+                actions: [
+                  _buildCreatedByStaffIndicator(),
+                ],
+              );
+            },
           );
         },
       ),

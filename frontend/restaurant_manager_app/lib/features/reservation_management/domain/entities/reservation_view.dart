@@ -1,5 +1,6 @@
 class ReservationView {
   final String id;
+  final String tag;
   final String name;
   final String email;
   final String phone;
@@ -10,6 +11,7 @@ class ReservationView {
 
   ReservationView({
     required this.id,
+    required this.tag,
     required this.name,
     required this.email,
     required this.phone,
