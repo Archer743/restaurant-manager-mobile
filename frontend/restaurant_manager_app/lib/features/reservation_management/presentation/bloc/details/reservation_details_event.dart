@@ -24,3 +24,8 @@ class UpdateReservationDetails extends ReservationDetailsEvent {
     required this.commentString,
   });
 }
+
+class RemoveReservation extends ReservationDetailsEvent {
+  final String id;
+  RemoveReservation(this.id);
+}

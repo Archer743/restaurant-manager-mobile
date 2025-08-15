@@ -10,6 +10,7 @@ ReservationViewModel _$ReservationViewModelFromJson(
         Map<String, dynamic> json) =>
     ReservationViewModel(
       id: json['id'] as String,
+      tag: json['tag'] as String,
       phone: json['phone'] as String,
       email: json['email'] as String,
       startTimeUtc: const AppDateTimeUtcConverter()
@@ -24,6 +25,7 @@ Map<String, dynamic> _$ReservationViewModelToJson(
         ReservationViewModel instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'tag': instance.tag,
       'name': instance.name,
       'email': instance.email,
       'phone': instance.phone,

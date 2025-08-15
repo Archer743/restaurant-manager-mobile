@@ -1,4 +1,3 @@
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:restaurant_manager_app/core/constants/error_codes.dart';
 import 'package:restaurant_manager_app/core/errors/failure.dart';
@@ -22,7 +21,7 @@ class ReservationTablesBloc
   ) : super(ReservationTablesInitial()) {
     on<GetTablesAvailability>(_onGetTablesAvailability);
     on<ToggleTableSelection>(_onToggleTableSelection);
-    on<SaveTablesSelection>(_onSaveTablesSelection);
+    on<SaveTableSelection>(_onSaveTableSelection);
   }
 
   Future<void> _onGetTablesAvailability(
@@ -57,8 +56,8 @@ class ReservationTablesBloc
     }
   }
 
-  Future<void> _onSaveTablesSelection(
-    SaveTablesSelection event,
+  Future<void> _onSaveTableSelection(
+    SaveTableSelection event,
     Emitter<ReservationTablesState> emit,
   ) async {
     final currState = state;

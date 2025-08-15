@@ -29,6 +29,7 @@ class ReservationCard extends StatelessWidget {
             if (reservation.isCreatedByStaff)
               Tooltip(
                 message: 'Създадена от служител',
+                triggerMode: TooltipTriggerMode.tap,
                 child: Icon(Icons.verified_user, color: Colors.grey[400]),
               ),
           ],

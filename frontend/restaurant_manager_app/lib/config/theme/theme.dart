@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -86,6 +87,21 @@ final darkElevatedButtonTheme = ElevatedButtonThemeData(
   ),
 );
 
+final darkOutlinedButtonTheme = OutlinedButtonThemeData(
+  style: OutlinedButton.styleFrom(
+    foregroundColor: textColor.toColor(),
+    backgroundColor: Colors.transparent,
+    side: BorderSide(
+        color: textColor.toColor().withOpacity(0.5), width: borderWidth),
+    elevation: 0,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(borderRadius),
+    ),
+    minimumSize: const Size(double.infinity, 50),
+    textStyle: elevatedButtonTextStyle.copyWith(color: textColor.toColor()),
+  ),
+);
+
 final floatingActionButtonTheme = FloatingActionButtonThemeData(
   backgroundColor: secondaryColor,
   foregroundColor: actionButtonTextColor.toColor(),
@@ -95,12 +111,32 @@ final floatingActionButtonTheme = FloatingActionButtonThemeData(
   ),
 );
 
+// PopupMenuButton
+final darkPopupMenuTheme = PopupMenuThemeData(
+  color: primaryColor,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(borderRadius),
+  ),
+  position: PopupMenuPosition.under,
+  textStyle: defaultTextStyle,
+);
+
 // SnackBars
 final baseSnackBarTheme = SnackBarThemeData(
   behavior: SnackBarBehavior.floating,
   shape:
       RoundedRectangleBorder(borderRadius: BorderRadius.circular(borderRadius)),
   contentTextStyle: snackBarTextStyle,
+);
+
+// Dialogs
+final darkCupertinoDialogTheme = CupertinoThemeData(
+  primaryColor: secondaryColor,
+  scaffoldBackgroundColor: bgColor,
+  barBackgroundColor: primaryColor,
+  textTheme: CupertinoTextThemeData(
+    textStyle: defaultTextStyle.copyWith(color: textColor.toColor()),
+  ),
 );
 
 // App Bar
@@ -251,7 +287,9 @@ ThemeData darkTheme = ThemeData.dark().copyWith(
   navigationBarTheme: navigationBarTheme,
   inputDecorationTheme: darkInputDecorationTheme,
   elevatedButtonTheme: darkElevatedButtonTheme,
+  outlinedButtonTheme: darkOutlinedButtonTheme,
   floatingActionButtonTheme: floatingActionButtonTheme,
+  popupMenuTheme: darkPopupMenuTheme,
   snackBarTheme: baseSnackBarTheme,
   tabBarTheme: tabBarTheme,
 );

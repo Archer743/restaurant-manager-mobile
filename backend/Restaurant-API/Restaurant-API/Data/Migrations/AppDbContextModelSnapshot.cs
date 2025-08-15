@@ -78,9 +78,14 @@ namespace Restaurant_API.Migrations
                     b.Property<int>("State")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Tag")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("RestaurantId");
+                    b.HasIndex("RestaurantId", "Tag")
+                        .IsUnique();
 
                     b.ToTable("Reservations");
                 });

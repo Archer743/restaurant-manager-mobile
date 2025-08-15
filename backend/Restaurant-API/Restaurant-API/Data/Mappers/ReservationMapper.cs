@@ -9,6 +9,7 @@ namespace Restaurant_API.Data.Mappers
         {
             return new Reservation
             {
+                // Tag is set in ReservationService
                 RestaurantId = createModel.RestaurantId,
                 Name = createModel.Name,
                 Email = createModel.Email,
@@ -23,6 +24,7 @@ namespace Restaurant_API.Data.Mappers
         {
             return new Reservation
             {
+                // Tag is set in ReservationService
                 // RestaurantId is set in ReservationService based on the current user
                 Name = createModel.Name,
                 Email = createModel.Email,
@@ -38,6 +40,7 @@ namespace Restaurant_API.Data.Mappers
             return new ReservationCalendarPreviewModel
             {
                 Id = reservation.Id,
+                Tag = reservation.Tag,
                 Name = reservation.Name,
                 // Converts StartTimeUtc to local time based on the restaurant time zone and extracts the time
                 Time = TimeOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(reservation.StartTimeUtc, restaurantTimeZone)),
@@ -51,6 +54,7 @@ namespace Restaurant_API.Data.Mappers
             return new PendingReservationPreviewModel
             {
                 Id = reservation.Id,
+                Tag = reservation.Tag,
                 Name = reservation.Name,
                 StartTimeUtc = reservation.StartTimeUtc,
                 CreatedAtUtc = reservation.CreatedAtUtc,
@@ -63,6 +67,7 @@ namespace Restaurant_API.Data.Mappers
             return new ReservationViewModel
             {
                 Id = reservation.Id,
+                Tag = reservation.Tag,
                 Phone = reservation.Phone,
                 Email = reservation.Email,
                 StartTimeUtc = reservation.StartTimeUtc,

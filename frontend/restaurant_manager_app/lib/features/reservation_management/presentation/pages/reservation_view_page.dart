@@ -5,8 +5,8 @@ import 'package:restaurant_manager_app/features/reservation_management/presentat
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_event.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/view_tabs/reservation_details_tab.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_form_mode.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/view_tabs/reservation_details_tab.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/view_tabs/reservation_tables_tab.dart';
 
 class ReservationViewPage extends StatefulWidget {
@@ -28,9 +28,6 @@ class _ReservationViewPageState extends State<ReservationViewPage>
   /// Controls shared state between the parent and details tab.
   final _detailsTabController = ReservationDetailsTabController();
 
-  /// Current mode: view or edit.
-  ReservationFormMode _displayMode = ReservationFormMode.view;
-
   @override
   void initState() {
     super.initState();
@@ -40,16 +37,16 @@ class _ReservationViewPageState extends State<ReservationViewPage>
   @override
   void dispose() {
     _tabController.dispose();
+    _detailsTabController.displayModeNotifier.dispose();
+    _detailsTabController.isCreatedByStaffNotifier.dispose();
     super.dispose();
   }
 
   Future<void> _handleRefresh() async {
-    // Refresh Details Tab
     context
         .read<ReservationDetailsBloc>()
         .add(GetReservationDetails(widget.reservationId));
 
-    // Refresh Tables Tab
     context
         .read<ReservationTablesBloc>()
         .add(GetTablesAvailability(widget.reservationId));
@@ -63,100 +60,87 @@ class _ReservationViewPageState extends State<ReservationViewPage>
     );
   }
 
-  Widget _buildTabBarView() {
-    return TabBarView(
-      controller: _tabController,
-      // While editing, prevent swiping away from the details tab.
-      physics: (_displayMode == ReservationFormMode.edit &&
-              _tabController.index == 0)
-          ? const NeverScrollableScrollPhysics()
-          : null,
-      children: [
-        ReservationDetailsTab(
-          reservationId: widget.reservationId,
-          controller: _detailsTabController,
-          displayMode: _displayMode,
-          onRefresh: _handleRefresh,
-        ),
-        ReservationTablesTab(
-          reservationId: widget.reservationId,
-          onRefresh: _handleRefresh,
-        ),
-      ],
-    );
-  }
-
   PreferredSizeWidget _buildAppBar() {
-    return BackLeadingAppBar(
-      title: 'Резервация',
-      bottom: _buildTabBar(),
-      actions: [
-        _buildCreatedByStaffIndicator(),
-        _buildEditActionButton(),
-      ],
-    );
-  }
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(kToolbarHeight + kTextTabBarHeight),
+      child: ValueListenableBuilder<ReservationFormMode>(
+        valueListenable: _detailsTabController.displayModeNotifier,
+        builder: (context, displayMode, _) {
+          return ValueListenableBuilder<String>(
+            valueListenable: _detailsTabController.tagNotifier,
+            builder: (context, tag, __) {
+              final tabBar = TabBar(
+                controller: _tabController,
+                tabs: const [
+                  Tab(text: 'Детайли'),
+                  Tab(text: 'Маси'),
+                ],
+              );
 
-  PreferredSizeWidget _buildTabBar() {
-    final tabBar = TabBar(
-      controller: _tabController,
-      tabs: const [
-        Tab(text: 'Детайли'),
-        Tab(text: 'Маси'),
-      ],
-    );
+              final tagText = tag.isNotEmpty ? '№ $tag' : 'Резервация';
+              final titleText = displayMode == ReservationFormMode.view
+                  ? tagText
+                  : 'Редакция';
 
-    // When editing, lock the tab bar so the user can’t switch tabs.
-    return _displayMode == ReservationFormMode.edit
-        ? PreferredSize(
-            preferredSize: const Size.fromHeight(kTextTabBarHeight),
-            child: AbsorbPointer(child: tabBar),
-          )
-        : tabBar;
+              return BackLeadingAppBar(
+                title: titleText,
+                bottom: displayMode == ReservationFormMode.edit
+                    ? PreferredSize(
+                        preferredSize: const Size.fromHeight(kTextTabBarHeight),
+                        child: AbsorbPointer(child: tabBar),
+                      )
+                    : tabBar,
+                actions: [
+                  _buildCreatedByStaffIndicator(),
+                ],
+              );
+            },
+          );
+        },
+      ),
+    );
   }
 
   Widget _buildCreatedByStaffIndicator() {
+    // TODO: Fix possition
     return ValueListenableBuilder<bool>(
       valueListenable: _detailsTabController.isCreatedByStaffNotifier,
       builder: (context, isCreatedByStaff, _) {
         return isCreatedByStaff
-            ? Tooltip(
-                message: 'Създадена от служител',
-                triggerMode: TooltipTriggerMode.tap,
-                child: Icon(Icons.verified_user, color: Colors.grey[400]),
+            ? Padding(
+                padding: const EdgeInsets.only(right: 15),
+                child: Tooltip(
+                  message: 'Създадена от служител',
+                  triggerMode: TooltipTriggerMode.tap,
+                  child: Icon(Icons.verified_user, color: Colors.grey[400]),
+                ),
               )
             : const SizedBox.shrink();
       },
     );
   }
 
-  Widget _buildEditActionButton() {
-    // If reservation is not loaded yet the icon button will be deactivated
-    return ValueListenableBuilder<bool>(
-      valueListenable: _detailsTabController.isReservationLoadedNotifier,
-      builder: (context, isLoaded, _) {
-        final bool isViewModeActive = _displayMode == ReservationFormMode.view;
-
-        return IconButton(
-          icon: Icon(isViewModeActive ? Icons.edit : Icons.check),
-          tooltip: isViewModeActive ? 'Редакция' : 'Готово',
-          onPressed: isLoaded
-              ? () {
-                  // Always go back to details tab before editing.
-                  if (_tabController.index != 0) {
-                    _tabController.animateTo(0);
-                  }
-
-                  if (isViewModeActive) {
-                    setState(() => _displayMode = ReservationFormMode.edit);
-                  } else {
-                    final isFormValid = _detailsTabController.submit();
-                    if (isFormValid) {
-                      setState(() => _displayMode = ReservationFormMode.view);
-                    }
-                  }
-                }
+  Widget _buildTabBarView() {
+    return ValueListenableBuilder<ReservationFormMode>(
+      valueListenable: _detailsTabController.displayModeNotifier,
+      builder: (context, displayMode, _) {
+        return TabBarView(
+          controller: _tabController,
+          // While editing, prevent swiping away from the details tab.
+          physics: displayMode == ReservationFormMode.edit
+              ? const NeverScrollableScrollPhysics()
               : null,
+          children: [
+            ReservationDetailsTab(
+              reservationId: widget.reservationId,
+              controller: _detailsTabController,
+              onRefresh: _handleRefresh,
+            ),
+            ReservationTablesTab(
+              reservationId: widget.reservationId,
+              onRefresh: _handleRefresh,
+            ),
+          ],
         );
       },
     );

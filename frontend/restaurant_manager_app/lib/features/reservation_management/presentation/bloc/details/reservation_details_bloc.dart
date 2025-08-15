@@ -6,6 +6,7 @@ import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_update.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_view.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/get_reservation_usecase.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/remove_reservation_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/update_reservation_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_state.dart';
@@ -14,13 +15,16 @@ class ReservationDetailsBloc
     extends Bloc<ReservationDetailsEvent, ReservationDetailsState> {
   final GetReservationUseCase _getReservationUseCase;
   final UpdateReservationUseCase _updateReservationUseCase;
+  final RemoveReservationUseCase _removeReservationUseCase;
 
   ReservationDetailsBloc(
     this._getReservationUseCase,
     this._updateReservationUseCase,
+    this._removeReservationUseCase,
   ) : super(ReservationDetailsInitial()) {
     on<GetReservationDetails>(_onGetReservationDetails);
     on<UpdateReservationDetails>(_onUpdateReservationDetails);
+    on<RemoveReservation>(_onRemoveReservation);
   }
 
   Future<void> _onGetReservationDetails(
@@ -80,6 +84,32 @@ class ReservationDetailsBloc
         ReservationDetailsUpdated(
             reservation, originalReservation.startTimeUtc),
       ),
+    );
+  }
+
+  Future<void> _onRemoveReservation(
+    RemoveReservation event,
+    Emitter<ReservationDetailsState> emit,
+  ) async {
+    final currState = state;
+    late final DateTime affectedDateUtc;
+
+    if (currState is ReservationDetailsLoaded) {
+      affectedDateUtc = currState.reservation.startTimeUtc;
+    } else if (currState is ReservationDetailsError &&
+        currState.hasReservation) {
+      affectedDateUtc = currState.originalReservation!.startTimeUtc;
+    } else {
+      return;
+    }
+
+    emit(ReservationDetailsLoading());
+
+    final result = await minDelayRun(_removeReservationUseCase(event.id));
+
+    result.fold(
+      (failure) => emit(ReservationDetailsError(failure)),
+      (_) => emit(ReservationRemoved(affectedDateUtc)),
     );
   }
 

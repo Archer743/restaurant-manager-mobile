@@ -18,6 +18,12 @@ class ReservationDetailsUpdated extends ReservationDetailsLoaded {
   ReservationDetailsUpdated(super.reservation, this.originalStartTimeUtc);
 }
 
+class ReservationRemoved extends ReservationDetailsState {
+  final DateTime affectedDateUtc;
+
+  ReservationRemoved(this.affectedDateUtc);
+}
+
 class ReservationDetailsError extends ReservationDetailsState {
   final Failure failure;
   final ReservationView? originalReservation;
