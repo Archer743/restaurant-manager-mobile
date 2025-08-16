@@ -5,6 +5,7 @@ import 'package:restaurant_manager_app/core/utils/future_utils.dart';
 import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_update.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_view.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/close_reservation_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/get_reservation_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/remove_reservation_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/update_reservation_usecase.dart';
@@ -16,15 +17,18 @@ class ReservationDetailsBloc
   final GetReservationUseCase _getReservationUseCase;
   final UpdateReservationUseCase _updateReservationUseCase;
   final RemoveReservationUseCase _removeReservationUseCase;
+  final CloseReservationUseCase _closeReservationUseCase;
 
   ReservationDetailsBloc(
     this._getReservationUseCase,
     this._updateReservationUseCase,
     this._removeReservationUseCase,
+    this._closeReservationUseCase,
   ) : super(ReservationDetailsInitial()) {
     on<GetReservationDetails>(_onGetReservationDetails);
     on<UpdateReservationDetails>(_onUpdateReservationDetails);
     on<RemoveReservation>(_onRemoveReservation);
+    on<CloseReservation>(_onCloseReservation);
   }
 
   Future<void> _onGetReservationDetails(
@@ -110,6 +114,34 @@ class ReservationDetailsBloc
     result.fold(
       (failure) => emit(ReservationDetailsError(failure)),
       (_) => emit(ReservationRemoved(affectedDateUtc)),
+    );
+  }
+
+  Future<void> _onCloseReservation(
+    CloseReservation event,
+    Emitter<ReservationDetailsState> emit,
+  ) async {
+    final currState = state;
+    late final ReservationView currReservation;
+
+    if (currState is ReservationDetailsLoaded) {
+      currReservation = currState.reservation;
+    } else if (currState is ReservationDetailsError &&
+        currState.hasReservation) {
+      currReservation = currState.originalReservation!;
+    } else {
+      return;
+    }
+
+    emit(ReservationDetailsLoading());
+
+    final result = await minDelayRun(_closeReservationUseCase(event.id));
+
+    result.fold(
+      (failure) => emit(ReservationDetailsError(failure, currReservation)),
+      (_) {
+        emit(ReservationRemoved(affectedDateUtc));
+      },
     );
   }
 

@@ -1,8 +1,20 @@
 abstract class ReservationDetailsEvent {}
 
-class GetReservationDetails extends ReservationDetailsEvent {
+abstract class ReservationActionEvent extends ReservationDetailsEvent {
   final String id;
-  GetReservationDetails(this.id);
+  ReservationActionEvent(this.id);
+}
+
+class GetReservationDetails extends ReservationActionEvent {
+  GetReservationDetails(super.id);
+}
+
+class RemoveReservation extends ReservationActionEvent {
+  RemoveReservation(super.id);
+}
+
+class CloseReservation extends ReservationActionEvent {
+  CloseReservation(super.id);
 }
 
 class UpdateReservationDetails extends ReservationDetailsEvent {
@@ -23,9 +35,4 @@ class UpdateReservationDetails extends ReservationDetailsEvent {
     required this.peopleCountString,
     required this.commentString,
   });
-}
-
-class RemoveReservation extends ReservationDetailsEvent {
-  final String id;
-  RemoveReservation(this.id);
 }

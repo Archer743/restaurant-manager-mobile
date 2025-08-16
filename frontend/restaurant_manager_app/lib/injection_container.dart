@@ -27,6 +27,7 @@ import 'package:restaurant_manager_app/features/reservation_management/data/data
 import 'package:restaurant_manager_app/features/reservation_management/data/data_sources/reservation_table_api_service.dart';
 import 'package:restaurant_manager_app/features/reservation_management/data/repository/reservation_repository_impl.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/repository/reservation_repository.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/close_reservation_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/create_reservation_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/get_reservation_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/get_tables_availability_for_reservation_usecase.dart';
@@ -153,6 +154,8 @@ Future<void> initDependencies() async {
   sl.registerSingleton<RemoveReservationUseCase>(
       RemoveReservationUseCase(sl()));
 
+  sl.registerSingleton<CloseReservationUseCase>(CloseReservationUseCase(sl()));
+
   sl.registerSingleton<GetTablesAvailabilityForReservationUseCase>(
       GetTablesAvailabilityForReservationUseCase(sl()));
 
@@ -169,6 +172,7 @@ Future<void> initDependencies() async {
       sl<GetReservationUseCase>(),
       sl<UpdateReservationUseCase>(),
       sl<RemoveReservationUseCase>(),
+      sl<CloseReservationUseCase>(),
     ),
   );
 
