@@ -19,6 +19,7 @@ class ReservationViewModel extends ReservationView {
     required super.peopleCount,
     required super.name,
     required super.isCreatedByStaff,
+    required super.isClosed,
     super.comment,
   }) : super(startTimeUtc: startTimeUtc);
 

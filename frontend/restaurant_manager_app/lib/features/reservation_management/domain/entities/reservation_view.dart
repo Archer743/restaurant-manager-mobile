@@ -8,6 +8,7 @@ class ReservationView {
   final int peopleCount;
   final String? comment;
   final bool isCreatedByStaff;
+  final bool isClosed;
 
   ReservationView({
     required this.id,
@@ -18,6 +19,7 @@ class ReservationView {
     required this.startTimeUtc,
     required this.peopleCount,
     required this.isCreatedByStaff,
+    required this.isClosed,
     this.comment,
   });
 }

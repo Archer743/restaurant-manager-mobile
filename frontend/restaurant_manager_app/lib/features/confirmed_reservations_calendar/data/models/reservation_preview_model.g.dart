@@ -14,6 +14,7 @@ ReservationPreviewModel _$ReservationPreviewModelFromJson(
       time: const AppTimeOfDayConverter().fromJson(json['time'] as String),
       peopleCount: (json['peopleCount'] as num).toInt(),
       isCreatedByStaff: json['isCreatedByStaff'] as bool,
+      isClosed: json['isClosed'] as bool,
     );
 
 Map<String, dynamic> _$ReservationPreviewModelToJson(
@@ -23,5 +24,6 @@ Map<String, dynamic> _$ReservationPreviewModelToJson(
       'name': instance.name,
       'peopleCount': instance.peopleCount,
       'isCreatedByStaff': instance.isCreatedByStaff,
+      'isClosed': instance.isClosed,
       'time': const AppTimeOfDayConverter().toJson(instance.time),
     };

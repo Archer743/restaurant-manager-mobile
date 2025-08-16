@@ -46,6 +46,7 @@ namespace Restaurant_API.Data.Mappers
                 Time = TimeOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(reservation.StartTimeUtc, restaurantTimeZone)),
                 PeopleCount = reservation.PeopleCount,
                 IsCreatedByStaff = reservation.IsCreatedByStaff,
+                IsClosed = reservation.IsClosed,
             };
         }
 
@@ -75,6 +76,7 @@ namespace Restaurant_API.Data.Mappers
                 Name = reservation.Name,
                 Comment = reservation.Comment,
                 IsCreatedByStaff = reservation.IsCreatedByStaff,
+                IsClosed = reservation.IsClosed,
             };
         }
     }

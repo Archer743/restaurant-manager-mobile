@@ -19,5 +19,7 @@
         public string? Comment { get; set; }
 
         public bool IsCreatedByStaff { get; set; }
+
+        public bool IsClosed { get; set; }
     }
 }
