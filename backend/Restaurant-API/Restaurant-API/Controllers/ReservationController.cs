@@ -31,6 +31,15 @@ namespace Restaurant_API.Controllers
             return NoContent();
         }
 
+        [HttpPost("{reservationId}/close"), AppAuthorize]
+        public async Task<IActionResult> CloseReservationAsync(Guid reservationId)
+        {
+            await reservationService.CloseReservationAsync(HttpContext, reservationId);
+            return NoContent();
+        }
+
+        // [HttpPost("{reservationId}/reopen"), AppAuthorize]
+
 
         /* ======================================================================== GET */
         [HttpGet("{reservationId}"), AppAuthorize]

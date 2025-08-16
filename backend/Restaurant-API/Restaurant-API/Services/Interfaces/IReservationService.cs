@@ -16,6 +16,8 @@ namespace Restaurant_API.Services.Interfaces
 
         Task<PagedResult<PendingReservationPreviewModel>> GetPendingReservationsAsync(HttpContext ctx, PendingReservationsQueryParams queryParams);
 
+        Task CloseReservationAsync(HttpContext ctx, Guid reservationId);
+
         Task<ReservationViewModel> UpdateAsync(HttpContext ctx, Guid reservationId, ReservationUpdateModel updateModel);
 
         Task RemoveAsync(HttpContext ctx, Guid reservationId);

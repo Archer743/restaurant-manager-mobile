@@ -45,6 +45,7 @@
             public const string StartTimeOutsideShift = "RESERVATION_START_OUTSIDE_SHIFT";
             // Returned when trying to access reservation's shift context, but its current start time does not fall within a valid shift
             public const string OutsideShift = "RESERVATION_OUTSIDE_SHIFT";
+            public const string AlreadyClosed = "RESERVATION_ALREADY_CLOSED";
         }
 
         public static class Data

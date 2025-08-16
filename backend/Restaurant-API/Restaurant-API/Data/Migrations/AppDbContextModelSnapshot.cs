@@ -54,6 +54,9 @@ namespace Restaurant_API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsClosed")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsCreatedByStaff")
                         .HasColumnType("boolean");
 

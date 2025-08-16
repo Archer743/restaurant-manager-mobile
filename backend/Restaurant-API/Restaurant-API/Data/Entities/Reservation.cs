@@ -55,6 +55,9 @@ namespace Restaurant_API.Data.Entities
         public bool IsCreatedByStaff { get; set; } = false;
 
 
+        public bool IsClosed { get; set; } = false;
+
+
         public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 
 

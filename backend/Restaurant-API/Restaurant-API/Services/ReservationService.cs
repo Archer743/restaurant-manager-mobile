@@ -183,6 +183,23 @@ namespace Restaurant_API.Services
             };
         }
 
+        public async Task CloseReservationAsync(HttpContext ctx, Guid reservationId)
+        {
+            Reservation reservation = await GetReservationIfOwnedAsync(ctx, reservationId, includeDetails: true);
+
+            if (reservation.IsClosed)
+            {
+                throw new ConflictException(ErrorCodes.Reservation.AlreadyClosed);
+            }
+
+            // Mark as closed and remove all reserved tables
+            reservation.IsClosed = true;
+            reservation.Tables.Clear();
+
+            // Persist changes
+            await reservationRepo.UpdateAsync(reservation);
+        }
+
         public async Task<ReservationViewModel> UpdateAsync(HttpContext ctx, Guid reservationId, ReservationUpdateModel updateModel)
         {
             // Retrieve the reservation and ensure it belongs to the current user's restaurant
