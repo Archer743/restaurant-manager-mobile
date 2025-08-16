@@ -35,4 +35,10 @@ abstract class ReservationApiService {
     @Header('Authorization') String authorization,
     @Path() String id,
   );
+
+  @POST("/{id}/close")
+  Future<HttpResponse<void>> closeReservation(
+    @Header('Authorization') String authorization,
+    @Path() String id,
+  );
 }

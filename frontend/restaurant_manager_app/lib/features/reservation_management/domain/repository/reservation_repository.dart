@@ -18,6 +18,8 @@ abstract class ReservationRepository {
 
   Future<Either<Failure, void>> removeReservation(String id);
 
+  Future<Either<Failure, void>> closeReservation(String id);
+
   Future<Either<Failure, ShiftView>> getTablesAvailabilityForReservation(
     String id,
   );
