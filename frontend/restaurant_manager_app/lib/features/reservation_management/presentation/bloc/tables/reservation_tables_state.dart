@@ -31,6 +31,8 @@ class ReservationTablesUpdated extends ReservationTablesLoaded {
   });
 }
 
+class ReservationTablesClosed extends ReservationTablesState {}
+
 class ReservationTablesError extends ReservationTablesState {
   final Failure failure;
   ReservationTablesError(this.failure);

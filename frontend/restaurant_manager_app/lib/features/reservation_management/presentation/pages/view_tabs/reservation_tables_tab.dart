@@ -73,12 +73,15 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
   Widget _buildContent(BuildContext context, ReservationTablesState state) {
     if (state is ReservationTablesLoaded) {
       return _buildLoadedContent(context, state);
+    } else if (state is ReservationTablesClosed) {
+      // TODO: Fix error code
+      return _buildMessageScreen(ErrorCodes.usernameTaken);
     } else if (state is ReservationTablesError) {
       final failure = state.failure;
 
       if (failure is ServerFailure &&
           failure.errorCode == ErrorCodes.reservationOutsideShift) {
-        return _buildEmptyContent(failure.errorCode);
+        return _buildMessageScreen(failure.errorCode);
       }
     }
 
@@ -173,8 +176,8 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
     );
   }
 
-  /// Build empty content screen when reservation is not in a shift
-  Widget _buildEmptyContent(String errorCode) {
+  /// Build message screen when reservation is not in a shift or is closed
+  Widget _buildMessageScreen(String errorCode) {
     return SafeArea(
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),

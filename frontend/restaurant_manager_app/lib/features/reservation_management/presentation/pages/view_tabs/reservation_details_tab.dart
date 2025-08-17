@@ -196,7 +196,7 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
             _buildContent(context, state),
             if (_isReservationDataAvailable(state)) ...[
               if (_displayMode == ReservationFormMode.view)
-                _buildActions(context),
+                _buildActions(context, state),
               if (_displayMode == ReservationFormMode.edit)
                 _buildEditActions(context),
             ],
@@ -215,7 +215,18 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
 
   void _handleStateChanges(
       BuildContext context, ReservationDetailsState state) {
-    if (state is ReservationDetailsUpdated) {
+    if (state is ReservationClosed) {
+      setState(() {
+        _refreshRequired = true;
+        rawDatesAffected.add(state.reservation.startTimeUtc.toLocal());
+      });
+
+      // Reflect the change in tables tab
+      context.read<ReservationTablesBloc>().add(ReservationClosedEvent());
+
+      SnackBarService.showSuccess(
+          context, 'Резервацията беше приключена успешно');
+    } else if (state is ReservationDetailsUpdated) {
       setState(() {
         _refreshRequired = true;
         rawDatesAffected.addAll([
@@ -320,11 +331,26 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
     );
   }
 
-  Widget _buildActions(BuildContext context) {
+  Widget _buildActions(BuildContext context, ReservationDetailsState state) {
+    bool isReservationClosed = false;
+
+    // _isReservationDataAvailable(state) guarantees it's one of these states
+    if (state is ReservationDetailsLoaded) {
+      isReservationClosed = state.reservation.isClosed;
+    } else if (state is ReservationDetailsError && state.hasReservation) {
+      isReservationClosed = state.originalReservation!.isClosed;
+    }
+
     return Positioned(
       top: 6,
       right: 6,
       child: ReservationActionsMenu(
+        isReservationClosed: isReservationClosed,
+        onClose: () {
+          context
+              .read<ReservationDetailsBloc>()
+              .add(CloseReservation(widget.reservationId));
+        },
         onEdit: () {
           setState(() {
             _displayMode = ReservationFormMode.edit;

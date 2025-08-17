@@ -140,7 +140,7 @@ class ReservationDetailsBloc
     result.fold(
       (failure) => emit(ReservationDetailsError(failure, currReservation)),
       (_) {
-        emit(ReservationClosed(currReservation));
+        emit(ReservationClosed(currReservation.copyWith(isClosed: true)));
       },
     );
   }

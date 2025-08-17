@@ -14,3 +14,5 @@ class SaveTableSelection extends ReservationTablesEvent {
   final String reservationId;
   SaveTableSelection(this.reservationId);
 }
+
+class ReservationClosedEvent extends ReservationTablesEvent {}
