@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:restaurant_manager_app/config/routing/app_routes.dart';
+import 'package:restaurant_manager_app/core/constants/error_codes.dart';
+import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
 import 'package:restaurant_manager_app/core/utils/datetime_utils.dart';
 import 'package:restaurant_manager_app/core/utils/spacing.dart';
@@ -280,6 +282,15 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
           _setControllers(state.originalReservation!);
         }
       });
+
+      final failure = state.failure;
+
+      // Indicates a concurrency conflict - the reservation was closed by another user or process
+      // while we had still access to close action. We have to update tables tab
+      if (failure is ServerFailure &&
+          failure.errorCode == ErrorCodes.reservationAlreadyClosed) {
+        context.read<ReservationTablesBloc>().add(ReservationClosedEvent());
+      }
 
       SnackBarService.showFailure(context, state.failure);
 

@@ -56,8 +56,18 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
 
       // Should show screen instead of snack bar
       if (failure is ServerFailure &&
-          failure.errorCode == ErrorCodes.reservationOutsideShift) {
+          (failure.errorCode == ErrorCodes.reservationOutsideShift ||
+              failure.errorCode ==
+                  ErrorCodes.closedReservationTablesUnavailable)) {
         return;
+      }
+
+      // Indicates a concurrency conflict - the reservation was closed by another user or process
+      // while we had still access to update tables
+      if (failure is ServerFailure &&
+          failure.errorCode ==
+              ErrorCodes.cannotModifyTablesOfClosedReservation) {
+        context.read<ReservationTablesBloc>().add(ReservationClosedEvent());
       }
 
       SnackBarService.showFailure(context, state.failure);
@@ -79,7 +89,9 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
       final failure = state.failure;
 
       if (failure is ServerFailure &&
-          failure.errorCode == ErrorCodes.reservationOutsideShift) {
+          (failure.errorCode == ErrorCodes.reservationOutsideShift ||
+              failure.errorCode ==
+                  ErrorCodes.closedReservationTablesUnavailable)) {
         return _buildMessageScreen(failure.errorCode);
       }
     }

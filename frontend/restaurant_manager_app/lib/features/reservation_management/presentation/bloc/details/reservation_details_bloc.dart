@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:restaurant_manager_app/core/constants/error_codes.dart';
+import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/core/utils/datetime_utils.dart';
 import 'package:restaurant_manager_app/core/utils/future_utils.dart';
 import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
@@ -122,7 +124,7 @@ class ReservationDetailsBloc
     Emitter<ReservationDetailsState> emit,
   ) async {
     final currState = state;
-    late final ReservationView currReservation;
+    ReservationView currReservation;
 
     if (currState is ReservationDetailsLoaded) {
       currReservation = currState.reservation;
@@ -138,7 +140,14 @@ class ReservationDetailsBloc
     final result = await minDelayRun(_closeReservationUseCase(event.id));
 
     result.fold(
-      (failure) => emit(ReservationDetailsError(failure, currReservation)),
+      (failure) {
+        if (failure is ServerFailure &&
+            failure.errorCode == ErrorCodes.reservationAlreadyClosed) {
+          currReservation = currReservation.copyWith(isClosed: true);
+        }
+
+        emit(ReservationDetailsError(failure, currReservation));
+      },
       (_) {
         emit(ReservationClosed(currReservation.copyWith(isClosed: true)));
       },
