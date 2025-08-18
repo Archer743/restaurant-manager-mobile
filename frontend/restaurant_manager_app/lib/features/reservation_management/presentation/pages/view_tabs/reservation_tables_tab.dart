@@ -74,8 +74,7 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
     if (state is ReservationTablesLoaded) {
       return _buildLoadedContent(context, state);
     } else if (state is ReservationTablesClosed) {
-      // TODO: Fix error code
-      return _buildMessageScreen(ErrorCodes.usernameTaken);
+      return _buildMessageScreen(ErrorCodes.closedReservationTablesUnavailable);
     } else if (state is ReservationTablesError) {
       final failure = state.failure;
 
