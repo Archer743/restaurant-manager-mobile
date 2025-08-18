@@ -33,6 +33,7 @@
             public const string BelongsToDifferentRestaurant = "TABLE_DIFFERENT_RESTAURANT";
             public const string AlreadyReserved = "TABLE_ALREADY_RESERVED";
             public const string ReservedInNewShift = "TABLE_RESERVED_IN_NEW_SHIFT";
+            public const string CannotModifyOfClosedReservation = "CANNOT_MODIFY_TABLES_OF_CLOSED_RESERVATION";
         }
 
         public static class Reservation
@@ -46,12 +47,13 @@
             // Returned when trying to access reservation's shift context, but its current start time does not fall within a valid shift
             public const string OutsideShift = "RESERVATION_OUTSIDE_SHIFT";
             public const string AlreadyClosed = "RESERVATION_ALREADY_CLOSED";
+            public const string ClosedTablesUnavailable = "CLOSED_RESERVATION_TABLES_UNAVAILABLE";
         }
 
         public static class Data
-		{
+        {
             public const string InvalidModel = "INVALID_MODEL";
             public const string InvalidDate = "INVALID_DATE";
-		}
-	}
+        }
+    }
 }
