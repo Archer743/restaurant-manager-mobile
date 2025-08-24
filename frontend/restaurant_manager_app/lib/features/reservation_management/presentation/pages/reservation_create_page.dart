@@ -93,7 +93,7 @@ class _ReservationCreatePageState extends State<ReservationCreatePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const BackLeadingAppBar(title: 'Нова Резервация'),
+      appBar: const BackLeadingAppBar(title: 'Нова резервация'),
       body: BlocConsumer<ReservationCreateBloc, ReservationCreateState>(
         listener: (context, state) {
           if (state is ReservationSaved) {

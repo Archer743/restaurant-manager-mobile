@@ -13,6 +13,7 @@ class ReservationPreviewModel extends ReservationPreview {
 
   ReservationPreviewModel({
     required super.id,
+    required super.tag,
     required super.name,
     required this.time,
     required super.peopleCount,
