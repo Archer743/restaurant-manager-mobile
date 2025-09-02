@@ -227,7 +227,20 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
       context.read<ReservationTablesBloc>().add(ReservationClosedEvent());
 
       SnackBarService.showSuccess(
-          context, 'Резервацията беше приключена успешно');
+          context, 'Резервацията беше приключена успешно.');
+    } else if (state is ReservationActivated) {
+      setState(() {
+        _refreshRequired = true;
+        rawDatesAffected.add(state.reservation.startTimeUtc.toLocal());
+      });
+
+      // Reload tables tab
+      context
+          .read<ReservationTablesBloc>()
+          .add(GetTablesAvailability(widget.reservationId));
+
+      SnackBarService.showSuccess(
+          context, 'Резервацията беше активирана успешно.');
     } else if (state is ReservationDetailsUpdated) {
       setState(() {
         _refreshRequired = true;
@@ -357,16 +370,21 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
       right: 6,
       child: ReservationActionsMenu(
         isReservationClosed: isReservationClosed,
-        onClose: () {
-          context
-              .read<ReservationDetailsBloc>()
-              .add(CloseReservation(widget.reservationId));
-        },
         onEdit: () {
           setState(() {
             _displayMode = ReservationFormMode.edit;
             widget.controller.updateDisplayMode(_displayMode);
           });
+        },
+        onClose: () {
+          context
+              .read<ReservationDetailsBloc>()
+              .add(CloseReservation(widget.reservationId));
+        },
+        onReopen: () {
+          context
+              .read<ReservationDetailsBloc>()
+              .add(ReopenReservation(widget.reservationId));
         },
         onRemove: () {
           context
