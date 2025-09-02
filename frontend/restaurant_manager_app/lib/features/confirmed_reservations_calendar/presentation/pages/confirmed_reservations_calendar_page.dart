@@ -190,19 +190,21 @@ class _ConfirmedReservationsCalendarPageState
 
           return Expanded(
             child: ListView.builder(
-                itemCount: reservations.length,
-                itemBuilder: (context, index) {
-                  final r = reservations[index];
-                  return GestureDetector(
-                      child: ReservationCard(reservation: r),
-                      onTap: () {
-                        final calendarBloc = context.read<CalendarBloc>();
-                        context.push(
-                          '${AppRoutes.reservation}/${r.id}',
-                          extra: calendarBloc,
-                        );
-                      });
-                }),
+              itemCount: reservations.length,
+              itemBuilder: (context, index) {
+                final reservation = reservations[index];
+                return ReservationCard(
+                  reservation: reservation,
+                  onTap: () {
+                    final calendarBloc = context.read<CalendarBloc>();
+                    context.push(
+                      '${AppRoutes.reservation}/${reservation.id}',
+                      extra: calendarBloc,
+                    );
+                  },
+                );
+              },
+            ),
           );
         });
   }
