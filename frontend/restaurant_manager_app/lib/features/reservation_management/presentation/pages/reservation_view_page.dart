@@ -77,7 +77,7 @@ class _ReservationViewPageState extends State<ReservationViewPage>
                 ],
               );
 
-              final tagText = tag.isNotEmpty ? '№ $tag' : 'Резервация';
+              final tagText = tag.isNotEmpty ? tag : 'Резервация';
               final titleText = displayMode == ReservationFormMode.view
                   ? tagText
                   : 'Редакция';

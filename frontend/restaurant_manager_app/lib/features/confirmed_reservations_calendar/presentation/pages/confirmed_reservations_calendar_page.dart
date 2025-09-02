@@ -190,6 +190,7 @@ class _ConfirmedReservationsCalendarPageState
 
           return Expanded(
             child: ListView.builder(
+              padding: const EdgeInsets.only(bottom: 80.0),
               itemCount: reservations.length,
               itemBuilder: (context, index) {
                 final reservation = reservations[index];
