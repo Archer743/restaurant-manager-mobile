@@ -200,6 +200,19 @@ namespace Restaurant_API.Services
             await reservationRepo.UpdateAsync(reservation);
         }
 
+        public async Task ReopenReservationAsync(HttpContext ctx, Guid reservationId)
+        {
+            Reservation reservation = await GetReservationIfOwnedAsync(ctx, reservationId);
+
+            if (!reservation.IsClosed)
+            {
+                throw new ConflictException(ErrorCodes.Reservation.AlreadyActive);
+            }
+
+            reservation.IsClosed = false;
+            await reservationRepo.UpdateAsync(reservation);
+        }
+
         public async Task<ReservationViewModel> UpdateAsync(HttpContext ctx, Guid reservationId, ReservationUpdateModel updateModel)
         {
             // Retrieve the reservation and ensure it belongs to the current user's restaurant
