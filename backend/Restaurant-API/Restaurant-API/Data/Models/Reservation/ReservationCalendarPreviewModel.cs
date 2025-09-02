@@ -13,8 +13,6 @@
 
         public int PeopleCount { get; set; }
 
-        public bool IsCreatedByStaff { get; set; }
-
         public bool IsClosed { get; set; }
     }
 }

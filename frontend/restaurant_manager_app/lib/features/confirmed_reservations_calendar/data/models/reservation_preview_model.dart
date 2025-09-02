@@ -17,7 +17,6 @@ class ReservationPreviewModel extends ReservationPreview {
     required super.name,
     required this.time,
     required super.peopleCount,
-    required super.isCreatedByStaff,
     required super.isClosed,
   }) : super(time: time);
 

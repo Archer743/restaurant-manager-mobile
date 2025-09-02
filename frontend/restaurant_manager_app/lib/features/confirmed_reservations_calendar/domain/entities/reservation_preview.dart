@@ -6,7 +6,6 @@ class ReservationPreview {
   final String name;
   final TimeOfDay time; // Local time
   final int peopleCount;
-  final bool isCreatedByStaff;
   final bool isClosed;
 
   ReservationPreview({
@@ -15,7 +14,6 @@ class ReservationPreview {
     required this.name,
     required this.time,
     required this.peopleCount,
-    required this.isCreatedByStaff,
     required this.isClosed,
   });
 }

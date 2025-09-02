@@ -45,7 +45,6 @@ namespace Restaurant_API.Data.Mappers
                 // Converts StartTimeUtc to local time based on the restaurant time zone and extracts the time
                 Time = TimeOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(reservation.StartTimeUtc, restaurantTimeZone)),
                 PeopleCount = reservation.PeopleCount,
-                IsCreatedByStaff = reservation.IsCreatedByStaff,
                 IsClosed = reservation.IsClosed,
             };
         }
