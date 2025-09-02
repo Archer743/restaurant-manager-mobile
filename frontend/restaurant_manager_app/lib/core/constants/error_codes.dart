@@ -38,6 +38,7 @@ abstract class ErrorCodes {
       'RESERVATION_START_OUTSIDE_SHIFT';
   static const String reservationOutsideShift = 'RESERVATION_OUTSIDE_SHIFT';
   static const String reservationAlreadyClosed = 'RESERVATION_ALREADY_CLOSED';
+  static const String reservationAlreadyActive = 'RESERVATION_ALREADY_ACTIVE';
   static const String closedReservationTablesUnavailable =
       'CLOSED_RESERVATION_TABLES_UNAVAILABLE';
 

@@ -17,6 +17,10 @@ class CloseReservation extends ReservationActionEvent {
   CloseReservation(super.id);
 }
 
+class ReopenReservation extends ReservationActionEvent {
+  ReopenReservation(super.id);
+}
+
 class UpdateReservationDetails extends ReservationDetailsEvent {
   final String name;
   final String email;

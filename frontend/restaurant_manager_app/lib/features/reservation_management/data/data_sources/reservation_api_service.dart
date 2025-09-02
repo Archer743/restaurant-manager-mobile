@@ -41,4 +41,10 @@ abstract class ReservationApiService {
     @Header('Authorization') String authorization,
     @Path() String id,
   );
+
+  @POST("/{id}/reopen")
+  Future<HttpResponse<void>> reopenReservation(
+    @Header('Authorization') String authorization,
+    @Path() String id,
+  );
 }

@@ -46,6 +46,7 @@ const Map<String, String> errorMessages = {
   ErrorCodes.reservationOutsideShift:
       "Резервацията е извън работното време на ресторанта.",
   ErrorCodes.reservationAlreadyClosed: "Резервацията е вече приключена.",
+  ErrorCodes.reservationAlreadyActive: "Резервацията е вече активна.",
   ErrorCodes.closedReservationTablesUnavailable:
       "Масите не са налични. Резервацията е приключена.",
 
