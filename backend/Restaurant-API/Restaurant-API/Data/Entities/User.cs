@@ -12,24 +12,24 @@ namespace Restaurant_API.Data.Entities
 		// Unique
 		[Required]
 		[StringLength(40, MinimumLength = 3)]
-		public string Username { get; set; }
+		public string Username { get; set; } = string.Empty;
 
 
-		[Required]
+        [Required]
 		[StringLength(50, MinimumLength = 1)]
-		public string FirstName { get; set; }
+		public string FirstName { get; set; } = string.Empty;
 
 
-		[Required]
+        [Required]
 		[StringLength(50, MinimumLength = 1)]
-		public string LastName { get; set; }
+		public string LastName { get; set; } = string.Empty;
 
 
-		[Required]
-		public string PasswordHash { get; set; }
+        [Required]
+		public string PasswordHash { get; set; } = string.Empty;
 
 
-		[ForeignKey(nameof(Role))]
+        [ForeignKey(nameof(Role))]
 		public Guid RoleId { get; set; }
 
 		public Role Role { get; set; }

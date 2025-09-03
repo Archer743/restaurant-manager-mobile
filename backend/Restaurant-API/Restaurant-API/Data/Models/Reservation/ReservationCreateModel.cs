@@ -5,15 +5,9 @@ namespace Restaurant_API.Data.Models.Reservation
 {
     public class ReservationCreateModel
     {
-        // Required name of the client
+        // Name of the client
         [MaxLength(100)]
         public string Name { get; set; }
-
-        [EmailAddress]
-        public string Email { get; set; }
-
-        [Phone]
-        public string Phone { get; set; }
 
         [MustBeUtc]
         public DateTime StartTimeUtc { get; set; }
@@ -21,7 +15,13 @@ namespace Restaurant_API.Data.Models.Reservation
         [Range(1, 100)]
         public int PeopleCount { get; set; }
 
-        // Optional comment
+        // Optional data
+        [EmailAddress]
+        public string? Email { get; set; }
+
+        [Phone]
+        public string? Phone { get; set; }
+
         [MaxLength(500)]
         public string? Comment { get; set; }
     }

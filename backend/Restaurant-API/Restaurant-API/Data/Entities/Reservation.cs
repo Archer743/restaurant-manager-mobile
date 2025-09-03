@@ -22,17 +22,9 @@ namespace Restaurant_API.Data.Entities
         public string Tag { get; set; }
 
 
-        // Required name of the client
+        // Required name of the client (TODO: change to ClientName)
         [Required, MaxLength(100)]
         public string Name { get; set; } = string.Empty;
-
-
-        [Required, EmailAddress]
-        public string Email { get; set; } = string.Empty;
-
-
-        [Required, Phone]
-        public string Phone { get; set; } = string.Empty;
 
 
         [Required]
@@ -43,7 +35,15 @@ namespace Restaurant_API.Data.Entities
         public int PeopleCount { get; set; }
 
 
-        // Optional comment
+        // Optional data
+        [EmailAddress]
+        public string? Email { get; set; }
+
+
+        [Phone]
+        public string? Phone { get; set; }
+
+
         [MaxLength(500)]
         public string? Comment { get; set; }
 

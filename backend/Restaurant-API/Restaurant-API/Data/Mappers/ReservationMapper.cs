@@ -12,10 +12,10 @@ namespace Restaurant_API.Data.Mappers
                 // Tag is set in ReservationService
                 RestaurantId = createModel.RestaurantId,
                 Name = createModel.Name,
-                Email = createModel.Email,
-                Phone = createModel.Phone,
                 StartTimeUtc = createModel.StartTimeUtc,
                 PeopleCount = createModel.PeopleCount,
+                Email = createModel.Email,
+                Phone = createModel.Phone,
                 Comment = createModel.Comment,
             };
         }
@@ -27,10 +27,10 @@ namespace Restaurant_API.Data.Mappers
                 // Tag is set in ReservationService
                 // RestaurantId is set in ReservationService based on the current user
                 Name = createModel.Name,
-                Email = createModel.Email,
-                Phone = createModel.Phone,
                 StartTimeUtc = createModel.StartTimeUtc,
                 PeopleCount = createModel.PeopleCount,
+                Email = createModel.Email,
+                Phone = createModel.Phone,
                 Comment = createModel.Comment,
             };
         }
@@ -68,11 +68,11 @@ namespace Restaurant_API.Data.Mappers
             {
                 Id = reservation.Id,
                 Tag = reservation.Tag,
-                Phone = reservation.Phone,
-                Email = reservation.Email,
+                Name = reservation.Name,
                 StartTimeUtc = reservation.StartTimeUtc,
                 PeopleCount = reservation.PeopleCount,
-                Name = reservation.Name,
+                Email = reservation.Email,
+                Phone = reservation.Phone,
                 Comment = reservation.Comment,
                 IsCreatedByStaff = reservation.IsCreatedByStaff,
                 IsClosed = reservation.IsClosed,
