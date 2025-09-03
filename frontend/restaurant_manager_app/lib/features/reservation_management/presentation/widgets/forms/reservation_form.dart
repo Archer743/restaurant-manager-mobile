@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:restaurant_manager_app/config/theme/theme.dart';
 import 'package:restaurant_manager_app/core/utils/spacing.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/fields/comment_field.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/fields/date_field.dart';
@@ -52,10 +53,49 @@ class ReservationForm extends StatelessWidget {
       child: Column(
         children: [
           SizedBox(height: spacingByHeight(context, 0.04)),
-          ReservationNameField(
-              controller: nameController,
-              displayMode: _getContactInfoDisplayMode),
-          SizedBox(height: spacingByHeight(context, 0.035)),
+          _buildRequiredFields(context),
+          SizedBox(height: spacingByHeight(context, 0.02)),
+          _buildOptionalFields(context),
+          SizedBox(height: spacingByHeight(context, 0.04)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRequiredFields(BuildContext context) {
+    return Column(
+      children: [
+        ReservationNameField(
+            controller: nameController,
+            displayMode: _getContactInfoDisplayMode),
+        SizedBox(height: spacingByHeight(context, 0.035)),
+        DateField(rawController: dateController, displayMode: displayMode),
+        SizedBox(height: spacingByHeight(context, 0.035)),
+        TimeField(rawController: timeController, displayMode: displayMode),
+        SizedBox(height: spacingByHeight(context, 0.035)),
+        PeopleCountField(
+            controller: peopleCountController, displayMode: displayMode),
+      ],
+    );
+  }
+
+  Widget _buildOptionalFields(BuildContext context) {
+    final bool hasOptionalData = emailController.text.isNotEmpty ||
+        phoneController.text.isNotEmpty ||
+        commentController.text.isNotEmpty;
+
+    return Theme(
+      data: Theme.of(context).copyWith(
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+      ),
+      child: ExpansionTile(
+        initiallyExpanded:
+            displayMode == ReservationFormMode.view ? hasOptionalData : false,
+        leading: const Icon(Icons.info_outline, size: 23),
+        title: const Text('Допълнителни детайли'),
+        children: [
+          SizedBox(height: spacingByHeight(context, 0.02)),
           EmailField(
               controller: emailController,
               displayMode: _getContactInfoDisplayMode),
@@ -64,15 +104,7 @@ class ReservationForm extends StatelessWidget {
               controller: phoneController,
               displayMode: _getContactInfoDisplayMode),
           SizedBox(height: spacingByHeight(context, 0.035)),
-          DateField(rawController: dateController, displayMode: displayMode),
-          SizedBox(height: spacingByHeight(context, 0.035)),
-          TimeField(rawController: timeController, displayMode: displayMode),
-          SizedBox(height: spacingByHeight(context, 0.035)),
-          PeopleCountField(
-              controller: peopleCountController, displayMode: displayMode),
-          SizedBox(height: spacingByHeight(context, 0.035)),
           CommentField(controller: commentController, displayMode: displayMode),
-          SizedBox(height: spacingByHeight(context, 0.04)),
         ],
       ),
     );

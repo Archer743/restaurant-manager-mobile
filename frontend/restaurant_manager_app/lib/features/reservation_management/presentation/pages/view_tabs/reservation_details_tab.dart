@@ -318,30 +318,25 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
       final double bottomPadding =
           _displayMode == ReservationFormMode.edit ? 70.0 : 16.0;
 
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(45, 0, 45, bottomPadding),
+          child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(45, 0, 45, bottomPadding),
-                child: ReservationForm(
-                  formKey: _formKey,
-                  displayMode: _displayMode,
-                  isCreatedByStaff: _isCreatedByStaff,
-                  nameController: _nameController,
-                  emailController: _emailController,
-                  phoneController: _phoneController,
-                  dateController: _dateController,
-                  timeController: _timeController,
-                  peopleCountController: _peopleCountController,
-                  commentController: _commentController,
-                ),
-              ),
+            child: ReservationForm(
+              formKey: _formKey,
+              displayMode: _displayMode,
+              isCreatedByStaff: _isCreatedByStaff,
+              nameController: _nameController,
+              emailController: _emailController,
+              phoneController: _phoneController,
+              dateController: _dateController,
+              timeController: _timeController,
+              peopleCountController: _peopleCountController,
+              commentController: _commentController,
             ),
-          );
-        },
+          ),
+        ),
       );
     }
 

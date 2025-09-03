@@ -71,6 +71,26 @@ final darkInputDecorationTheme = InputDecorationTheme(
   errorMaxLines: 2,
 );
 
+// Expansion Tile
+final darkExpansionTileTheme = ExpansionTileThemeData(
+  backgroundColor: bgColor, // tile background
+  collapsedBackgroundColor: bgColor, // collapsed background
+  iconColor: accentColor, // expanded icon color
+  collapsedIconColor: hintTextColor.toColor(), // collapsed icon color
+  textColor: accentColor, // expanded title color
+  collapsedTextColor: hintTextColor.toColor(), // collapsed title color
+  shape: RoundedRectangleBorder(
+    // expanded shape
+    borderRadius: BorderRadius.circular(borderRadius),
+  ),
+  collapsedShape: RoundedRectangleBorder(
+    // collapsed shape
+    borderRadius: BorderRadius.circular(borderRadius),
+  ),
+  tilePadding: const EdgeInsets.symmetric(),
+  childrenPadding: const EdgeInsets.symmetric(),
+);
+
 // Action Buttons
 final darkElevatedButtonTheme = ElevatedButtonThemeData(
   style: ElevatedButton.styleFrom(
@@ -286,6 +306,7 @@ ThemeData darkTheme = ThemeData.dark().copyWith(
   appBarTheme: darkAppBarTheme,
   navigationBarTheme: navigationBarTheme,
   inputDecorationTheme: darkInputDecorationTheme,
+  expansionTileTheme: darkExpansionTileTheme,
   elevatedButtonTheme: darkElevatedButtonTheme,
   outlinedButtonTheme: darkOutlinedButtonTheme,
   floatingActionButtonTheme: floatingActionButtonTheme,
