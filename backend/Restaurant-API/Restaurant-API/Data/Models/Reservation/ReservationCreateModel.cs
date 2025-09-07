@@ -16,10 +16,10 @@ namespace Restaurant_API.Data.Models.Reservation
         public int PeopleCount { get; set; }
 
         // Optional data
-        [EmailAddress]
+        [OptionalEmail]
         public string? Email { get; set; }
 
-        [Phone]
+        [OptionalPhone]
         public string? Phone { get; set; }
 
         [MaxLength(500)]

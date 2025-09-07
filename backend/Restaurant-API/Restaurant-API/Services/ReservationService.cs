@@ -41,6 +41,9 @@ namespace Restaurant_API.Services
             
             reservation.Tag = await GenerateTagAsync(reservation.RestaurantId);
             reservation.State = ReservationState.Pending;  // Reservation needs to be confirmed by the restaurant
+
+            reservation.Email = reservation.Email == "" ? null : reservation.Email;
+            reservation.Phone = reservation.Phone == "" ? null : reservation.Phone;
             reservation.Comment = string.IsNullOrWhiteSpace(reservation.Comment) ? null : reservation.Comment;
 
             // Validate that the associated restaurant exists
@@ -73,6 +76,9 @@ namespace Restaurant_API.Services
             reservation.Tag = await GenerateTagAsync(currUserRestaurant.Id);
             reservation.State = ReservationState.Confirmed;  // Reservation created by a restaurant member is automatically confirmed
             reservation.IsCreatedByStaff = true;
+
+            reservation.Email = reservation.Email == "" ? null : reservation.Email;
+            reservation.Phone = reservation.Phone == "" ? null : reservation.Phone;
             reservation.Comment = string.IsNullOrWhiteSpace(reservation.Comment) ? null : reservation.Comment;
 
             // Disallow creating a reservation to a past moment unless the user has the Admin role.
@@ -256,17 +262,27 @@ namespace Restaurant_API.Services
             }
 
             // Apply email update (passed model validation)
-            if (updateModel.Email != null && reservation.Email != updateModel.Email)
+           if (updateModel.Email != null)
             {
-                reservation.Email = updateModel.Email;
-                isModified = true;
+                var sanitizedEmail = updateModel.Email == "" ? null : updateModel.Email;
+
+                if (reservation.Email != sanitizedEmail)
+                {
+                    reservation.Email = sanitizedEmail;
+                    isModified = true;
+                }
             }
 
             // Apply phone number update (passed model validation)
-            if (updateModel.Phone != null && reservation.Phone != updateModel.Phone)
+            if (updateModel.Phone != null)
             {
-                reservation.Phone = updateModel.Phone;
-                isModified = true;
+                var sanitizedPhone = updateModel.Phone == "" ? null : updateModel.Phone;
+
+                if (reservation.Phone != sanitizedPhone)
+                {
+                    reservation.Phone = sanitizedPhone;
+                    isModified = true;
+                }
             }
 
             // Apply comment update - treat empty or whitespace-only comments as null (i.e., remove the comment)

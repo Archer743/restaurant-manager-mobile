@@ -86,9 +86,9 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
 
   void _setControllers(ReservationView reservation) {
     _nameController.text = reservation.name;
-    _emailController.text = reservation.email;
-    _phoneController.text = reservation.phone;
     _peopleCountController.text = reservation.peopleCount.toString();
+    _emailController.text = reservation.email ?? '';
+    _phoneController.text = reservation.phone ?? '';
     _commentController.text = reservation.comment ?? '';
 
     final (localDate, localTime) =
@@ -105,12 +105,12 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
         extractLocalComponentsFromUtc(_originalReservation!.startTimeUtc);
 
     final hasChanges = _nameController.text != _originalReservation!.name ||
-        _emailController.text != _originalReservation!.email ||
-        _phoneController.text != _originalReservation!.phone ||
         _peopleCountController.text !=
             _originalReservation!.peopleCount.toString() ||
         _dateController.text != originalLocalDate.toYYYYMMDDString() ||
         _timeController.text != originalLocalTime.toHHMMSSString() ||
+        _emailController.text != (_originalReservation!.email ?? '') ||
+        _phoneController.text != (_originalReservation!.phone ?? '') ||
         _commentController.text != (_originalReservation!.comment ?? '');
 
     _hasChangesNotifier.value = hasChanges;
@@ -121,11 +121,11 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
       context.read<ReservationDetailsBloc>().add(
             UpdateReservationDetails(
               name: _nameController.text,
-              email: _emailController.text,
-              phone: _phoneController.text,
               dateString: _dateController.text,
               timeString: _timeController.text,
               peopleCountString: _peopleCountController.text,
+              email: _emailController.text,
+              phone: _phoneController.text,
               commentString: _commentController.text,
             ),
           );

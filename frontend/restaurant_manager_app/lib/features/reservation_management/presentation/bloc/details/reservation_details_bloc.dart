@@ -75,7 +75,6 @@ class ReservationDetailsBloc
     }
 
     final update = _getUpdateFromEvent(event, originalReservation);
-    if (!update.hasChanges || isClosed) return;
 
     emit(ReservationDetailsLoading());
 
@@ -196,8 +195,6 @@ class ReservationDetailsBloc
   ReservationUpdate _getUpdateFromEvent(
       UpdateReservationDetails event, ReservationView original) {
     final String? newName = event.name != original.name ? event.name : null;
-    final String? newEmail = event.email != original.email ? event.email : null;
-    final String? newPhone = event.phone != original.phone ? event.phone : null;
 
     final DateTime localDate = DateTime.parse(event.dateString);
     final TimeOfDay localTime = parseTimeOfDay(event.timeString);
@@ -213,6 +210,9 @@ class ReservationDetailsBloc
             ? peopleCountInt
             : null;
 
+    final String? newEmail = event.email != original.email ? event.email : null;
+    final String? newPhone = event.phone != original.phone ? event.phone : null;
+
     final String normalizedComment = event.commentString.trim();
     final String? newComment =
         (normalizedComment != (original.comment ?? '').trim())
@@ -221,10 +221,10 @@ class ReservationDetailsBloc
 
     return ReservationUpdate(
       name: newName,
-      email: newEmail,
-      phone: newPhone,
       startTimeUtc: newStartTimeUtc,
       peopleCount: newPeopleCount,
+      email: newEmail,
+      phone: newPhone,
       comment: newComment,
     );
   }

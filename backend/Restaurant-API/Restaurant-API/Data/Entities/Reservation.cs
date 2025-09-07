@@ -36,11 +36,9 @@ namespace Restaurant_API.Data.Entities
 
 
         // Optional data
-        [EmailAddress]
         public string? Email { get; set; }
 
 
-        [Phone]
         public string? Phone { get; set; }
 
 

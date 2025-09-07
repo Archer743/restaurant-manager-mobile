@@ -14,14 +14,4 @@ class ReservationUpdate {
     this.peopleCount,
     this.comment,
   });
-
-  /// Returns true if there is at least one field being changed.
-  bool get hasChanges {
-    return name != null ||
-        email != null ||
-        phone != null ||
-        startTimeUtc != null ||
-        peopleCount != null ||
-        comment != null;
-  }
 }

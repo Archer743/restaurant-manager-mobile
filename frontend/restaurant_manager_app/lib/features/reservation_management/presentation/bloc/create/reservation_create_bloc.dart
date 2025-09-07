@@ -44,13 +44,19 @@ class ReservationCreateBloc
     final DateTime date = DateTime.parse(event.dateString);
     final TimeOfDay time = parseTimeOfDay(event.timeString);
 
+    final email = event.email.isEmpty ? null : event.email;
+    final phone = event.phone.isEmpty ? null : event.phone;
+
+    final normalizedComment = event.comment.trim();
+    final comment = normalizedComment.isEmpty ? null : normalizedComment;
+
     return ReservationCreate(
       name: event.name,
-      email: event.email,
-      phone: event.phone,
       startTimeUtc: buildUtcDateTimeFromLocalComponents(date, time),
       peopleCount: int.parse(event.peopleCountString),
-      comment: event.comment,
+      email: email,
+      phone: phone,
+      comment: comment,
     );
   }
 }

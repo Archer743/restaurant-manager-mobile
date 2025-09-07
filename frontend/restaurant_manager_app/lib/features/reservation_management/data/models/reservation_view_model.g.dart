@@ -11,14 +11,14 @@ ReservationViewModel _$ReservationViewModelFromJson(
     ReservationViewModel(
       id: json['id'] as String,
       tag: json['tag'] as String,
-      phone: json['phone'] as String,
-      email: json['email'] as String,
+      name: json['name'] as String,
       startTimeUtc: const AppDateTimeUtcConverter()
           .fromJson(json['startTimeUtc'] as String),
       peopleCount: (json['peopleCount'] as num).toInt(),
-      name: json['name'] as String,
       isCreatedByStaff: json['isCreatedByStaff'] as bool,
       isClosed: json['isClosed'] as bool,
+      email: json['email'] as String?,
+      phone: json['phone'] as String?,
       comment: json['comment'] as String?,
     );
 
@@ -28,9 +28,9 @@ Map<String, dynamic> _$ReservationViewModelToJson(
       'id': instance.id,
       'tag': instance.tag,
       'name': instance.name,
+      'peopleCount': instance.peopleCount,
       'email': instance.email,
       'phone': instance.phone,
-      'peopleCount': instance.peopleCount,
       'comment': instance.comment,
       'isCreatedByStaff': instance.isCreatedByStaff,
       'isClosed': instance.isClosed,

@@ -11,21 +11,21 @@ class ReservationCreateModel extends ReservationCreate {
   final DateTime startTimeUtc;
 
   ReservationCreateModel({
-    required super.phone,
-    required super.email,
+    required super.name,
     required this.startTimeUtc,
     required super.peopleCount,
-    required super.name,
+    required super.email,
+    required super.phone,
     required super.comment,
   }) : super(startTimeUtc: startTimeUtc);
 
   factory ReservationCreateModel.fromEntity(ReservationCreate entity) {
     return ReservationCreateModel(
-      phone: entity.phone,
-      email: entity.email,
+      name: entity.name,
       startTimeUtc: entity.startTimeUtc,
       peopleCount: entity.peopleCount,
-      name: entity.name,
+      email: entity.email,
+      phone: entity.phone,
       comment: entity.comment,
     );
   }
