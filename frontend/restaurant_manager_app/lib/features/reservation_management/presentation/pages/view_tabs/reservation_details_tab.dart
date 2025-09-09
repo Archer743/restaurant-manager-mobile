@@ -26,15 +26,15 @@ import 'package:restaurant_manager_app/features/reservation_management/presentat
 class ReservationDetailsTabController {
   final ValueNotifier<ReservationFormMode> displayModeNotifier =
       ValueNotifier(ReservationFormMode.view);
-  final ValueNotifier<bool> isCreatedByStaffNotifier = ValueNotifier(false);
+  final ValueNotifier<bool?> isClosedNotifier = ValueNotifier(null);
   final ValueNotifier<String> tagNotifier = ValueNotifier("");
 
   void updateDisplayMode(ReservationFormMode newMode) {
     displayModeNotifier.value = newMode;
   }
 
-  void updateCreatedByStaff(bool isCreatedByStaff) {
-    isCreatedByStaffNotifier.value = isCreatedByStaff;
+  void updateIsClosed(bool isClosed) {
+    isClosedNotifier.value = isClosed;
   }
 
   void updateTag(String tag) {
@@ -218,6 +218,8 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
   void _handleStateChanges(
       BuildContext context, ReservationDetailsState state) {
     if (state is ReservationClosed) {
+      widget.controller.updateIsClosed(state.reservation.isClosed);
+
       setState(() {
         _refreshRequired = true;
         rawDatesAffected.add(state.reservation.startTimeUtc.toLocal());
@@ -229,6 +231,8 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
       SnackBarService.showSuccess(
           context, 'Резервацията беше приключена успешно.');
     } else if (state is ReservationActivated) {
+      widget.controller.updateIsClosed(state.reservation.isClosed);
+
       setState(() {
         _refreshRequired = true;
         rawDatesAffected.add(state.reservation.startTimeUtc.toLocal());
@@ -249,6 +253,7 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
           state.reservation.startTimeUtc.toLocal(), // After update
         ]);
 
+        _isCreatedByStaff = state.reservation.isCreatedByStaff;
         _originalReservation = state.reservation;
         _setControllers(state.reservation);
         _hasChangesNotifier.value = false;
@@ -265,9 +270,7 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
       SnackBarService.showSuccess(
           context, 'Резервацията беше обновена успешно');
     } else if (state is ReservationDetailsLoaded) {
-      widget.controller
-          .updateCreatedByStaff(state.reservation.isCreatedByStaff);
-
+      widget.controller.updateIsClosed(state.reservation.isClosed);
       widget.controller.updateTag(state.reservation.tag);
 
       setState(() {

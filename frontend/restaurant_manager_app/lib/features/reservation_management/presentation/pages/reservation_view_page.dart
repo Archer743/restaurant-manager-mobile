@@ -8,6 +8,7 @@ import 'package:restaurant_manager_app/features/reservation_management/presentat
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_form_mode.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/view_tabs/reservation_details_tab.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/view_tabs/reservation_tables_tab.dart';
+import 'package:restaurant_manager_app/config/theme/theme.dart';
 
 class ReservationViewPage extends StatefulWidget {
   final String reservationId;
@@ -38,7 +39,8 @@ class _ReservationViewPageState extends State<ReservationViewPage>
   void dispose() {
     _tabController.dispose();
     _detailsTabController.displayModeNotifier.dispose();
-    _detailsTabController.isCreatedByStaffNotifier.dispose();
+    _detailsTabController.tagNotifier.dispose();
+    _detailsTabController.isClosedNotifier.dispose();
     super.dispose();
   }
 
@@ -91,7 +93,7 @@ class _ReservationViewPageState extends State<ReservationViewPage>
                       )
                     : tabBar,
                 actions: [
-                  _buildCreatedByStaffIndicator(),
+                  _buildIsClosedIndicator(),
                 ],
               );
             },
@@ -101,21 +103,23 @@ class _ReservationViewPageState extends State<ReservationViewPage>
     );
   }
 
-  Widget _buildCreatedByStaffIndicator() {
-    // TODO: Fix possition
-    return ValueListenableBuilder<bool>(
-      valueListenable: _detailsTabController.isCreatedByStaffNotifier,
-      builder: (context, isCreatedByStaff, _) {
-        return isCreatedByStaff
-            ? Padding(
-                padding: const EdgeInsets.only(right: 15),
-                child: Tooltip(
-                  message: 'Създадена от служител',
-                  triggerMode: TooltipTriggerMode.tap,
-                  child: Icon(Icons.verified_user, color: Colors.grey[400]),
-                ),
-              )
-            : const SizedBox.shrink();
+  Widget _buildIsClosedIndicator() {
+    return ValueListenableBuilder<bool?>(
+      valueListenable: _detailsTabController.isClosedNotifier,
+      builder: (context, isClosed, _) {
+        if (isClosed == null) return const SizedBox.shrink();
+
+        return Padding(
+          // Match the default padding of the leading IconButton
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            isClosed ? "Приключена" : "Активна",
+            style: TextStyle(
+              color: isClosed ? successColor : actionColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        );
       },
     );
   }
