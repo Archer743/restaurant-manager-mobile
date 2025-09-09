@@ -51,8 +51,10 @@ namespace Restaurant_API.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsClosed")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsCreatedByStaff")
                         .HasColumnType("boolean");
@@ -66,7 +68,6 @@ namespace Restaurant_API.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Phone")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid>("RestaurantId")

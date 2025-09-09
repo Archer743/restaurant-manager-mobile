@@ -30,6 +30,11 @@ namespace Restaurant_API.Services
             // Load reservation and verify ownership
             Reservation reservation = await reservationService.GetReservationIfOwnedAsync(ctx, reservationId, includeDetails: true);
 
+            if (reservation.IsClosed)
+            {
+                throw new ConflictException(ErrorCodes.Reservation.ClosedTablesUnavailable);
+            }
+
             ShiftContext shiftCtx = await shiftService.GetReservationShiftContextAsync(reservation);
 
             return await BuildReservationShiftViewAsync(reservation, shiftCtx);
@@ -39,7 +44,11 @@ namespace Restaurant_API.Services
         {
             // Load reservation and verify ownership
             Reservation reservation = await reservationService.GetReservationIfOwnedAsync(ctx, reservationId, includeDetails: true);
-            List<Table> reservationTables = reservation.Tables.ToList();
+
+            if (reservation.IsClosed)
+            {
+                throw new ConflictException(ErrorCodes.Table.CannotModifyOfClosedReservation);
+            }
 
             bool hasAdds = updateModel.TablesToAdd?.Any() ?? false;
             bool hasRemoves = updateModel.TablesToRemove?.Any() ?? false;
@@ -47,6 +56,7 @@ namespace Restaurant_API.Services
             if (!hasAdds && !hasRemoves)
                 return null; // Nothing to update
 
+            List<Table> reservationTables = reservation.Tables.ToList();
             ShiftContext shiftCtx;
 
             // Handle removal of tables

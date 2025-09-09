@@ -22,6 +22,7 @@ class ReservationTablesBloc
     on<GetTablesAvailability>(_onGetTablesAvailability);
     on<ToggleTableSelection>(_onToggleTableSelection);
     on<SaveTableSelection>(_onSaveTableSelection);
+    on<ReservationClosedEvent>(_onReservationClosedEvent);
   }
 
   Future<void> _onGetTablesAvailability(
@@ -95,6 +96,13 @@ class ReservationTablesBloc
         },
       );
     }
+  }
+
+  Future<void> _onReservationClosedEvent(
+    ReservationClosedEvent event,
+    Emitter<ReservationTablesState> emit,
+  ) async {
+    emit(ReservationTablesClosed());
   }
 
   ReservationTablesUpdate? _getUpdate(ReservationTablesLoaded currState) {

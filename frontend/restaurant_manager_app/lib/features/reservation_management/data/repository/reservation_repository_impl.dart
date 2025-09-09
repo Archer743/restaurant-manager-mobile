@@ -95,6 +95,30 @@ class ReservationRepositoryImpl implements ReservationRepository {
   }
 
   @override
+  Future<Either<Failure, void>> closeReservation(String id) async {
+    return await handleAuthRequest<Null>(
+      _tokenService,
+      _authSharedRepo,
+      (authorization) async {
+        await _reservationApiService.closeReservation(authorization, id);
+        return null;
+      },
+    );
+  }
+
+  @override
+  Future<Either<Failure, void>> reopenReservation(String id) async {
+    return await handleAuthRequest<Null>(
+      _tokenService,
+      _authSharedRepo,
+      (authorization) async {
+        await _reservationApiService.reopenReservation(authorization, id);
+        return null;
+      },
+    );
+  }
+
+  @override
   Future<Either<Failure, ShiftView>> getTablesAvailabilityForReservation(
     String id,
   ) async {

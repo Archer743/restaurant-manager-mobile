@@ -24,6 +24,14 @@ class ReservationRemoved extends ReservationDetailsState {
   ReservationRemoved(this.affectedDateUtc);
 }
 
+class ReservationClosed extends ReservationDetailsLoaded {
+  ReservationClosed(super.reservation);
+}
+
+class ReservationActivated extends ReservationDetailsLoaded {
+  ReservationActivated(super.reservation);
+}
+
 class ReservationDetailsError extends ReservationDetailsState {
   final Failure failure;
   final ReservationView? originalReservation;

@@ -56,8 +56,18 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
 
       // Should show screen instead of snack bar
       if (failure is ServerFailure &&
-          failure.errorCode == ErrorCodes.reservationOutsideShift) {
+          (failure.errorCode == ErrorCodes.reservationOutsideShift ||
+              failure.errorCode ==
+                  ErrorCodes.closedReservationTablesUnavailable)) {
         return;
+      }
+
+      // Indicates a concurrency conflict - the reservation was closed by another user or process
+      // while we had still access to update tables
+      if (failure is ServerFailure &&
+          failure.errorCode ==
+              ErrorCodes.cannotModifyTablesOfClosedReservation) {
+        context.read<ReservationTablesBloc>().add(ReservationClosedEvent());
       }
 
       SnackBarService.showFailure(context, state.failure);
@@ -73,12 +83,16 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
   Widget _buildContent(BuildContext context, ReservationTablesState state) {
     if (state is ReservationTablesLoaded) {
       return _buildLoadedContent(context, state);
+    } else if (state is ReservationTablesClosed) {
+      return _buildMessageScreen(ErrorCodes.closedReservationTablesUnavailable);
     } else if (state is ReservationTablesError) {
       final failure = state.failure;
 
       if (failure is ServerFailure &&
-          failure.errorCode == ErrorCodes.reservationOutsideShift) {
-        return _buildEmptyContent(failure.errorCode);
+          (failure.errorCode == ErrorCodes.reservationOutsideShift ||
+              failure.errorCode ==
+                  ErrorCodes.closedReservationTablesUnavailable)) {
+        return _buildMessageScreen(failure.errorCode);
       }
     }
 
@@ -173,8 +187,8 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
     );
   }
 
-  /// Build empty content screen when reservation is not in a shift
-  Widget _buildEmptyContent(String errorCode) {
+  /// Build message screen when reservation is not in a shift or is closed
+  Widget _buildMessageScreen(String errorCode) {
     return SafeArea(
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),

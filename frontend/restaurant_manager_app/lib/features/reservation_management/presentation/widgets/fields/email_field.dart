@@ -21,12 +21,12 @@ class EmailField extends BaseFormField {
             ? const Icon(Icons.edit)
             : null,
         labelText: 'Имейл',
-        hintText: 'Въведете имейл',
+        hintText: isEditable ? 'Въведете имейл' : 'Няма имейл',
       ),
       validator: (String? value) {
-        if (value == null || value.trim().isEmpty) {
-          return 'Въведете имейл';
-        } else if (!Validators.isValidEmail(value)) {
+        if (value != null &&
+            value.isNotEmpty &&
+            !Validators.isValidEmail(value)) {
           return 'Въведете валиден имейл адрес';
         }
 

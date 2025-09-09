@@ -34,12 +34,12 @@ class PhoneNumberField extends BaseFormField {
         prefixIcon: const Icon(Icons.phone),
         suffixIcon: _buildSuffixIcon(context),
         labelText: 'Телефон',
-        hintText: 'Въведете телефон',
+        hintText: isEditable ? 'Въведете телефон' : 'Няма телефон',
       ),
       validator: (String? value) {
-        if (value == null || value.trim().isEmpty) {
-          return 'Въведете телефон';
-        } else if (!Validators.isValidPhone(value)) {
+        if (value != null &&
+            value.isNotEmpty &&
+            !Validators.isValidPhone(value)) {
           return 'Въведете валиден телефонен номер';
         }
 

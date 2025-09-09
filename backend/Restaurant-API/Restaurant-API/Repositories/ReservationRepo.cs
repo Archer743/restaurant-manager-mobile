@@ -42,7 +42,7 @@ namespace Restaurant_API.Repositories
             return await context.Reservations
                                 .Include(r => r.Tables)
                                 .Where(r => r.RestaurantId == restaurantId &&
-                                            r.State == ReservationState.Confirmed &&
+                                            r.State == ReservationState.Confirmed && !r.IsClosed &&
                                             r.StartTimeUtc >= periodStartUtc && r.StartTimeUtc < periodEndUtc)
                                 .SelectMany(r => r.Tables.Select(t => t.Id))
                                 .ToHashSetAsync();

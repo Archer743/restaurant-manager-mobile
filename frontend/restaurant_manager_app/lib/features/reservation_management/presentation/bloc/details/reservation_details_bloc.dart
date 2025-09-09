@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:restaurant_manager_app/core/constants/error_codes.dart';
+import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/core/utils/datetime_utils.dart';
 import 'package:restaurant_manager_app/core/utils/future_utils.dart';
 import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_update.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_view.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/close_reservation_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/get_reservation_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/remove_reservation_usecase.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/reopen_reservation_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/update_reservation_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_state.dart';
@@ -16,15 +20,21 @@ class ReservationDetailsBloc
   final GetReservationUseCase _getReservationUseCase;
   final UpdateReservationUseCase _updateReservationUseCase;
   final RemoveReservationUseCase _removeReservationUseCase;
+  final CloseReservationUseCase _closeReservationUseCase;
+  final ReopenReservationUseCase _reopenReservationUseCase;
 
   ReservationDetailsBloc(
     this._getReservationUseCase,
     this._updateReservationUseCase,
     this._removeReservationUseCase,
+    this._closeReservationUseCase,
+    this._reopenReservationUseCase,
   ) : super(ReservationDetailsInitial()) {
     on<GetReservationDetails>(_onGetReservationDetails);
     on<UpdateReservationDetails>(_onUpdateReservationDetails);
     on<RemoveReservation>(_onRemoveReservation);
+    on<CloseReservation>(_onCloseReservation);
+    on<ReopenReservation>(_onReopenReservation);
   }
 
   Future<void> _onGetReservationDetails(
@@ -65,7 +75,6 @@ class ReservationDetailsBloc
     }
 
     final update = _getUpdateFromEvent(event, originalReservation);
-    if (!update.hasChanges || isClosed) return;
 
     emit(ReservationDetailsLoading());
 
@@ -113,11 +122,79 @@ class ReservationDetailsBloc
     );
   }
 
+  Future<void> _onCloseReservation(
+    CloseReservation event,
+    Emitter<ReservationDetailsState> emit,
+  ) async {
+    final currState = state;
+    ReservationView currReservation;
+
+    if (currState is ReservationDetailsLoaded) {
+      currReservation = currState.reservation;
+    } else if (currState is ReservationDetailsError &&
+        currState.hasReservation) {
+      currReservation = currState.originalReservation!;
+    } else {
+      return;
+    }
+
+    emit(ReservationDetailsLoading());
+
+    final result = await minDelayRun(_closeReservationUseCase(event.id));
+
+    result.fold(
+      (failure) {
+        if (failure is ServerFailure &&
+            failure.errorCode == ErrorCodes.reservationAlreadyClosed) {
+          currReservation = currReservation.copyWith(isClosed: true);
+        }
+
+        emit(ReservationDetailsError(failure, currReservation));
+      },
+      (_) {
+        emit(ReservationClosed(currReservation.copyWith(isClosed: true)));
+      },
+    );
+  }
+
+  Future<void> _onReopenReservation(
+    ReopenReservation event,
+    Emitter<ReservationDetailsState> emit,
+  ) async {
+    final currState = state;
+    ReservationView currReservation;
+
+    if (currState is ReservationDetailsLoaded) {
+      currReservation = currState.reservation;
+    } else if (currState is ReservationDetailsError &&
+        currState.hasReservation) {
+      currReservation = currState.originalReservation!;
+    } else {
+      return;
+    }
+
+    emit(ReservationDetailsLoading());
+
+    final result = await minDelayRun(_reopenReservationUseCase(event.id));
+
+    result.fold(
+      (failure) {
+        if (failure is ServerFailure &&
+            failure.errorCode == ErrorCodes.reservationAlreadyActive) {
+          currReservation = currReservation.copyWith(isClosed: false);
+        }
+
+        emit(ReservationDetailsError(failure, currReservation));
+      },
+      (_) {
+        emit(ReservationActivated(currReservation.copyWith(isClosed: false)));
+      },
+    );
+  }
+
   ReservationUpdate _getUpdateFromEvent(
       UpdateReservationDetails event, ReservationView original) {
     final String? newName = event.name != original.name ? event.name : null;
-    final String? newEmail = event.email != original.email ? event.email : null;
-    final String? newPhone = event.phone != original.phone ? event.phone : null;
 
     final DateTime localDate = DateTime.parse(event.dateString);
     final TimeOfDay localTime = parseTimeOfDay(event.timeString);
@@ -133,6 +210,9 @@ class ReservationDetailsBloc
             ? peopleCountInt
             : null;
 
+    final String? newEmail = event.email != original.email ? event.email : null;
+    final String? newPhone = event.phone != original.phone ? event.phone : null;
+
     final String normalizedComment = event.commentString.trim();
     final String? newComment =
         (normalizedComment != (original.comment ?? '').trim())
@@ -141,10 +221,10 @@ class ReservationDetailsBloc
 
     return ReservationUpdate(
       name: newName,
-      email: newEmail,
-      phone: newPhone,
       startTimeUtc: newStartTimeUtc,
       peopleCount: newPeopleCount,
+      email: newEmail,
+      phone: newPhone,
       comment: newComment,
     );
   }

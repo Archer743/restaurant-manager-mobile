@@ -23,6 +23,8 @@ abstract class ErrorCodes {
   static const String tableDifferentRestaurant = 'TABLE_DIFFERENT_RESTAURANT';
   static const String tableAlreadyReserved = 'TABLE_ALREADY_RESERVED';
   static const String tableReservedInNewShift = 'TABLE_RESERVED_IN_NEW_SHIFT';
+  static const String cannotModifyTablesOfClosedReservation =
+      'CANNOT_MODIFY_TABLES_OF_CLOSED_RESERVATION';
 
   // Reservation
   static const String reservationNotFound = 'RESERVATION_NOT_FOUND';
@@ -35,6 +37,10 @@ abstract class ErrorCodes {
   static const String reservationStartTimeOutsideShift =
       'RESERVATION_START_OUTSIDE_SHIFT';
   static const String reservationOutsideShift = 'RESERVATION_OUTSIDE_SHIFT';
+  static const String reservationAlreadyClosed = 'RESERVATION_ALREADY_CLOSED';
+  static const String reservationAlreadyActive = 'RESERVATION_ALREADY_ACTIVE';
+  static const String closedReservationTablesUnavailable =
+      'CLOSED_RESERVATION_TABLES_UNAVAILABLE';
 
   // Data
   static const String invalidModel = 'INVALID_MODEL';

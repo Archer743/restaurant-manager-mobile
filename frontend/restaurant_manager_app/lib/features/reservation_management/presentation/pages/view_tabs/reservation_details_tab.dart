@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:restaurant_manager_app/config/routing/app_routes.dart';
+import 'package:restaurant_manager_app/core/constants/error_codes.dart';
+import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
 import 'package:restaurant_manager_app/core/utils/datetime_utils.dart';
 import 'package:restaurant_manager_app/core/utils/spacing.dart';
@@ -24,15 +26,15 @@ import 'package:restaurant_manager_app/features/reservation_management/presentat
 class ReservationDetailsTabController {
   final ValueNotifier<ReservationFormMode> displayModeNotifier =
       ValueNotifier(ReservationFormMode.view);
-  final ValueNotifier<bool> isCreatedByStaffNotifier = ValueNotifier(false);
+  final ValueNotifier<bool?> isClosedNotifier = ValueNotifier(null);
   final ValueNotifier<String> tagNotifier = ValueNotifier("");
 
   void updateDisplayMode(ReservationFormMode newMode) {
     displayModeNotifier.value = newMode;
   }
 
-  void updateCreatedByStaff(bool isCreatedByStaff) {
-    isCreatedByStaffNotifier.value = isCreatedByStaff;
+  void updateIsClosed(bool isClosed) {
+    isClosedNotifier.value = isClosed;
   }
 
   void updateTag(String tag) {
@@ -84,9 +86,9 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
 
   void _setControllers(ReservationView reservation) {
     _nameController.text = reservation.name;
-    _emailController.text = reservation.email;
-    _phoneController.text = reservation.phone;
     _peopleCountController.text = reservation.peopleCount.toString();
+    _emailController.text = reservation.email ?? '';
+    _phoneController.text = reservation.phone ?? '';
     _commentController.text = reservation.comment ?? '';
 
     final (localDate, localTime) =
@@ -103,12 +105,12 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
         extractLocalComponentsFromUtc(_originalReservation!.startTimeUtc);
 
     final hasChanges = _nameController.text != _originalReservation!.name ||
-        _emailController.text != _originalReservation!.email ||
-        _phoneController.text != _originalReservation!.phone ||
         _peopleCountController.text !=
             _originalReservation!.peopleCount.toString() ||
         _dateController.text != originalLocalDate.toYYYYMMDDString() ||
         _timeController.text != originalLocalTime.toHHMMSSString() ||
+        _emailController.text != (_originalReservation!.email ?? '') ||
+        _phoneController.text != (_originalReservation!.phone ?? '') ||
         _commentController.text != (_originalReservation!.comment ?? '');
 
     _hasChangesNotifier.value = hasChanges;
@@ -119,11 +121,11 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
       context.read<ReservationDetailsBloc>().add(
             UpdateReservationDetails(
               name: _nameController.text,
-              email: _emailController.text,
-              phone: _phoneController.text,
               dateString: _dateController.text,
               timeString: _timeController.text,
               peopleCountString: _peopleCountController.text,
+              email: _emailController.text,
+              phone: _phoneController.text,
               commentString: _commentController.text,
             ),
           );
@@ -196,7 +198,7 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
             _buildContent(context, state),
             if (_isReservationDataAvailable(state)) ...[
               if (_displayMode == ReservationFormMode.view)
-                _buildActions(context),
+                _buildActions(context, state),
               if (_displayMode == ReservationFormMode.edit)
                 _buildEditActions(context),
             ],
@@ -215,7 +217,35 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
 
   void _handleStateChanges(
       BuildContext context, ReservationDetailsState state) {
-    if (state is ReservationDetailsUpdated) {
+    if (state is ReservationClosed) {
+      widget.controller.updateIsClosed(state.reservation.isClosed);
+
+      setState(() {
+        _refreshRequired = true;
+        rawDatesAffected.add(state.reservation.startTimeUtc.toLocal());
+      });
+
+      // Reflect the change in tables tab
+      context.read<ReservationTablesBloc>().add(ReservationClosedEvent());
+
+      SnackBarService.showSuccess(
+          context, 'Резервацията беше приключена успешно.');
+    } else if (state is ReservationActivated) {
+      widget.controller.updateIsClosed(state.reservation.isClosed);
+
+      setState(() {
+        _refreshRequired = true;
+        rawDatesAffected.add(state.reservation.startTimeUtc.toLocal());
+      });
+
+      // Reload tables tab
+      context
+          .read<ReservationTablesBloc>()
+          .add(GetTablesAvailability(widget.reservationId));
+
+      SnackBarService.showSuccess(
+          context, 'Резервацията беше активирана успешно.');
+    } else if (state is ReservationDetailsUpdated) {
       setState(() {
         _refreshRequired = true;
         rawDatesAffected.addAll([
@@ -223,6 +253,7 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
           state.reservation.startTimeUtc.toLocal(), // After update
         ]);
 
+        _isCreatedByStaff = state.reservation.isCreatedByStaff;
         _originalReservation = state.reservation;
         _setControllers(state.reservation);
         _hasChangesNotifier.value = false;
@@ -239,9 +270,7 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
       SnackBarService.showSuccess(
           context, 'Резервацията беше обновена успешно');
     } else if (state is ReservationDetailsLoaded) {
-      widget.controller
-          .updateCreatedByStaff(state.reservation.isCreatedByStaff);
-
+      widget.controller.updateIsClosed(state.reservation.isClosed);
       widget.controller.updateTag(state.reservation.tag);
 
       setState(() {
@@ -270,6 +299,15 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
         }
       });
 
+      final failure = state.failure;
+
+      // Indicates a concurrency conflict - the reservation was closed by another user or process
+      // while we had still access to close action. We have to update tables tab
+      if (failure is ServerFailure &&
+          failure.errorCode == ErrorCodes.reservationAlreadyClosed) {
+        context.read<ReservationTablesBloc>().add(ReservationClosedEvent());
+      }
+
       SnackBarService.showFailure(context, state.failure);
 
       if (state.failure.requiresReauthentication) {
@@ -283,30 +321,25 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
       final double bottomPadding =
           _displayMode == ReservationFormMode.edit ? 70.0 : 16.0;
 
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(45, 0, 45, bottomPadding),
+          child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(45, 0, 45, bottomPadding),
-                child: ReservationForm(
-                  formKey: _formKey,
-                  displayMode: _displayMode,
-                  isCreatedByStaff: _isCreatedByStaff,
-                  nameController: _nameController,
-                  emailController: _emailController,
-                  phoneController: _phoneController,
-                  dateController: _dateController,
-                  timeController: _timeController,
-                  peopleCountController: _peopleCountController,
-                  commentController: _commentController,
-                ),
-              ),
+            child: ReservationForm(
+              formKey: _formKey,
+              displayMode: _displayMode,
+              isCreatedByStaff: _isCreatedByStaff,
+              nameController: _nameController,
+              emailController: _emailController,
+              phoneController: _phoneController,
+              dateController: _dateController,
+              timeController: _timeController,
+              peopleCountController: _peopleCountController,
+              commentController: _commentController,
             ),
-          );
-        },
+          ),
+        ),
       );
     }
 
@@ -320,16 +353,36 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
     );
   }
 
-  Widget _buildActions(BuildContext context) {
+  Widget _buildActions(BuildContext context, ReservationDetailsState state) {
+    bool isReservationClosed = false;
+
+    // _isReservationDataAvailable(state) guarantees it's one of these states
+    if (state is ReservationDetailsLoaded) {
+      isReservationClosed = state.reservation.isClosed;
+    } else if (state is ReservationDetailsError && state.hasReservation) {
+      isReservationClosed = state.originalReservation!.isClosed;
+    }
+
     return Positioned(
       top: 6,
       right: 6,
       child: ReservationActionsMenu(
+        isReservationClosed: isReservationClosed,
         onEdit: () {
           setState(() {
             _displayMode = ReservationFormMode.edit;
             widget.controller.updateDisplayMode(_displayMode);
           });
+        },
+        onClose: () {
+          context
+              .read<ReservationDetailsBloc>()
+              .add(CloseReservation(widget.reservationId));
+        },
+        onReopen: () {
+          context
+              .read<ReservationDetailsBloc>()
+              .add(ReopenReservation(widget.reservationId));
         },
         onRemove: () {
           context

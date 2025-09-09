@@ -8,10 +8,10 @@ namespace Restaurant_API.Data.Models.Reservation
         [MaxLength(100)]
         public string? Name { get; set; }
 
-        [EmailAddress]
+        [OptionalEmail]
         public string? Email { get; set; }
 
-        [Phone]
+        [OptionalPhone]
         public string? Phone { get; set; }
 
         [MustBeUtc]
