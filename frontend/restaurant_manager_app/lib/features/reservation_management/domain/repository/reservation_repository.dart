@@ -4,7 +4,7 @@ import 'package:restaurant_manager_app/features/reservation_management/domain/en
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_tables_update.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_update.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_view.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/entities/shift_view.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_shift_view.dart';
 
 abstract class ReservationRepository {
   Future<Either<Failure, void>> createReservation(ReservationCreate data);
@@ -22,11 +22,12 @@ abstract class ReservationRepository {
 
   Future<Either<Failure, void>> reopenReservation(String id);
 
-  Future<Either<Failure, ShiftView>> getTablesAvailabilityForReservation(
+  Future<Either<Failure, ReservationShiftView>>
+      getTablesAvailabilityForReservation(
     String id,
   );
 
-  Future<Either<Failure, ShiftView?>> updateReservationTables(
+  Future<Either<Failure, ReservationShiftView?>> updateReservationTables(
     String id,
     ReservationTablesUpdate update,
   );

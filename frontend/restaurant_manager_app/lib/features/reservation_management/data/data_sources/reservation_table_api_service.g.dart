@@ -22,7 +22,8 @@ class _ReservationTableApiService implements ReservationTableApiService {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<HttpResponse<ShiftViewModel>> getTablesAvailabilityForReservation(
+  Future<HttpResponse<ReservationShiftViewModel>>
+      getTablesAvailabilityForReservation(
     String authorization,
     String id,
   ) async {
@@ -31,26 +32,27 @@ class _ReservationTableApiService implements ReservationTableApiService {
     final _headers = <String, dynamic>{r'Authorization': authorization};
     _headers.removeWhere((k, v) => v == null);
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<HttpResponse<ShiftViewModel>>(Options(
+    final _options =
+        _setStreamType<HttpResponse<ReservationShiftViewModel>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
     )
-        .compose(
-          _dio.options,
-          '/${id}/tables',
-          queryParameters: queryParameters,
-          data: _data,
-        )
-        .copyWith(
-            baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        )));
+            .compose(
+              _dio.options,
+              '/${id}/tables',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            )));
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late ShiftViewModel _value;
+    late ReservationShiftViewModel _value;
     try {
-      _value = ShiftViewModel.fromJson(_result.data!);
+      _value = ReservationShiftViewModel.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
       rethrow;

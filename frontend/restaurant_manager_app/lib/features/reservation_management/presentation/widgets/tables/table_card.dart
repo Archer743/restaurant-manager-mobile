@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:restaurant_manager_app/config/theme/theme.dart';
 import 'package:restaurant_manager_app/core/utils/color_utils.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/entities/table_availability.dart';
+import 'package:restaurant_manager_app/core/domain/entities/table_availability.dart';
 
 class TableCard extends StatelessWidget {
   final TableAvailability table;

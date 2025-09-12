@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:restaurant_manager_app/features/reservation_management/data/models/reservation_tables_update_model.dart';
-import 'package:restaurant_manager_app/features/reservation_management/data/models/shift_view_model.dart';
+import 'package:restaurant_manager_app/features/reservation_management/data/models/reservation_shift_view_model.dart';
 import 'package:retrofit/retrofit.dart';
 
 part 'reservation_table_api_service.g.dart';
@@ -11,7 +11,8 @@ abstract class ReservationTableApiService {
       _ReservationTableApiService;
 
   @GET("/{id}/tables")
-  Future<HttpResponse<ShiftViewModel>> getTablesAvailabilityForReservation(
+  Future<HttpResponse<ReservationShiftViewModel>>
+      getTablesAvailabilityForReservation(
     @Header('Authorization') String authorization,
     @Path() String id,
   );
