@@ -24,6 +24,13 @@
         public static class Restaurant
         {
             public const string NotFound = "RESTAURANT_NOT_FOUND";
+            public const string NoShiftsFound = "RESTAURANT_NO_SHIFTS_FOUND";
+        }
+
+        public static class Shift
+        {
+            public const string NotFound = "SHIFT_NOT_FOUND";
+            public const string BelongsToDifferentRestaurant = "SHIFT_DIFFERENT_RESTAURANT";
         }
 
         public static class Table

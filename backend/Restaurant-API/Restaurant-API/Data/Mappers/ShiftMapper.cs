@@ -9,6 +9,17 @@ namespace Restaurant_API.Data.Mappers
         {
             return new ShiftViewModel
             {
+                Id = shift.Id,
+                Name = shift.Name,
+                StartTime = shift.StartTime,
+                EndTime = shift.EndTime,
+            };
+        }
+
+        public static ReservationShiftViewModel ToReservationView(this Shift shift)
+        {
+            return new ReservationShiftViewModel
+            {
                 Name = shift.Name,
                 StartTime = shift.StartTime,
                 EndTime = shift.EndTime,

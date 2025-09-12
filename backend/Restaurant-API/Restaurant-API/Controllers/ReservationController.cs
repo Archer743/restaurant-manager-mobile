@@ -2,6 +2,7 @@
 using Restaurant_API.Data.Models.Reservation;
 using Restaurant_API.Services.Interfaces;
 using Restaurant_API.Attributes;
+using System.ComponentModel.DataAnnotations;
 
 namespace Restaurant_API.Controllers
 {
@@ -55,7 +56,7 @@ namespace Restaurant_API.Controllers
         }
 
         [HttpGet("confirmed"), AppAuthorize]
-        public async Task<IActionResult> GetConfirmedReservationsInPeriodAsync([FromQuery] DateOnly start, [FromQuery] DateOnly end)
+        public async Task<IActionResult> GetConfirmedReservationsInPeriodAsync([FromQuery, Required] DateOnly start, [FromQuery, Required] DateOnly end)
         {
             var previews = await reservationService.GetConfirmedReservationsInPeriodAsync(HttpContext, start, end);
             return Ok(previews);
