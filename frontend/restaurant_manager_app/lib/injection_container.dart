@@ -38,6 +38,11 @@ import 'package:restaurant_manager_app/features/reservation_management/domain/us
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/create/reservation_create_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_bloc.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/data/data_sources/floor_plan_api_service.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/data/repository/floor_plan_repository_impl.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/domain/repository/floor_plan_repository.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/domain/usecases/get_floor_plan_usecase.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/floor_plan_bloc.dart';
 import 'package:restaurant_manager_app/features/splash/data/repository/session_repository_impl.dart';
 import 'package:restaurant_manager_app/features/splash/domain/repository/session_repository.dart';
 import 'package:restaurant_manager_app/features/splash/domain/usecases/check_auth_status_usecase.dart';
@@ -186,6 +191,28 @@ Future<void> initDependencies() async {
       sl<GetTablesAvailabilityForReservationUseCase>(),
       sl<UpdateReservationTablesUseCase>(),
     ),
+  );
+
+  // ---------------- Restaurant Floor Plan Feature ----------------
+  // [Data Sources]
+  sl.registerSingleton<FloorPlanApiService>(
+      FloorPlanApiService(sl<Dio>(), baseUrl: apiBaseUrl));
+
+  // [Repositories]
+  sl.registerSingleton<FloorPlanRepository>(
+    FloorPlanRepositoryImpl(
+      sl<AuthSharedRepository>(),
+      sl<TokenStorageService>(),
+      sl<FloorPlanApiService>(),
+    ),
+  );
+
+  // [UseCases]
+  sl.registerSingleton<GetFloorPlanUseCase>(GetFloorPlanUseCase(sl()));
+
+  // [Blocs]
+  sl.registerFactory<FloorPlanBloc>(
+    () => FloorPlanBloc(sl()),
   );
 
   // ---------------- Pending Reservations Inbox Feature ----------------
