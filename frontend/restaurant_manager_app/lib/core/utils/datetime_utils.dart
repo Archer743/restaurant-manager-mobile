@@ -68,6 +68,11 @@ extension DateTimeFormatter on DateTime {
     return DateFormat('yyyy-MM-dd').format(this);
   }
 
+  /// Format a DateTime object to a 'dd.MM.yyyy' string
+  String toDDMMYYYYString() {
+    return DateFormat('dd.MM.yyyy').format(this);
+  }
+
   /// Used for local time
   String toSmartBulgarianDateString() {
     final now = DateTime.now();
