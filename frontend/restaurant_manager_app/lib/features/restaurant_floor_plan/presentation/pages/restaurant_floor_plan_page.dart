@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:restaurant_manager_app/config/theme/theme.dart';
-import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/tables/tables_grid.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/domain/entities/shift_view.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/floor_plan_bloc.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/floor_plan_event.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/floor_plan_state.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/widgets/filters/date_filter.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/widgets/filters/shift_filter.dart';
 
 class RestaurantFloorPlanPage extends StatefulWidget {
   const RestaurantFloorPlanPage({super.key});
@@ -107,48 +106,14 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
         const SizedBox(width: 16),
         if (_allShifts != null)
           Expanded(
-            child: DropdownButtonFormField<int>(
-              // Aladin's lamp. Allows long text to be displayed without overflowing
-              isExpanded: true,
-              dropdownColor: primaryColor,
-              value: _selectedShiftIndex,
-              items: _allShifts!.asMap().entries.map((entry) {
-                final index = entry.key;
-                final shift = entry.value;
-                return DropdownMenuItem<int>(
-                  value: index,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        shift.name,
-                        style: const TextStyle(fontWeight: FontWeight.w500),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        '${shift.startTime.toHHMMString()} - ${shift.endTime.toHHMMString()}',
-                        style: TextStyle(
-                            fontSize: 13, color: hintTextColor.toColor()),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-              onChanged: (int? newIndex) {
+            child: ShiftFilter(
+              allShifts: _allShifts!,
+              selectedShiftIndex: _selectedShiftIndex,
+              onShiftSelected: (int? newIndex) {
                 if (newIndex != null) {
                   setState(() => _selectedShiftIndex = newIndex);
                   _getFloorPlan();
                 }
-              },
-              selectedItemBuilder: (BuildContext context) {
-                return _allShifts!.map((shift) {
-                  return Text(
-                    shift.name,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  );
-                }).toList();
               },
             ),
           ),
