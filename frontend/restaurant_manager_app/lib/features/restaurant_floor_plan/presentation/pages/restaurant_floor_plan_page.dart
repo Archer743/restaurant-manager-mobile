@@ -46,7 +46,7 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
       // Store shifts and index only on the initial load
       _allShifts = state.floorPlanView.shifts;
       _selectedShiftIndex = state.floorPlanView.selectedShiftIndex;
-    }
+    } else if (state is FloorPlanError) {}
   }
 
   @override
