@@ -9,7 +9,6 @@ import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
 import 'package:restaurant_manager_app/core/utils/spacing.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/tables/tables_grid.dart';
-import 'package:restaurant_manager_app/features/restaurant_floor_plan/domain/entities/floor_plan_view.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/domain/entities/shift_view.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/floor_plan_bloc.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/floor_plan_event.dart';
@@ -86,48 +85,38 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
       body: BlocConsumer<FloorPlanBloc, FloorPlanState>(
         listener: _handleStateChanges,
         builder: (context, state) {
-          if (state is FloorPlanLoaded) {
-            return _buildLoadedContent(state.floorPlanView);
-          } else if (state is FloorPlanError) {
-            final failure = state.failure;
-
-            if (state.hasView()) {
-              return _buildLoadedContent(state.floorPlanView!);
-            } else if (failure is ServerFailure &&
-                failure.errorCode == ErrorCodes.restaurantNoShiftsFound) {
-              return _buildMessageScreen(failure.errorCode);
-            }
-          }
-
-          return const Center(child: CircularProgressIndicator());
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                _buildFilters(state is FloorPlanLoading),
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      _getFloorPlan(isRefresh: true);
+                    },
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 34.0),
+                          _buildBodyContent(state),
+                          // Ensures the last row of tables is not clipped
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
         },
       ),
     );
   }
 
-  Widget _buildLoadedContent(FloorPlanView floorPlanView) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          _buildFilters(),
-          const SizedBox(height: 24.0),
-          // Space for the tables visualization
-          Expanded(
-            child: SingleChildScrollView(
-              child: TablesGrid(
-                tables: floorPlanView.tables,
-                selectedTableIds: const {}, // This is just a placeholder
-                onTableTap: (_) {}, // This is just a placeholder
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilters() {
+  Widget _buildFilters(bool isLoading) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -155,6 +144,34 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
             ),
           ),
       ],
+    );
+  }
+
+  Widget _buildBodyContent(FloorPlanState state) {
+    if (state is FloorPlanLoaded) {
+      return TablesGrid(
+        tables: state.floorPlanView.tables,
+        selectedTableIds: const {},
+        onTableTap: (_) {},
+      );
+    } else if (state is FloorPlanError) {
+      final failure = state.failure;
+
+      if (state.hasView()) {
+        return TablesGrid(
+          tables: state.floorPlanView!.tables,
+          selectedTableIds: const {},
+          onTableTap: (_) {},
+        );
+      } else if (failure is ServerFailure &&
+          failure.errorCode == ErrorCodes.restaurantNoShiftsFound) {
+        return _buildMessageScreen(failure.errorCode);
+      }
+    }
+
+    return SizedBox(
+      height: spacingByHeight(context, 0.7),
+      child: const Center(child: CircularProgressIndicator()),
     );
   }
 
