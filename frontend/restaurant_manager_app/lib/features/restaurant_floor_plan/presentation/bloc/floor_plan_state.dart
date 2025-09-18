@@ -1,9 +1,7 @@
 import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/domain/entities/floor_plan_view.dart';
 
-abstract class FloorPlanState {
-  bool hasView() => false;
-}
+abstract class FloorPlanState {}
 
 class FloorPlanInitial extends FloorPlanState {}
 
@@ -13,9 +11,6 @@ class FloorPlanLoaded extends FloorPlanState {
   final FloorPlanView floorPlanView;
 
   FloorPlanLoaded(this.floorPlanView);
-
-  @override
-  bool hasView() => true;
 }
 
 class FloorPlanError extends FloorPlanState {
@@ -24,6 +19,5 @@ class FloorPlanError extends FloorPlanState {
 
   FloorPlanError({required this.failure, this.floorPlanView});
 
-  @override
   bool hasView() => floorPlanView != null;
 }

@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:restaurant_manager_app/config/routing/app_routes.dart';
+import 'package:restaurant_manager_app/config/theme/theme.dart';
+import 'package:restaurant_manager_app/core/constants/error_codes.dart';
+import 'package:restaurant_manager_app/core/errors/error_mapper.dart';
+import 'package:restaurant_manager_app/core/errors/failure.dart';
+import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
+import 'package:restaurant_manager_app/core/utils/spacing.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/tables/tables_grid.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/domain/entities/floor_plan_view.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/domain/entities/shift_view.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/floor_plan_bloc.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/floor_plan_event.dart';
@@ -29,10 +38,10 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _getFloorPlan());
   }
 
-  void _getFloorPlan() {
+  void _getFloorPlan({bool isRefresh = false}) {
     String? selectedShiftId;
 
-    if (_allShifts != null && _selectedShiftIndex != null) {
+    if (_allShifts != null && _selectedShiftIndex != null && !isRefresh) {
       selectedShiftId = _allShifts![_selectedShiftIndex!].id;
     }
 
@@ -42,11 +51,32 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
   }
 
   void _handleStateChanges(BuildContext context, FloorPlanState state) {
+    // Store shifts and index only on the initial load
     if (state is FloorPlanLoaded && state.floorPlanView.shifts != null) {
-      // Store shifts and index only on the initial load
-      _allShifts = state.floorPlanView.shifts;
-      _selectedShiftIndex = state.floorPlanView.selectedShiftIndex;
-    } else if (state is FloorPlanError) {}
+      setState(() {
+        _allShifts = state.floorPlanView.shifts;
+        _selectedShiftIndex = state.floorPlanView.selectedShiftIndex;
+      });
+    } else if (state is FloorPlanError) {
+      final failure = state.failure;
+
+      if (failure is ServerFailure) {
+        switch (failure.errorCode) {
+          case ErrorCodes.restaurantNoShiftsFound:
+            return; // Should show screen instead of snack bar
+          case ErrorCodes.shiftNotFound:
+          case ErrorCodes.shiftBelongsToDifferentRestaurant:
+            _getFloorPlan(isRefresh: true);
+            break;
+        }
+      }
+
+      SnackBarService.showFailure(context, state.failure);
+
+      if (failure.requiresReauthentication) {
+        context.go(AppRoutes.welcome);
+      }
+    }
   }
 
   @override
@@ -56,36 +86,43 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
       body: BlocConsumer<FloorPlanBloc, FloorPlanState>(
         listener: _handleStateChanges,
         builder: (context, state) {
-          if (state is FloorPlanLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (state is FloorPlanError) {
-            return Center(child: Text('Error: ${state.failure}'));
-          }
           if (state is FloorPlanLoaded) {
-            final floorPlanView = state.floorPlanView;
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  _buildFilters(),
-                  const SizedBox(height: 24.0),
-                  // Space for the tables visualization
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: TablesGrid(
-                        tables: floorPlanView.tables,
-                        selectedTableIds: const {}, // This is just a placeholder
-                        onTableTap: (_) {}, // This is just a placeholder
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
+            return _buildLoadedContent(state.floorPlanView);
+          } else if (state is FloorPlanError) {
+            final failure = state.failure;
+
+            if (state.hasView()) {
+              return _buildLoadedContent(state.floorPlanView!);
+            } else if (failure is ServerFailure &&
+                failure.errorCode == ErrorCodes.restaurantNoShiftsFound) {
+              return _buildMessageScreen(failure.errorCode);
+            }
           }
-          return const SizedBox.shrink();
+
+          return const Center(child: CircularProgressIndicator());
         },
+      ),
+    );
+  }
+
+  Widget _buildLoadedContent(FloorPlanView floorPlanView) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          _buildFilters(),
+          const SizedBox(height: 24.0),
+          // Space for the tables visualization
+          Expanded(
+            child: SingleChildScrollView(
+              child: TablesGrid(
+                tables: floorPlanView.tables,
+                selectedTableIds: const {}, // This is just a placeholder
+                onTableTap: (_) {}, // This is just a placeholder
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -118,6 +155,28 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
             ),
           ),
       ],
+    );
+  }
+
+  Widget _buildMessageScreen(String errorCode) {
+    return SafeArea(
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        children: [
+          SizedBox(
+            height:
+                spacingByHeight(context, 0.8), // Enough to center vertically
+            child: Center(
+              child: Text(
+                getErrorMessage(errorCode),
+                style: defaultTextStyle,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
