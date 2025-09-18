@@ -7,12 +7,14 @@ class ShiftFilter extends StatelessWidget {
   final List<ShiftView> allShifts;
   final int? selectedShiftIndex;
   final ValueChanged<int?> onShiftSelected;
+  final bool isEnabled;
 
   const ShiftFilter({
     super.key,
     required this.allShifts,
     required this.selectedShiftIndex,
     required this.onShiftSelected,
+    this.isEnabled = true,
   });
 
   @override
@@ -21,6 +23,7 @@ class ShiftFilter extends StatelessWidget {
       // Aladin's lamp. Allows long text to be displayed without overflowing
       isExpanded: true,
       dropdownColor: primaryColor,
+      decoration: const InputDecoration(labelText: 'Смяна'),
       value: selectedShiftIndex,
       items: allShifts.asMap().entries.map((entry) {
         final index = entry.key;
@@ -46,7 +49,7 @@ class ShiftFilter extends StatelessWidget {
           ),
         );
       }).toList(),
-      onChanged: onShiftSelected,
+      onChanged: isEnabled ? onShiftSelected : null,
       selectedItemBuilder: (BuildContext context) {
         return allShifts.map((shift) {
           return Text(

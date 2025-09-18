@@ -55,8 +55,7 @@ final darkInputDecorationTheme = InputDecorationTheme(
   ),
   focusedBorder: OutlineInputBorder(
     borderRadius: BorderRadius.circular(borderRadius),
-    borderSide:
-        const BorderSide(color: primaryColor, width: borderFocusedWidth),
+    borderSide: const BorderSide(color: primaryColor, width: borderWidth),
   ),
   errorBorder: OutlineInputBorder(
     borderRadius: BorderRadius.circular(borderRadius),

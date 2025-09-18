@@ -26,7 +26,7 @@ class RestaurantFloorPlanPage extends StatefulWidget {
 
 class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
   DateTime _selectedDate = DateTime.now(); // local time
-  List<ShiftView>? _allShifts;
+  List<ShiftView> _allShifts = [];
   int? _selectedShiftIndex;
 
   @override
@@ -40,8 +40,8 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
   void _getFloorPlan({bool isRefresh = false}) {
     String? selectedShiftId;
 
-    if (_allShifts != null && _selectedShiftIndex != null && !isRefresh) {
-      selectedShiftId = _allShifts![_selectedShiftIndex!].id;
+    if (_allShifts.isNotEmpty && _selectedShiftIndex != null && !isRefresh) {
+      selectedShiftId = _allShifts[_selectedShiftIndex!].id;
     }
 
     context
@@ -53,7 +53,7 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
     // Store shifts and index only on the initial load
     if (state is FloorPlanLoaded && state.floorPlanView.shifts != null) {
       setState(() {
-        _allShifts = state.floorPlanView.shifts;
+        _allShifts = state.floorPlanView.shifts!;
         _selectedShiftIndex = state.floorPlanView.selectedShiftIndex;
       });
     } else if (state is FloorPlanError) {
@@ -122,6 +122,7 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
       children: [
         Expanded(
           child: DateFilter(
+            isEnabled: !isLoading,
             initialDate: _selectedDate,
             onDateSelected: (date) {
               setState(() => _selectedDate = date);
@@ -130,19 +131,19 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
           ),
         ),
         const SizedBox(width: 16),
-        if (_allShifts != null)
-          Expanded(
-            child: ShiftFilter(
-              allShifts: _allShifts!,
-              selectedShiftIndex: _selectedShiftIndex,
-              onShiftSelected: (int? newIndex) {
-                if (newIndex != null) {
-                  setState(() => _selectedShiftIndex = newIndex);
-                  _getFloorPlan();
-                }
-              },
-            ),
+        Expanded(
+          child: ShiftFilter(
+            isEnabled: _allShifts.isNotEmpty && !isLoading,
+            allShifts: _allShifts,
+            selectedShiftIndex: _selectedShiftIndex,
+            onShiftSelected: (int? newIndex) {
+              if (newIndex != null) {
+                setState(() => _selectedShiftIndex = newIndex);
+                _getFloorPlan();
+              }
+            },
           ),
+        ),
       ],
     );
   }
