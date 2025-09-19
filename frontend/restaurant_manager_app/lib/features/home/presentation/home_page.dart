@@ -17,8 +17,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final _pageController = PageController(initialPage: 0);
-  int _currIndex = 0;
+  final _pageController = PageController(initialPage: 1);
+  int _currIndex = 1;
 
   late final List<Widget> _pages;
 

@@ -158,43 +158,30 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
     } else if (state is FloorPlanError) {
       final failure = state.failure;
 
-      if (state.hasView()) {
+      if (failure is ServerFailure &&
+          failure.errorCode == ErrorCodes.restaurantNoShiftsFound) {
+        return SizedBox(
+          height: spacingByHeight(context, 0.6),
+          child: Center(
+            child: Text(
+              getErrorMessage(failure.errorCode),
+              style: defaultTextStyle,
+              textAlign: TextAlign.center,
+            ),
+          ),
+        );
+      } else if (state.hasView()) {
         return TablesGrid(
           tables: state.floorPlanView!.tables,
           selectedTableIds: const {},
           onTableTap: (_) {},
         );
-      } else if (failure is ServerFailure &&
-          failure.errorCode == ErrorCodes.restaurantNoShiftsFound) {
-        return _buildMessageScreen(failure.errorCode);
       }
     }
 
     return SizedBox(
       height: spacingByHeight(context, 0.7),
       child: const Center(child: CircularProgressIndicator()),
-    );
-  }
-
-  Widget _buildMessageScreen(String errorCode) {
-    return SafeArea(
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        children: [
-          SizedBox(
-            height:
-                spacingByHeight(context, 0.8), // Enough to center vertically
-            child: Center(
-              child: Text(
-                getErrorMessage(errorCode),
-                style: defaultTextStyle,
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
