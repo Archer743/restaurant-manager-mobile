@@ -62,9 +62,17 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
       if (failure is ServerFailure) {
         switch (failure.errorCode) {
           case ErrorCodes.restaurantNoShiftsFound:
+            setState(() {
+              _allShifts.clear();
+              _selectedShiftIndex = null;
+            });
             return; // Should show screen instead of snack bar
           case ErrorCodes.shiftNotFound:
           case ErrorCodes.shiftBelongsToDifferentRestaurant:
+            setState(() {
+              _allShifts.clear();
+              _selectedShiftIndex = null;
+            });
             _getFloorPlan(isRefresh: true);
             break;
         }
