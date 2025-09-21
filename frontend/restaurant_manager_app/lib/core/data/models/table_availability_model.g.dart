@@ -13,6 +13,7 @@ TableAvailabilityModel _$TableAvailabilityModelFromJson(
       tableNumber: (json['tableNumber'] as num).toInt(),
       capacity: (json['capacity'] as num).toInt(),
       status: $enumDecode(_$TableStatusEnumMap, json['status']),
+      reservationId: json['reservationId'] as String?,
     );
 
 Map<String, dynamic> _$TableAvailabilityModelToJson(
@@ -22,10 +23,11 @@ Map<String, dynamic> _$TableAvailabilityModelToJson(
       'tableNumber': instance.tableNumber,
       'capacity': instance.capacity,
       'status': _$TableStatusEnumMap[instance.status]!,
+      'reservationId': instance.reservationId,
     };
 
 const _$TableStatusEnumMap = {
   TableStatus.available: 'available',
-  TableStatus.occupiedByOther: 'occupiedByOther',
+  TableStatus.reserved: 'reserved',
   TableStatus.reservedByCurrent: 'reservedByCurrent',
 };

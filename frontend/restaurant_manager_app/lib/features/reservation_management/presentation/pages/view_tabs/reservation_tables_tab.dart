@@ -126,7 +126,7 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
                 shift: shift,
                 selectedTableIds: selectedTableIds,
                 onTableTap: (table) {
-                  if (table.status != TableStatus.occupiedByOther) {
+                  if (table.status != TableStatus.reserved) {
                     context
                         .read<ReservationTablesBloc>()
                         .add(ToggleTableSelection(table.id));

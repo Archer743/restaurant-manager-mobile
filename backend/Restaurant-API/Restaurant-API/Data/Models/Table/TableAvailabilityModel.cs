@@ -3,7 +3,7 @@
     public enum TableStatus
     {
         Available,
-        OccupiedByOther,
+        Reserved,
         ReservedByCurrent
     }
 

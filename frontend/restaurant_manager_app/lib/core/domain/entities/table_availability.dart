@@ -1,6 +1,6 @@
 enum TableStatus {
   available,
-  occupiedByOther,
+  reserved,
   reservedByCurrent,
 }
 
@@ -9,11 +9,13 @@ class TableAvailability {
   final int tableNumber;
   final int capacity;
   final TableStatus status;
+  final String? reservationId;
 
   TableAvailability({
     required this.id,
     required this.tableNumber,
     required this.capacity,
     required this.status,
+    this.reservationId,
   });
 }

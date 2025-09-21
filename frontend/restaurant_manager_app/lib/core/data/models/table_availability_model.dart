@@ -10,6 +10,7 @@ class TableAvailabilityModel extends TableAvailability {
     required super.tableNumber,
     required super.capacity,
     required super.status,
+    super.reservationId,
   });
 
   factory TableAvailabilityModel.fromJson(Map<String, dynamic> json) =>

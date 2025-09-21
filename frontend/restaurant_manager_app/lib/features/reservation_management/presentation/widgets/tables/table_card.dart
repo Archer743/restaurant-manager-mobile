@@ -20,7 +20,7 @@ class TableCard extends StatelessWidget {
     switch (status) {
       case TableStatus.available:
         return successColor;
-      case TableStatus.occupiedByOther:
+      case TableStatus.reserved:
         return warningColor;
       case TableStatus.reservedByCurrent:
         return actionColor;
