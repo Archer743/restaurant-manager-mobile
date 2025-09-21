@@ -107,6 +107,14 @@ namespace Restaurant_API.Services
             return reservation.ToView();
         }
 
+        public async Task<FloorPlanReservationPreviewModel> GetFloorPlanReservationPreviewAsync(HttpContext ctx, Guid reservationId)
+        {
+            Reservation reservation = await GetReservationIfOwnedAsync(ctx, reservationId, includeRestaurant: true);
+            TimeZoneInfo restaurantTimeZone = restaurantService.GetTimeZoneInfo(reservation.Restaurant);
+
+            return reservation.ToFloorPlanPreview(restaurantTimeZone);
+        }
+
         public async Task<Dictionary<DateOnly, List<ReservationCalendarPreviewModel>>> GetConfirmedReservationsInPeriodAsync(HttpContext ctx, DateOnly start, DateOnly end)
         {
             Restaurant currUserRestaurant = await restaurantService.GetCurrUserAssociatedRestaurantAsync(ctx);
@@ -319,13 +327,22 @@ namespace Restaurant_API.Services
             await reservationRepo.RemoveAsync(reservation);
         }
 
-        public async Task<Reservation> GetReservationIfOwnedAsync(HttpContext ctx, Guid reservationId, bool includeDetails = false)
+        public async Task<Reservation> GetReservationIfOwnedAsync(HttpContext ctx, Guid reservationId, bool includeDetails = false, bool includeRestaurant = false)
         {
             Restaurant currUserRestaurant = await restaurantService.GetCurrUserAssociatedRestaurantAsync(ctx);
+            Reservation? reservation;
 
             // Get reservation by id
-            Reservation? reservation = includeDetails ? await reservationRepo.GetByIdWithDetailsAsync(reservationId)
-                                                      : await reservationRepo.GetByIdAsync(reservationId);
+            if (includeDetails)
+            {
+                reservation = await reservationRepo.GetByIdWithDetailsAsync(reservationId);
+            } else if (includeRestaurant)
+            {
+                reservation = await reservationRepo.GetByIdWithRestaurantAsync(reservationId);
+            } else
+            {
+                reservation = await reservationRepo.GetByIdAsync(reservationId);
+            }
 
             // Validate that the user has access to that reservation
             if (reservation == null)

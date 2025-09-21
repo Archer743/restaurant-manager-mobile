@@ -55,6 +55,13 @@ namespace Restaurant_API.Controllers
             return Ok(reservation);
         }
 
+        [HttpGet("{reservationId}/floor-plan-preview"), AppAuthorize]
+        public async Task<IActionResult> GetFloorPlanReservationPreviewAsync(Guid reservationId)
+        {
+            var preview = await reservationService.GetFloorPlanReservationPreviewAsync(HttpContext, reservationId);
+            return Ok(preview);
+        }
+
         [HttpGet("confirmed"), AppAuthorize]
         public async Task<IActionResult> GetConfirmedReservationsInPeriodAsync([FromQuery, Required] DateOnly start, [FromQuery, Required] DateOnly end)
         {

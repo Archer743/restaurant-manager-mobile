@@ -12,6 +12,8 @@ namespace Restaurant_API.Services.Interfaces
 
         Task<ReservationViewModel> GetByIdAsync(HttpContext ctx, Guid reservationId);
 
+        Task<FloorPlanReservationPreviewModel> GetFloorPlanReservationPreviewAsync(HttpContext ctx, Guid reservationId);
+
         Task<Dictionary<DateOnly, List<ReservationCalendarPreviewModel>>> GetConfirmedReservationsInPeriodAsync(HttpContext ctx, DateOnly start, DateOnly end);
 
         Task<PagedResult<PendingReservationPreviewModel>> GetPendingReservationsAsync(HttpContext ctx, PendingReservationsQueryParams queryParams);
@@ -24,6 +26,6 @@ namespace Restaurant_API.Services.Interfaces
 
         Task RemoveAsync(HttpContext ctx, Guid reservationId);
 
-        Task<Reservation> GetReservationIfOwnedAsync(HttpContext ctx, Guid reservationId, bool includeDetails = false);
+        Task<Reservation> GetReservationIfOwnedAsync(HttpContext ctx, Guid reservationId, bool includeDetails = false, bool includeRestaurant = false);
     }
 }

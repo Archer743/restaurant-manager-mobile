@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Restaurant_API.Data.Entities;
+using Restaurant_API.Data.Entities.Enums;
 
 namespace Restaurant_API.Data
 {
@@ -46,8 +48,14 @@ namespace Restaurant_API.Data
                         .HasIndex(t => new { t.RestaurantId, t.TableNumber })
 						.IsUnique();
 
-			// Makes Reservation.Tag Unique for a restaurant
-			modelBuilder.Entity<Reservation>()
+            // Configures Entity Framework Core to store the ReservationState enum as its string representation,
+            // preventing data corruption if the integer values of the enum members are changed in the future
+            /*modelBuilder.Entity<Reservation>()
+                .Property(r => r.State)
+                .HasConversion<string>();*/
+
+            // Makes Reservation.Tag Unique for a restaurant
+            modelBuilder.Entity<Reservation>()
 						.HasIndex(r => new { r.RestaurantId, r.Tag })
 						.IsUnique();
 

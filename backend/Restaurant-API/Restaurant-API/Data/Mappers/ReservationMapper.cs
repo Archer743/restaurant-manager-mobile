@@ -1,5 +1,6 @@
 ﻿using Restaurant_API.Data.Entities;
 using Restaurant_API.Data.Models.Reservation;
+using System.Xml.Linq;
 
 namespace Restaurant_API.Data.Mappers
 {
@@ -32,6 +33,19 @@ namespace Restaurant_API.Data.Mappers
                 Email = createModel.Email,
                 Phone = createModel.Phone,
                 Comment = createModel.Comment,
+            };
+        }
+
+        public static FloorPlanReservationPreviewModel ToFloorPlanPreview(this Reservation reservation, TimeZoneInfo restaurantTimeZone)
+        {
+            return new FloorPlanReservationPreviewModel
+            {
+                Id = reservation.Id,
+                Tag = reservation.Tag,
+                Name = reservation.Name,
+                // Converts StartTimeUtc to local time based on the restaurant time zone and extracts the time
+                Time = TimeOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(reservation.StartTimeUtc, restaurantTimeZone)),
+                PeopleCount = reservation.PeopleCount,
             };
         }
 
