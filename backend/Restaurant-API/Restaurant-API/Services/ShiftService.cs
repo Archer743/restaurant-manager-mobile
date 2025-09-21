@@ -41,17 +41,10 @@ namespace Restaurant_API.Services
             throw new NotFoundException(ErrorCodes.Reservation.OutsideShift);
         }
 
-        public async Task<HashSet<Guid>> GetReservedTableIdsForShiftAsync(Shift shift, DateOnly localDate, TimeZoneInfo restaurantTimeZone)
+        public async Task<Dictionary<Guid, Guid>> GetReservedTablesForShiftAsync(Shift shift, DateOnly localDate, TimeZoneInfo restaurantTimeZone)
         {
-            // Calculate shift start and end in UTC for that date
-            var shiftStartUtc = TimeZoneInfo.ConvertTimeToUtc(localDate.ToDateTime(shift.StartTime), restaurantTimeZone);
-            var shiftEndUtc = TimeZoneInfo.ConvertTimeToUtc(localDate.ToDateTime(shift.EndTime), restaurantTimeZone);
-
-            // Get all table IDs reserved in this shift
-            return await reservationRepo.GetReservedTableIdsInPeriodAsync(
-                shift.RestaurantId,
-                shiftStartUtc,
-                shiftEndUtc);
+            var (shiftStartUtc, shiftEndUtc) = CalculateShiftPeriodUtc(shift, localDate, restaurantTimeZone);
+            return await reservationRepo.GetReservedTablesInPeriodAsync(shift.RestaurantId, shiftStartUtc, shiftEndUtc);
         }
 
         public async Task<bool> HasShiftAtTimeAsync(Restaurant restaurant, DateTime dateTimeUtc)
@@ -81,6 +74,15 @@ namespace Restaurant_API.Services
             }
         }
 
+        /// <summary> Calculate shift start and end in UTC for a specific date</summary>
+        private (DateTime shiftStartUtc, DateTime shiftEndUtc) CalculateShiftPeriodUtc(Shift shift, DateOnly localDate, TimeZoneInfo restaurantTimeZone)
+        {
+            var shiftStartUtc = TimeZoneInfo.ConvertTimeToUtc(localDate.ToDateTime(shift.StartTime), restaurantTimeZone);
+            var shiftEndUtc = TimeZoneInfo.ConvertTimeToUtc(localDate.ToDateTime(shift.EndTime), restaurantTimeZone);
+
+            return (shiftStartUtc, shiftEndUtc);
+        }
+
         private async Task<ShiftContext?> GetShiftContextAsync(Restaurant restaurant, DateTime dateTimeUtc)
         {
             var restaurantTimeZone = restaurantService.GetTimeZoneInfo(restaurant);
@@ -88,7 +90,10 @@ namespace Restaurant_API.Services
 
             var shift = await shiftRepo.GetRestaurantShiftAtTimeAsync(restaurant.Id, localTime);
             if (shift == null) return null;
-            var reservedTableIds = await GetReservedTableIdsForShiftAsync(shift, localDate, restaurantTimeZone);
+
+            // Get all table IDs reserved in this shift
+            var (shiftStartUtc, shiftEndUtc) = CalculateShiftPeriodUtc(shift, localDate, restaurantTimeZone);
+            var reservedTableIds = await reservationRepo.GetReservedTableIdsInPeriodAsync(shift.RestaurantId, shiftStartUtc, shiftEndUtc);
 
             return new ShiftContext
             {

@@ -1,4 +1,5 @@
 ﻿using Restaurant_API.Data.Entities;
+using Restaurant_API.Data.Entities.Enums;
 
 namespace Restaurant_API.Repositories.Interfaces
 {
@@ -11,6 +12,9 @@ namespace Restaurant_API.Repositories.Interfaces
         Task<List<Reservation>> GetConfirmedInPeriodAsync(Guid restaurantId, DateTime periodStartUtc, DateTime periodEndUtc);
 
         Task<HashSet<Guid>> GetReservedTableIdsInPeriodAsync(Guid restaurantId, DateTime periodStartUtc, DateTime periodEndUtc);
+
+        /// <returns>A dictionary where the key is the table's ID and the value is the ID of the reservation currently occupying that table.</returns>
+        Task<Dictionary<Guid, Guid>> GetReservedTablesInPeriodAsync(Guid restaurantId, DateTime periodStartUtc, DateTime periodEndUtc);
 
         Task<Reservation?> GetByIdAsync(Guid id);
 

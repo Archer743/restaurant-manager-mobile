@@ -15,5 +15,16 @@ namespace Restaurant_API.Data.Mappers
                 // Status is set in TableService
             };
         }
+
+        public static FloorPlanTableAvailabilityModel ToFloorPlanAvailabilityView(this Table table)
+        {
+            return new FloorPlanTableAvailabilityModel
+            {
+                Id = table.Id,
+                TableNumber = table.TableNumber,
+                Capacity = table.Capacity,
+                // Status and ReservationId are set in TableService
+            };
+        }
     }
 }

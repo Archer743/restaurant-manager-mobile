@@ -6,6 +6,7 @@ using Restaurant_API.Data.Models.Table;
 using Restaurant_API.Exceptions;
 using Restaurant_API.Repositories.Interfaces;
 using Restaurant_API.Services.Interfaces;
+using System.Linq;
 
 namespace Restaurant_API.Services
 {
@@ -73,20 +74,24 @@ namespace Restaurant_API.Services
                 }
             }
 
-            // ===========================Tables
+            // =========================== Tables
             var tables = await tableRepo.GetAllRestaurantTablesAsync(currUserRestaurant.Id);
-            var reservedTableIds = await shiftService.GetReservedTableIdsForShiftAsync(selectedShift, date, restaurantTimeZone);
+            var reservedTablesMap = await shiftService.GetReservedTablesForShiftAsync(selectedShift, date, restaurantTimeZone);
 
             // Set state for each table - Available / OccupiedByOther
             var tablesAvailability = tables.Select(table =>
             {
-                var dto = table.ToAvailabilityView();
+                var dto = table.ToFloorPlanAvailabilityView();
 
-                if (reservedTableIds.Contains(table.Id))
+                if (reservedTablesMap.TryGetValue(table.Id, out Guid reservationId))
+                {
                     dto.Status = TableStatus.OccupiedByOther;
-                else
+                    dto.ReservationId = reservationId;
+                } else
+                {
                     dto.Status = TableStatus.Available;
-
+                }
+                    
                 return dto;
             }).ToList();
 

@@ -48,6 +48,22 @@ namespace Restaurant_API.Repositories
                                 .ToHashSetAsync();
         }
 
+        public async Task<Dictionary<Guid, Guid>> GetReservedTablesInPeriodAsync(Guid restaurantId, DateTime periodStartUtc, DateTime periodEndUtc)
+        {
+            // GroupBy prevents a runtime exception if a single table is reserved by multiple reservations within the specified period
+            return await context.Reservations
+                                .Include(r => r.Tables)
+                                .Where(r => r.RestaurantId == restaurantId &&
+                                            r.State == ReservationState.Confirmed && !r.IsClosed &&
+                                            r.StartTimeUtc >= periodStartUtc && r.StartTimeUtc < periodEndUtc)
+                                .SelectMany(r => r.Tables.Select(t => new { TableId = t.Id, ReservationId = r.Id }))
+                                .GroupBy(x => x.TableId)
+                                .ToDictionaryAsync(
+                                    g => g.Key,
+                                    g => g.First().ReservationId
+                                );
+        }
+
         public async Task<Reservation?> GetByIdAsync(Guid id)
         {
             return await context.Reservations
