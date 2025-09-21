@@ -4,11 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:restaurant_manager_app/config/routing/app_routes.dart';
 import 'package:restaurant_manager_app/config/theme/theme.dart';
 import 'package:restaurant_manager_app/core/constants/error_codes.dart';
+import 'package:restaurant_manager_app/core/domain/entities/table_availability.dart';
 import 'package:restaurant_manager_app/core/errors/error_mapper.dart';
 import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
 import 'package:restaurant_manager_app/core/utils/spacing.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/tables/tables_grid.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/widgets/tables/tables_grid.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/domain/entities/shift_view.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/floor_plan_bloc.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/floor_plan_event.dart';
@@ -160,7 +161,6 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
     if (state is FloorPlanLoaded) {
       return TablesGrid(
         tables: state.floorPlanView.tables,
-        selectedTableIds: const {},
         onTableTap: (_) {},
       );
     } else if (state is FloorPlanError) {
@@ -181,7 +181,6 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
       } else if (state.hasView()) {
         return TablesGrid(
           tables: state.floorPlanView!.tables,
-          selectedTableIds: const {},
           onTableTap: (_) {},
         );
       }
