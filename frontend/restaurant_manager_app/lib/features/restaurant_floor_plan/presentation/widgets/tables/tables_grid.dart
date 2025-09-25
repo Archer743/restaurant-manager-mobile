@@ -2,22 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:restaurant_manager_app/core/domain/entities/table_availability.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/widgets/tables/table_card.dart';
 
-class TablesGrid extends StatefulWidget {
+class TablesGrid extends StatelessWidget {
   final List<TableAvailability> tables;
   final void Function(TableAvailability) onTableTap;
+  final String? selectedReservationId;
 
   const TablesGrid({
     super.key,
     required this.tables,
     required this.onTableTap,
+    this.selectedReservationId,
   });
-
-  @override
-  State<TablesGrid> createState() => _TablesGridState();
-}
-
-class _TablesGridState extends State<TablesGrid> {
-  String? _selectedReservationId;
 
   @override
   Widget build(BuildContext context) {
@@ -30,28 +25,15 @@ class _TablesGridState extends State<TablesGrid> {
         crossAxisSpacing: 10,
         childAspectRatio: 1,
       ),
-      itemCount: widget.tables.length,
+      itemCount: tables.length,
       itemBuilder: (context, index) {
-        final table = widget.tables[index];
+        final table = tables[index];
         final isSelected = table.reservationId != null &&
-            table.reservationId == _selectedReservationId;
+            table.reservationId == selectedReservationId;
 
         return TableCard(
           table: table,
-          onTableTap: (table) {
-            if (table.status == TableStatus.reserved) {
-              setState(() {
-                // If it is already selected - clear
-                if (_selectedReservationId == table.reservationId) {
-                  _selectedReservationId = null;
-                } else {
-                  _selectedReservationId = table.reservationId;
-                }
-              });
-            }
-
-            widget.onTableTap(table);
-          },
+          onTableTap: onTableTap,
           isSelected: isSelected,
         );
       },

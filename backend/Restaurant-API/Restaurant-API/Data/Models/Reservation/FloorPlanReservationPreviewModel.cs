@@ -12,5 +12,7 @@
         public TimeOnly Time { get; set; }
 
         public int PeopleCount { get; set; }
+
+        public int TableCount { get; set; }
     }
 }

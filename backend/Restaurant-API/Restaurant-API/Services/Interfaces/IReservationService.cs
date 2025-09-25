@@ -26,6 +26,6 @@ namespace Restaurant_API.Services.Interfaces
 
         Task RemoveAsync(HttpContext ctx, Guid reservationId);
 
-        Task<Reservation> GetReservationIfOwnedAsync(HttpContext ctx, Guid reservationId, bool includeDetails = false, bool includeRestaurant = false);
+        Task<Reservation> GetReservationIfOwnedAsync(HttpContext ctx, Guid reservationId, bool includeDetails = false);
     }
 }

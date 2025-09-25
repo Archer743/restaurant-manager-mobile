@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:restaurant_manager_app/config/routing/app_routes.dart';
 import 'package:restaurant_manager_app/core/utils/spacing.dart';
-import 'package:restaurant_manager_app/features/auth/presentation/widgets/buttons/nav_button.dart';
+import 'package:restaurant_manager_app/core/presentation/widgets/buttons/nav_button.dart';
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});

@@ -5,7 +5,8 @@ import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/
 import 'package:restaurant_manager_app/features/pending_reservations_inbox/presentation/bloc/pending_inbox_bloc.dart';
 import 'package:restaurant_manager_app/features/pending_reservations_inbox/presentation/bloc/pending_inbox_event.dart';
 import 'package:restaurant_manager_app/features/pending_reservations_inbox/presentation/pages/pending_reservations_inbox_page.dart';
-import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/floor_plan_bloc.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/floor_plan/floor_plan_bloc.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/reservation_preview/reservation_preview_bloc.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/pages/restaurant_floor_plan_page.dart';
 import 'package:restaurant_manager_app/injection_container.dart';
 
@@ -31,8 +32,11 @@ class _HomePageState extends State<HomePage> {
         create: (_) => sl(),
         child: const ConfirmedReservationsCalendarPage(),
       ),
-      BlocProvider<FloorPlanBloc>(
-        create: (_) => sl(),
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<FloorPlanBloc>(create: (_) => sl()),
+          BlocProvider<ReservationPreviewBloc>(create: (_) => sl()),
+        ],
         child: const RestaurantFloorPlanPage(),
       ),
       BlocProvider<PendingInboxBloc>(

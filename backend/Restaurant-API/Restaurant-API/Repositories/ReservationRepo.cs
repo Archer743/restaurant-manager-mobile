@@ -70,13 +70,6 @@ namespace Restaurant_API.Repositories
                                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 
-        public async Task<Reservation?> GetByIdWithRestaurantAsync(Guid id)
-        {
-            return await context.Reservations
-                                .Include(r => r.Restaurant)
-                                .FirstOrDefaultAsync(r => r.Id == id);
-        }
-
         public async Task<Reservation?> GetByIdWithDetailsAsync(Guid id)
         {
             return await context.Reservations
