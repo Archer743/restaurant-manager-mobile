@@ -4,7 +4,7 @@ import 'package:restaurant_manager_app/core/domain/entities/table_availability.d
 
 class TableCard extends StatelessWidget {
   final TableAvailability table;
-  final void Function(TableAvailability) onTableTap;
+  final Future<void> Function(TableAvailability) onTableTap;
   final bool isSelected;
 
   const TableCard({
@@ -32,7 +32,9 @@ class TableCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => onTableTap(table),
+      onTap: () async {
+        await onTableTap(table);
+      },
       child: Container(
         decoration: BoxDecoration(
           color: _getBaseColor(),

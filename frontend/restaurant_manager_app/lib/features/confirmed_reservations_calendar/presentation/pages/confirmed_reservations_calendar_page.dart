@@ -9,6 +9,7 @@ import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_event.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_state.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/widgets/reservation_card.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/coordinators/reservation_refresh_coordinator.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:restaurant_manager_app/config/theme/theme.dart';
 
@@ -197,10 +198,14 @@ class _ConfirmedReservationsCalendarPageState
                 return ReservationCard(
                   reservation: reservation,
                   onTap: () {
-                    final calendarBloc = context.read<CalendarBloc>();
+                    final coordinator =
+                        ReservationRefreshCoordinator.forCalendar(
+                      calendarBloc: context.read<CalendarBloc>(),
+                    );
+
                     context.push(
                       '${AppRoutes.reservation}/${reservation.id}',
-                      extra: calendarBloc,
+                      extra: coordinator,
                     );
                   },
                 );

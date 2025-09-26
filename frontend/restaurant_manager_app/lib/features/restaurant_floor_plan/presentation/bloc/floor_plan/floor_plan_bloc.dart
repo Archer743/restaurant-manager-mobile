@@ -30,6 +30,7 @@ class FloorPlanBloc extends Bloc<FloorPlanEvent, FloorPlanState> {
     final result = await minDelayRun(
       _getFloorPlanUseCase(
           GetFloorPlanParams(date: event.date, shiftId: event.shiftId)),
+      minimumDelay: const Duration(milliseconds: 300),
     );
 
     result.fold(

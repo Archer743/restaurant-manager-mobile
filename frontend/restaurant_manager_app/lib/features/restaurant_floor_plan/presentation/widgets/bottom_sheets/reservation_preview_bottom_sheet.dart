@@ -1,31 +1,54 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:restaurant_manager_app/config/routing/app_routes.dart';
 import 'package:restaurant_manager_app/config/theme/theme.dart';
-import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
 import 'package:restaurant_manager_app/core/presentation/widgets/buttons/nav_button.dart';
+import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/coordinators/reservation_refresh_coordinator.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/domain/entities/reservation_preview.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/reservation_preview/reservation_preview_bloc.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/reservation_preview/reservation_preview_state.dart';
 
 class ReservationPreviewBottomSheet extends StatelessWidget {
-  final ReservationPreview reservationPreview;
+  final ReservationRefreshCoordinator coordinator;
 
   const ReservationPreviewBottomSheet({
     super.key,
-    required this.reservationPreview,
+    required this.coordinator,
   });
 
   @override
   Widget build(BuildContext context) {
+    return BlocBuilder<ReservationPreviewBloc, ReservationPreviewState>(
+      builder: (context, state) {
+        if (state is ReservationPreviewLoaded) {
+          return _buildLoadedContent(state.reservationPreview);
+        }
+
+        return _buildLoadingContent();
+      },
+    );
+  }
+
+  Widget _buildLoadingContent() {
+    return const SizedBox(
+      height: 190,
+      child: Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  Widget _buildLoadedContent(ReservationPreview reservationPreview) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // top row
-          _buildTopRow(context),
+          _buildTopRow(reservationPreview),
           const SizedBox(height: 16),
 
           // bottom row
-          _buildBottomRow(context),
+          _buildBottomRow(reservationPreview),
           const SizedBox(height: 24),
 
           // action button
@@ -35,6 +58,7 @@ class ReservationPreviewBottomSheet extends StatelessWidget {
               label: 'Виж детайли',
               destination: '${AppRoutes.reservation}/${reservationPreview.id}',
               navigationType: NavigationType.push,
+              extra: coordinator,
             ),
           ),
         ],
@@ -42,7 +66,7 @@ class ReservationPreviewBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildTopRow(BuildContext context) {
+  Widget _buildTopRow(ReservationPreview reservationPreview) {
     return Row(
       children: [
         // Tag chip
@@ -87,7 +111,7 @@ class ReservationPreviewBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomRow(BuildContext context) {
+  Widget _buildBottomRow(ReservationPreview reservationPreview) {
     return Row(
       children: [
         Row(

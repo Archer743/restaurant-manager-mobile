@@ -4,7 +4,7 @@ import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentati
 
 class TablesGrid extends StatelessWidget {
   final List<TableAvailability> tables;
-  final void Function(TableAvailability) onTableTap;
+  final Future<void> Function(TableAvailability) onTableTap;
   final String? selectedReservationId;
 
   const TablesGrid({

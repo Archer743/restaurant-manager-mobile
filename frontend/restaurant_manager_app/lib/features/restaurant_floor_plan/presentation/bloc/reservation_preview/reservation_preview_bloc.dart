@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:restaurant_manager_app/core/utils/future_utils.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/domain/usecases/get_reservation_preview_usecase.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/reservation_preview/reservation_preview_event.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/reservation_preview/reservation_preview_state.dart';
@@ -16,7 +17,10 @@ class ReservationPreviewBloc
       Emitter<ReservationPreviewState> emit) async {
     emit(ReservationPreviewLoading());
 
-    final result = await _getReservationPreviewUseCase(event.reservationId);
+    final result = await minDelayRun(
+      _getReservationPreviewUseCase(event.reservationId),
+      minimumDelay: const Duration(milliseconds: 600),
+    );
 
     result.fold(
       (failure) => emit(ReservationPreviewError(failure)),

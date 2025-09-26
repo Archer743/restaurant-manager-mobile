@@ -8,6 +8,7 @@ import 'package:restaurant_manager_app/core/errors/error_mapper.dart';
 import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
 import 'package:restaurant_manager_app/core/utils/spacing.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/coordinators/reservation_refresh_coordinator.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/domain/entities/floor_plan_view.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/reservation_preview/reservation_preview_bloc.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/reservation_preview/reservation_preview_event.dart';
@@ -43,12 +44,16 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _getFloorPlan());
   }
 
-  void _getFloorPlan({bool isRefresh = false}) {
-    String? selectedShiftId;
-
-    if (_allShifts.isNotEmpty && _selectedShiftIndex != null && !isRefresh) {
-      selectedShiftId = _allShifts[_selectedShiftIndex!].id;
+  String? _getSelectedShiftId() {
+    if (_allShifts.isNotEmpty && _selectedShiftIndex != null) {
+      return _allShifts[_selectedShiftIndex!].id;
     }
+
+    return null;
+  }
+
+  void _getFloorPlan({bool isRefresh = false}) {
+    String? selectedShiftId = !isRefresh ? _getSelectedShiftId() : null;
 
     context
         .read<FloorPlanBloc>()
@@ -93,25 +98,14 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
     }
   }
 
-  Future<void> _handleReservationPreviewState(
-      BuildContext context, ReservationPreviewState state) async {
-    if (state is ReservationPreviewLoaded) {
-      // Wait until the bottom sheet is closed
-      await showModalBottomSheet(
-        showDragHandle: true,
-        context: context,
-        builder: (BuildContext context) {
-          return ReservationPreviewBottomSheet(
-            reservationPreview: state.reservationPreview,
-          );
-        },
-      );
+  void _handleReservationPreviewState(
+      BuildContext context, ReservationPreviewState state) {
+    if (state is ReservationPreviewError) {
+      // Check if the bottom sheet is currently mounted/visible and close it
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
 
-      // Remove table group selection
-      setState(() {
-        _selectedReservationId = null;
-      });
-    } else if (state is ReservationPreviewError) {
       // Remove table group selection
       setState(() {
         _selectedReservationId = null;
@@ -231,7 +225,7 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
     return TablesGrid(
       tables: floorPlanView.tables,
       selectedReservationId: _selectedReservationId,
-      onTableTap: (table) {
+      onTableTap: (table) async {
         // Clear selection if an unreserved table is tapped
         if (table.reservationId == null) {
           setState(() {
@@ -253,9 +247,34 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
           _selectedReservationId = table.reservationId;
         });
 
+        final coordinator = ReservationRefreshCoordinator.forFloorPlan(
+          floorPlanBloc: context.read<FloorPlanBloc>(),
+          reservationPreviewBloc: context.read<ReservationPreviewBloc>(),
+          date: _selectedDate,
+          reservationId: table.reservationId!,
+          shiftId: _getSelectedShiftId(),
+        );
+
         context
             .read<ReservationPreviewBloc>()
             .add(GetReservationPreview(table.reservationId!));
+
+        // Wait until the bottom sheet is closed
+        await showModalBottomSheet(
+          showDragHandle: true,
+          context: context,
+          builder: (BuildContext bottomSheetContext) {
+            return BlocProvider.value(
+              value: context.read<ReservationPreviewBloc>(),
+              child: ReservationPreviewBottomSheet(coordinator: coordinator),
+            );
+          },
+        );
+
+        // Remove table group selection
+        setState(() {
+          _selectedReservationId = null;
+        });
       },
     );
   }

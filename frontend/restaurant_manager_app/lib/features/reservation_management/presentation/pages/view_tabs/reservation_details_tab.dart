@@ -18,6 +18,7 @@ import 'package:restaurant_manager_app/features/reservation_management/presentat
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_state.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_event.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/coordinators/reservation_refresh_coordinator.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/buttons/reservation_actions_menu.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/forms/reservation_form.dart';
 
@@ -45,12 +46,14 @@ class ReservationDetailsTabController {
 class ReservationDetailsTab extends StatefulWidget {
   final String reservationId;
   final ReservationDetailsTabController controller;
+  final ReservationRefreshCoordinator coordinator;
   final Future<void> Function() onRefresh;
 
   const ReservationDetailsTab({
     super.key,
     required this.reservationId,
     required this.controller,
+    required this.coordinator,
     required this.onRefresh,
   });
 
@@ -73,11 +76,6 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
   final _timeController = TextEditingController();
   final _peopleCountController = TextEditingController();
   final _commentController = TextEditingController();
-
-  // Refresh Calendar Page
-  late final CalendarBloc? _calendarBloc;
-  bool _refreshRequired = false;
-  List<DateTime> rawDatesAffected = [];
 
   bool _isReservationDataAvailable(ReservationDetailsState state) {
     return state is ReservationDetailsLoaded ||
@@ -160,20 +158,8 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
     _commentController.addListener(_onFormChanged);
   }
 
-  // Runs after the widget is inserted into the widget tree and context is still valid
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _calendarBloc = context.read<CalendarBloc?>();
-  }
-
   @override
   void dispose() {
-    // Update Calendar Page
-    if (_refreshRequired && _calendarBloc != null) {
-      _calendarBloc.add(RefreshCalendar(rawDatesAffected: rawDatesAffected));
-    }
-
     _hasChangesNotifier.dispose();
 
     _nameController.dispose();
@@ -220,10 +206,9 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
     if (state is ReservationClosed) {
       widget.controller.updateIsClosed(state.reservation.isClosed);
 
-      setState(() {
-        _refreshRequired = true;
-        rawDatesAffected.add(state.reservation.startTimeUtc.toLocal());
-      });
+      widget.coordinator.requireCalendarRefresh(state.reservation.startTimeUtc);
+      widget.coordinator.requireFloorPlanRefresh();
+      widget.coordinator.requireReservationPreviewRefresh();
 
       // Reflect the change in tables tab
       context.read<ReservationTablesBloc>().add(ReservationClosedEvent());
@@ -232,11 +217,7 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
           context, 'Резервацията беше приключена успешно.');
     } else if (state is ReservationActivated) {
       widget.controller.updateIsClosed(state.reservation.isClosed);
-
-      setState(() {
-        _refreshRequired = true;
-        rawDatesAffected.add(state.reservation.startTimeUtc.toLocal());
-      });
+      widget.coordinator.requireCalendarRefresh(state.reservation.startTimeUtc);
 
       // Reload tables tab
       context
@@ -247,12 +228,6 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
           context, 'Резервацията беше активирана успешно.');
     } else if (state is ReservationDetailsUpdated) {
       setState(() {
-        _refreshRequired = true;
-        rawDatesAffected.addAll([
-          state.originalStartTimeUtc.toLocal(), // Before update
-          state.reservation.startTimeUtc.toLocal(), // After update
-        ]);
-
         _isCreatedByStaff = state.reservation.isCreatedByStaff;
         _originalReservation = state.reservation;
         _setControllers(state.reservation);
@@ -261,6 +236,11 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
         _displayMode = ReservationFormMode.view;
         widget.controller.updateDisplayMode(_displayMode);
       });
+
+      widget.coordinator.requireCalendarRefresh(state.originalStartTimeUtc);
+      widget.coordinator.requireCalendarRefresh(state.reservation.startTimeUtc);
+      widget.coordinator.requireFloorPlanRefresh();
+      widget.coordinator.requireReservationPreviewRefresh();
 
       // Reload tables tab
       context
@@ -279,10 +259,9 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
         _setControllers(state.reservation);
       });
     } else if (state is ReservationRemoved) {
-      setState(() {
-        _refreshRequired = true;
-        rawDatesAffected.add(state.affectedDateUtc.toLocal());
-      });
+      widget.coordinator.requireCalendarRefresh(state.affectedDateUtc);
+      widget.coordinator.requireFloorPlanRefresh();
+      widget.coordinator.requireReservationPreviewRefresh();
 
       SnackBarService.showSuccess(context, 'Резервацията беше изтрита успешно');
 
