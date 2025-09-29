@@ -5,3 +5,5 @@ class GetReservationPreview extends ReservationPreviewEvent {
 
   GetReservationPreview(this.reservationId);
 }
+
+class DismissReservationPreview extends ReservationPreviewEvent {}

@@ -98,19 +98,18 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
     }
   }
 
-  void _handleReservationPreviewState(
+  void _handleReservationPreviewStateChanges(
       BuildContext context, ReservationPreviewState state) {
+    final bool shouldDismiss = state is ReservationPreviewDismissed ||
+        state is ReservationPreviewError;
+
+    // Dismiss the reservation preview if required
+    // Check if the bottom sheet is currently mounted/visible and close it
+    if (shouldDismiss && Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
+
     if (state is ReservationPreviewError) {
-      // Check if the bottom sheet is currently mounted/visible and close it
-      if (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
-      }
-
-      // Remove table group selection
-      setState(() {
-        _selectedReservationId = null;
-      });
-
       SnackBarService.showFailure(context, state.failure);
 
       if (state.failure.requiresReauthentication) {
@@ -127,7 +126,7 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
         listener: _handleFloorPlanStateChanges,
         builder: (context, state) {
           return BlocListener<ReservationPreviewBloc, ReservationPreviewState>(
-            listener: _handleReservationPreviewState,
+            listener: _handleReservationPreviewStateChanges,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(

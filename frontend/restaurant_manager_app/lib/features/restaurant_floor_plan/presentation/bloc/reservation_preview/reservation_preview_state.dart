@@ -18,3 +18,5 @@ class ReservationPreviewError extends ReservationPreviewState {
 
   ReservationPreviewError(this.failure);
 }
+
+class ReservationPreviewDismissed extends ReservationPreviewState {}

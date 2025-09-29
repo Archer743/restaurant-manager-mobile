@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -9,8 +8,6 @@ import 'package:restaurant_manager_app/core/presentation/services/snackbar_servi
 import 'package:restaurant_manager_app/core/utils/datetime_utils.dart';
 import 'package:restaurant_manager_app/core/utils/spacing.dart';
 import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
-import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_bloc.dart';
-import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_form_mode.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_view.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_bloc.dart';
@@ -208,7 +205,7 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
 
       widget.coordinator.requireCalendarRefresh(state.reservation.startTimeUtc);
       widget.coordinator.requireFloorPlanRefresh();
-      widget.coordinator.requireReservationPreviewRefresh();
+      widget.coordinator.requirePreviewDismiss();
 
       // Reflect the change in tables tab
       context.read<ReservationTablesBloc>().add(ReservationClosedEvent());
@@ -261,7 +258,7 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
     } else if (state is ReservationRemoved) {
       widget.coordinator.requireCalendarRefresh(state.affectedDateUtc);
       widget.coordinator.requireFloorPlanRefresh();
-      widget.coordinator.requireReservationPreviewRefresh();
+      widget.coordinator.requirePreviewDismiss();
 
       SnackBarService.showSuccess(context, 'Резервацията беше изтрита успешно');
 

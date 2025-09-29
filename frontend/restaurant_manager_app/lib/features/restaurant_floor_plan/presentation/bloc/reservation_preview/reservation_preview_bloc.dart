@@ -11,6 +11,7 @@ class ReservationPreviewBloc
   ReservationPreviewBloc(this._getReservationPreviewUseCase)
       : super(ReservationPreviewInitial()) {
     on<GetReservationPreview>(_onGetReservationPreview);
+    on<DismissReservationPreview>(_onDismissReservationPreview);
   }
 
   Future<void> _onGetReservationPreview(GetReservationPreview event,
@@ -26,5 +27,10 @@ class ReservationPreviewBloc
       (failure) => emit(ReservationPreviewError(failure)),
       (preview) => emit(ReservationPreviewLoaded(preview)),
     );
+  }
+
+  Future<void> _onDismissReservationPreview(DismissReservationPreview event,
+      Emitter<ReservationPreviewState> emit) async {
+    emit(ReservationPreviewDismissed());
   }
 }

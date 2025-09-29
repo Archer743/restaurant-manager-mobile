@@ -21,6 +21,7 @@ class ReservationRefreshCoordinator {
 
   bool _refreshFloorPlanRequired = false;
   bool _refreshReservationPreviewRequired = false;
+  bool _dismissReservationPreviewRequired = false;
 
   // This is the only place where final fields are directly initialized.
   ReservationRefreshCoordinator._internal({
@@ -68,22 +69,33 @@ class ReservationRefreshCoordinator {
     _refreshReservationPreviewRequired = true;
   }
 
+  void requirePreviewDismiss() {
+    _dismissReservationPreviewRequired = true;
+  }
+
+  // TODO: Improve preview dismiss and refresh - handle difficult states like:
+  //- when reservation date is changed to a different day from the one that is displayed in floor plan
+  //- when reservation is closed and then activated again + tables are added
+  //- when all tables are removed
+  // TODO: It's bad practice to use a BLoC event to trigger navigation or transient side effects like closing a modal
   void executeRefresh() {
     // Refresh calendar
     if (_refreshCalendarRequired && _calendarBloc != null) {
       _calendarBloc.add(RefreshCalendar(rawDatesAffected: _rawDatesAffected));
     }
 
+    // Refresh or dismiss reservation preview in floor plan page
+    if (_reservationPreviewBloc != null) {
+      if (_dismissReservationPreviewRequired) {
+        _reservationPreviewBloc.add(DismissReservationPreview());
+      } else if (_refreshReservationPreviewRequired && _reservationId != null) {
+        _reservationPreviewBloc.add(GetReservationPreview(_reservationId));
+      }
+    }
+
     // Refresh floor plan
     if (_refreshFloorPlanRequired && _floorPlanBloc != null && _date != null) {
       _floorPlanBloc.add(GetFloorPlan(date: _date, shiftId: _shiftId));
-    }
-
-    // Refresh reservation preview in floor plan page
-    if (_refreshReservationPreviewRequired &&
-        _reservationPreviewBloc != null &&
-        _reservationId != null) {
-      _reservationPreviewBloc.add(GetReservationPreview(_reservationId));
     }
   }
 }
