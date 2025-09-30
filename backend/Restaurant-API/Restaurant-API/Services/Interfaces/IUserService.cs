@@ -10,6 +10,8 @@ namespace Restaurant_API.Services.Interfaces
 
 		Task<UserAuthModel> LoginAsync(UserLoginModel loginModel);
 
-		Task<User> GetCurrUserAsync(HttpContext ctx);
+        Task<UserProfileViewModel> GetCurrUserProfileAsync(HttpContext ctx);
+
+        Task<User> GetCurrUserAsync(HttpContext ctx);
 	}
 }

@@ -15,5 +15,16 @@ namespace Restaurant_API.Data.Mappers
 				// Id, PasswordHash and RoleId are set in UserService
 			};
 		}
+
+		public static UserProfileViewModel ToProfileView(this User user)
+		{
+			return new UserProfileViewModel
+            {
+				Username = user.Username,
+				FirstName = user.FirstName,
+				LastName = user.LastName,
+				RoleName = user.Role.Name,
+			};
+		}
 	}
 }

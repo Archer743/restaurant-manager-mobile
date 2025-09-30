@@ -57,7 +57,13 @@ namespace Restaurant_API.Services
 			return tokens;
 		}
 
-		public async Task<User> GetCurrUserAsync(HttpContext ctx)
+		public async Task<UserProfileViewModel> GetCurrUserProfileAsync(HttpContext ctx)
+		{
+			var currUser = await GetCurrUserAsync(ctx);
+			return currUser.ToProfileView();
+		}
+
+        public async Task<User> GetCurrUserAsync(HttpContext ctx)
 		{
 			Guid userId = (Guid)ctx.Items["UserId"]!;
 			User? currUser = await userRepo.GetByIdAsync(userId);
