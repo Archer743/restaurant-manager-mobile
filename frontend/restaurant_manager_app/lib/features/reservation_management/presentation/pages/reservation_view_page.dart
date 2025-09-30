@@ -6,16 +6,19 @@ import 'package:restaurant_manager_app/features/reservation_management/presentat
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_form_mode.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/coordinators/reservation_refresh_coordinator.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/view_tabs/reservation_details_tab.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/view_tabs/reservation_tables_tab.dart';
 import 'package:restaurant_manager_app/config/theme/theme.dart';
 
 class ReservationViewPage extends StatefulWidget {
   final String reservationId;
+  final ReservationRefreshCoordinator coordinator;
 
   const ReservationViewPage({
     super.key,
     required this.reservationId,
+    required this.coordinator,
   });
 
   @override
@@ -37,10 +40,14 @@ class _ReservationViewPageState extends State<ReservationViewPage>
 
   @override
   void dispose() {
+    // Refresh all related screens
+    widget.coordinator.executeRefresh();
+
     _tabController.dispose();
     _detailsTabController.displayModeNotifier.dispose();
     _detailsTabController.tagNotifier.dispose();
     _detailsTabController.isClosedNotifier.dispose();
+
     super.dispose();
   }
 
@@ -138,10 +145,12 @@ class _ReservationViewPageState extends State<ReservationViewPage>
             ReservationDetailsTab(
               reservationId: widget.reservationId,
               controller: _detailsTabController,
+              coordinator: widget.coordinator,
               onRefresh: _handleRefresh,
             ),
             ReservationTablesTab(
               reservationId: widget.reservationId,
+              coordinator: widget.coordinator,
               onRefresh: _handleRefresh,
             ),
           ],

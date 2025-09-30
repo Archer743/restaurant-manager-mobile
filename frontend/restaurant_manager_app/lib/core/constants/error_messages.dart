@@ -19,6 +19,12 @@ const Map<String, String> errorMessages = {
 
   // Restaurant
   ErrorCodes.restaurantNotFound: "Вашият ресторант не е намерен.",
+  ErrorCodes.restaurantNoShiftsFound: "Няма намерени смени за ресторанта.",
+
+  // Shift
+  ErrorCodes.shiftNotFound: "Смяната не е намерена.",
+  ErrorCodes.shiftBelongsToDifferentRestaurant:
+      "Смяната не принадлежи на този ресторант.",
 
   // Table
   ErrorCodes.tableNotFound: "Някоя от избраните маси не беше намерена.",

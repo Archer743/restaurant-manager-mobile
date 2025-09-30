@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:restaurant_manager_app/config/theme/theme.dart';
 import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/entities/shift_view.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/entities/table_availability.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_shift_view.dart';
+import 'package:restaurant_manager_app/core/domain/entities/table_availability.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/tables/tables_grid.dart';
 
 class ShiftDisplay extends StatelessWidget {
-  final ShiftView shift;
+  final ReservationShiftView shift;
   final Set<String> selectedTableIds;
   final void Function(TableAvailability) onTableTap;
 

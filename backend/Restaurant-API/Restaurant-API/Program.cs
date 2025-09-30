@@ -122,6 +122,7 @@ namespace Restaurant_API
 			builder.Services.AddScoped<ISessionService, SessionService>();
 
 			builder.Services.AddScoped<IRestaurantService, RestaurantService>();
+			builder.Services.AddScoped<ITimeZoneService, TimeZoneService>();
 			builder.Services.AddScoped<IShiftService, ShiftService>();
             builder.Services.AddScoped<ITableService, TableService>();
 			builder.Services.AddScoped<IReservationService, ReservationService>();

@@ -1,0 +1,76 @@
+import 'package:flutter/material.dart';
+import 'package:restaurant_manager_app/config/theme/theme.dart';
+import 'package:restaurant_manager_app/core/domain/entities/table_availability.dart';
+
+class TableCard extends StatelessWidget {
+  final TableAvailability table;
+  final Future<void> Function(TableAvailability) onTableTap;
+  final bool isSelected;
+
+  const TableCard({
+    super.key,
+    required this.table,
+    required this.onTableTap,
+    required this.isSelected,
+  });
+
+  Color _getBaseColor() {
+    if (isSelected) {
+      return actionColor;
+    }
+
+    switch (table.status) {
+      case TableStatus.available:
+        return successColor;
+      case TableStatus.reserved:
+        return warningColor;
+      case TableStatus.reservedByCurrent:
+        return actionColor;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        await onTableTap(table);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: _getBaseColor(),
+          borderRadius: BorderRadius.circular(borderRadius),
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Маса ${table.tableNumber}',
+                    style: defaultTextStyle,
+                  ),
+                  _buildCapacityRow(context),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCapacityRow(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          '${table.capacity}x',
+          style: defaultTextStyle,
+        ),
+        Icon(Icons.person, size: 18, color: textColor.toColor()),
+      ],
+    );
+  }
+}

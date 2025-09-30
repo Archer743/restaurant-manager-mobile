@@ -107,6 +107,17 @@ namespace Restaurant_API.Services
             return reservation.ToView();
         }
 
+        public async Task<FloorPlanReservationPreviewModel> GetFloorPlanReservationPreviewAsync(HttpContext ctx, Guid reservationId)
+        {
+            Reservation reservation = await GetReservationIfOwnedAsync(ctx, reservationId, includeDetails: true);
+            TimeZoneInfo restaurantTimeZone = restaurantService.GetTimeZoneInfo(reservation.Restaurant);
+
+            var preview = reservation.ToFloorPlanPreview(restaurantTimeZone);
+            preview.TableCount = reservation.Tables.Count;
+
+            return preview;
+        }
+
         public async Task<Dictionary<DateOnly, List<ReservationCalendarPreviewModel>>> GetConfirmedReservationsInPeriodAsync(HttpContext ctx, DateOnly start, DateOnly end)
         {
             Restaurant currUserRestaurant = await restaurantService.GetCurrUserAssociatedRestaurantAsync(ctx);

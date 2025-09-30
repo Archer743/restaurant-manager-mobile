@@ -5,6 +5,9 @@ import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/
 import 'package:restaurant_manager_app/features/pending_reservations_inbox/presentation/bloc/pending_inbox_bloc.dart';
 import 'package:restaurant_manager_app/features/pending_reservations_inbox/presentation/bloc/pending_inbox_event.dart';
 import 'package:restaurant_manager_app/features/pending_reservations_inbox/presentation/pages/pending_reservations_inbox_page.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/floor_plan/floor_plan_bloc.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/reservation_preview/reservation_preview_bloc.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/pages/restaurant_floor_plan_page.dart';
 import 'package:restaurant_manager_app/injection_container.dart';
 
 class HomePage extends StatefulWidget {
@@ -15,8 +18,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final _pageController = PageController(initialPage: 0);
-  int _currIndex = 0;
+  final _pageController = PageController(initialPage: 1);
+  int _currIndex = 1;
 
   late final List<Widget> _pages;
 
@@ -29,7 +32,13 @@ class _HomePageState extends State<HomePage> {
         create: (_) => sl(),
         child: const ConfirmedReservationsCalendarPage(),
       ),
-      const Scaffold(body: Center(child: Text("2: Restaurant Tables"))),
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<FloorPlanBloc>(create: (_) => sl()),
+          BlocProvider<ReservationPreviewBloc>(create: (_) => sl()),
+        ],
+        child: const RestaurantFloorPlanPage(),
+      ),
       BlocProvider<PendingInboxBloc>(
         create: (_) => sl()..add(GetPendingReservations()),
         child: const PendingReservationsInboxPage(),

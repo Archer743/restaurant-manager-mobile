@@ -1,5 +1,5 @@
 import 'package:restaurant_manager_app/core/errors/failure.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/entities/shift_view.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_shift_view.dart';
 
 abstract class ReservationTablesState {}
 
@@ -8,13 +8,13 @@ class ReservationTablesInitial extends ReservationTablesState {}
 class ReservationTablesLoading extends ReservationTablesState {}
 
 class ReservationTablesLoaded extends ReservationTablesState {
-  final ShiftView shiftView;
+  final ReservationShiftView shiftView;
   final Set<String> selectedTableIds;
 
   ReservationTablesLoaded(this.shiftView, {this.selectedTableIds = const {}});
 
   ReservationTablesLoaded copyWith({
-    ShiftView? shiftView,
+    ReservationShiftView? shiftView,
     Set<String>? selectedTableIds,
   }) {
     return ReservationTablesLoaded(

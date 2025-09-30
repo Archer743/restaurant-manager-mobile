@@ -15,6 +15,12 @@ abstract class ErrorCodes {
 
   // Restaurant
   static const String restaurantNotFound = 'RESTAURANT_NOT_FOUND';
+  static const String restaurantNoShiftsFound = 'RESTAURANT_NO_SHIFTS_FOUND';
+
+  // Shift
+  static const String shiftNotFound = 'SHIFT_NOT_FOUND';
+  static const String shiftBelongsToDifferentRestaurant =
+      'SHIFT_DIFFERENT_RESTAURANT';
 
   // Table
   static const String tableNotFound = 'TABLE_NOT_FOUND';

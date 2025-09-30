@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/entities/table_availability.dart';
+import 'package:restaurant_manager_app/core/domain/entities/table_availability.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/tables/table_card.dart';
 
 class TablesGrid extends StatelessWidget {

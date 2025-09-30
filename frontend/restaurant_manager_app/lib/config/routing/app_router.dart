@@ -14,6 +14,7 @@ import 'package:restaurant_manager_app/features/reservation_management/presentat
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/create/reservation_create_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_event.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/coordinators/reservation_refresh_coordinator.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/reservation_create_page.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/reservation_view_page.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/bloc/splash_bloc.dart';
@@ -87,11 +88,14 @@ final GoRouter appRouter = GoRouter(
           path: ':id',
           builder: (context, state) {
             final reservationId = state.pathParameters['id'];
-            final calendarBloc = state.extra as CalendarBloc?;
+            final Object? extra = state.extra;
+
+            final coordinator =
+                extra is ReservationRefreshCoordinator ? extra : null;
 
             // TODO: Navigate to an error page
-            if (reservationId == null) {
-              return const Text('Error: Reservation ID missing');
+            if (reservationId == null || coordinator == null) {
+              return const Text('Error: Reservation ID or Coordinator missing');
             }
 
             return MultiBlocProvider(
@@ -104,10 +108,11 @@ final GoRouter appRouter = GoRouter(
                   create: (_) =>
                       sl()..add(GetTablesAvailability(reservationId)),
                 ),
-                if (calendarBloc != null)
-                  BlocProvider<CalendarBloc>.value(value: calendarBloc),
               ],
-              child: ReservationViewPage(reservationId: reservationId),
+              child: ReservationViewPage(
+                reservationId: reservationId,
+                coordinator: coordinator,
+              ),
             );
           },
         ),

@@ -38,6 +38,14 @@ import 'package:restaurant_manager_app/features/reservation_management/domain/us
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/create/reservation_create_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_bloc.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/data/data_sources/floor_plan_api_service.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/data/data_sources/reservation_preview_api_service.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/data/repository/floor_plan_repository_impl.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/domain/repository/floor_plan_repository.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/domain/usecases/get_floor_plan_usecase.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/domain/usecases/get_reservation_preview_usecase.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/floor_plan/floor_plan_bloc.dart';
+import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/reservation_preview/reservation_preview_bloc.dart';
 import 'package:restaurant_manager_app/features/splash/data/repository/session_repository_impl.dart';
 import 'package:restaurant_manager_app/features/splash/domain/repository/session_repository.dart';
 import 'package:restaurant_manager_app/features/splash/domain/usecases/check_auth_status_usecase.dart';
@@ -185,6 +193,43 @@ Future<void> initDependencies() async {
     () => ReservationTablesBloc(
       sl<GetTablesAvailabilityForReservationUseCase>(),
       sl<UpdateReservationTablesUseCase>(),
+    ),
+  );
+
+  // ---------------- Restaurant Floor Plan Feature ----------------
+  // [Data Sources]
+  sl.registerSingleton<FloorPlanApiService>(
+      FloorPlanApiService(sl<Dio>(), baseUrl: apiBaseUrl));
+
+  sl.registerSingleton<ReservationPreviewApiService>(
+      ReservationPreviewApiService(sl<Dio>(), baseUrl: reservationsBaseUrl));
+
+  // [Repositories]
+  sl.registerSingleton<FloorPlanRepository>(
+    FloorPlanRepositoryImpl(
+      sl<AuthSharedRepository>(),
+      sl<TokenStorageService>(),
+      sl<FloorPlanApiService>(),
+      sl<ReservationPreviewApiService>(),
+    ),
+  );
+
+  // [UseCases]
+  sl.registerSingleton<GetFloorPlanUseCase>(GetFloorPlanUseCase(sl()));
+
+  sl.registerSingleton<GetReservationPreviewUseCase>(
+      GetReservationPreviewUseCase(sl()));
+
+  // [Blocs]
+  sl.registerFactory<FloorPlanBloc>(
+    () => FloorPlanBloc(
+      sl<GetFloorPlanUseCase>(),
+    ),
+  );
+
+  sl.registerFactory<ReservationPreviewBloc>(
+    () => ReservationPreviewBloc(
+      sl<GetReservationPreviewUseCase>(),
     ),
   );
 

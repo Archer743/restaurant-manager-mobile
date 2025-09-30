@@ -10,12 +10,12 @@ import 'package:restaurant_manager_app/features/reservation_management/data/data
 import 'package:restaurant_manager_app/features/reservation_management/data/models/reservation_create_model.dart';
 import 'package:restaurant_manager_app/features/reservation_management/data/models/reservation_tables_update_model.dart';
 import 'package:restaurant_manager_app/features/reservation_management/data/models/reservation_update_model.dart';
-import 'package:restaurant_manager_app/features/reservation_management/data/models/shift_view_model.dart';
+import 'package:restaurant_manager_app/features/reservation_management/data/models/reservation_shift_view_model.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_create.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_tables_update.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_update.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_view.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/entities/shift_view.dart';
+import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_shift_view.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/repository/reservation_repository.dart';
 
 class ReservationRepositoryImpl implements ReservationRepository {
@@ -119,7 +119,8 @@ class ReservationRepositoryImpl implements ReservationRepository {
   }
 
   @override
-  Future<Either<Failure, ShiftView>> getTablesAvailabilityForReservation(
+  Future<Either<Failure, ReservationShiftView>>
+      getTablesAvailabilityForReservation(
     String id,
   ) async {
     return await handleAuthRequest(
@@ -135,7 +136,7 @@ class ReservationRepositoryImpl implements ReservationRepository {
   }
 
   @override
-  Future<Either<Failure, ShiftView?>> updateReservationTables(
+  Future<Either<Failure, ReservationShiftView?>> updateReservationTables(
     String id,
     ReservationTablesUpdate update,
   ) async {
@@ -152,7 +153,7 @@ class ReservationRepositoryImpl implements ReservationRepository {
         // But since the backend can return either 200 with JSON (ShiftViewModel)
         // OR 204 No Content (with an empty body), we must handle the parsing manually.
         if (response.response.statusCode == HttpStatus.ok) {
-          final shift = ShiftViewModel.fromJson(response.data);
+          final shift = ReservationShiftViewModel.fromJson(response.data);
           return shift.getEntity();
         }
 
