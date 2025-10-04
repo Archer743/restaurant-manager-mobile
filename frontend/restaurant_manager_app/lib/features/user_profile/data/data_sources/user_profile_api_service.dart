@@ -9,7 +9,7 @@ abstract class UserProfileApiService {
   factory UserProfileApiService(Dio dio, {String baseUrl}) =
       _UserProfileApiService;
 
-  @GET("current")
+  @GET("/current")
   Future<HttpResponse<UserProfileViewModel>> getCurrUserProfile(
     @Header('Authorization') String authorization,
   );

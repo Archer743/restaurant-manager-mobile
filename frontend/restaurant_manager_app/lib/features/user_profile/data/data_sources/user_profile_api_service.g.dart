@@ -36,7 +36,7 @@ class _UserProfileApiService implements UserProfileApiService {
     )
         .compose(
           _dio.options,
-          'current',
+          '/current',
           queryParameters: queryParameters,
           data: _data,
         )

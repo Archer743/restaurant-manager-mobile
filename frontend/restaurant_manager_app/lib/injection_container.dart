@@ -54,6 +54,7 @@ import 'package:restaurant_manager_app/features/user_profile/data/data_sources/u
 import 'package:restaurant_manager_app/features/user_profile/data/repository/user_profile_repository_impl.dart';
 import 'package:restaurant_manager_app/features/user_profile/domain/repository/user_profile_repository.dart';
 import 'package:restaurant_manager_app/features/user_profile/domain/usecases/get_curr_user_profile_usecase.dart';
+import 'package:restaurant_manager_app/features/user_profile/presentation/bloc/user_profile_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -296,4 +297,9 @@ void _initUserProfileFeature() {
   // [UseCases]
   sl.registerSingleton<GetCurrUserProfileUseCase>(
       GetCurrUserProfileUseCase(sl()));
+
+  // [Blocs]
+  sl.registerFactory<UserProfileBloc>(
+    () => UserProfileBloc(sl()),
+  );
 }
