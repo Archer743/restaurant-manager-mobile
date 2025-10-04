@@ -78,9 +78,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
             },
             child: Stack(
               children: [
-                SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  child: _buildBodyContent(state),
+                Center(
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: _buildBodyContent(state),
+                  ),
                 ),
                 // if (_isProfileAvailable(state)) ...[
                 //   Positioned(top: 6, right: 6, child: _buildActions()),
@@ -95,26 +97,21 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   Widget _buildBodyContent(UserProfileState state) {
     if (_isProfileAvailable(state)) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(45, 0, 45, 16),
-          child: UserProfileForm(
-            formKey: _formKey,
-            displayMode: _displayMode,
-            usernameController: _usernameController,
-            roleNameController: _roleNameController,
-            firstNameController: _firstNameController,
-            lastNameController: _lastNameController,
-          ),
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(45, 0, 45, 16),
+        child: UserProfileForm(
+          formKey: _formKey,
+          displayMode: _displayMode,
+          usernameController: _usernameController,
+          roleNameController: _roleNameController,
+          firstNameController: _firstNameController,
+          lastNameController: _lastNameController,
         ),
       );
     }
 
     // Loading and error state
-    return SizedBox(
-      height: spacingByHeight(context, 0.8),
-      child: const Center(child: CircularProgressIndicator()),
-    );
+    return const CircularProgressIndicator();
   }
 
   Widget _buildActions() {
