@@ -3,11 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:restaurant_manager_app/config/routing/app_routes.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
-import 'package:restaurant_manager_app/core/utils/spacing.dart';
 import 'package:restaurant_manager_app/features/user_profile/domain/entities/user_profile_view.dart';
 import 'package:restaurant_manager_app/features/user_profile/presentation/bloc/user_profile_bloc.dart';
 import 'package:restaurant_manager_app/features/user_profile/presentation/bloc/user_profile_event.dart';
 import 'package:restaurant_manager_app/features/user_profile/presentation/bloc/user_profile_state.dart';
+import 'package:restaurant_manager_app/features/user_profile/presentation/widgets/buttons/profile_actions_menu.dart';
 import 'package:restaurant_manager_app/features/user_profile/presentation/widgets/forms/user_profile_form.dart';
 
 class UserProfilePage extends StatefulWidget {
@@ -84,9 +84,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     child: _buildBodyContent(state),
                   ),
                 ),
-                // if (_isProfileAvailable(state)) ...[
-                //   Positioned(top: 6, right: 6, child: _buildActions()),
-                // ]
+                if (_isProfileAvailable(state)) ...[
+                  Positioned(top: 6, right: 6, child: _buildActions()),
+                ]
               ],
             ),
           );
@@ -115,6 +115,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
   }
 
   Widget _buildActions() {
-    return const SizedBox.shrink();
+    return ProfileActionsMenu(
+      onLogout: () => debugPrint("Logout"),
+    );
   }
 }
