@@ -13,6 +13,7 @@
         {
             public const string InvalidSession = "INVALID_SESSION";
             public const string CreationFailed = "SESSION_CREATION_FAILED";
+            public const string UpdateFailed = "SESSION_UPDATE_FAILED";
         }
 
         public static class User

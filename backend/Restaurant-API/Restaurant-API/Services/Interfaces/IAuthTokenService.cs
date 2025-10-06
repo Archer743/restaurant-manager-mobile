@@ -7,6 +7,5 @@ namespace Restaurant_API.Services.Interfaces
 		UserAuthModel GenerateAuthTokens(Guid userId, Guid sessionId);
 
         string GenerateRefreshToken();
-
     }
 }

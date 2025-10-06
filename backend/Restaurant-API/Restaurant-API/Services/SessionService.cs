@@ -14,7 +14,9 @@ namespace Restaurant_API.Services
 {
     public class SessionService : ISessionService
 	{
-		private readonly SessionSettings sessionSettings;
+        private enum SessionOperationType { Create, Refresh }
+
+        private readonly SessionSettings sessionSettings;
 		private readonly IAuthTokenService authTokenService;
 		private readonly ISessionRepo sessionRepo;
 
@@ -27,42 +29,15 @@ namespace Restaurant_API.Services
 
 		public async Task<UserAuthModel> CreateNewSessionAsync(Guid userId)
 		{
-			const int MaxHashRetries = 3;
-
-            // Generate new access and refresh tokens
+            // Generate access and unique refresh tokens
             Guid sessionId = Guid.NewGuid();
-            UserAuthModel tokens = authTokenService.GenerateAuthTokens(userId, sessionId);
-
-			string hashedToken = GetHashedRefreshToken(tokens.RefreshToken);
-
-            bool isHashUnique = false;
-
-			// Ensure that the refresh token's hash is unique
-            for (int attempt = 0; attempt < MaxHashRetries; attempt++)
-			{
-				if (!await sessionRepo.HashExistsAsync(hashedToken))
-				{
-					isHashUnique = true; break;
-				}
-				else if (attempt == MaxHashRetries - 1)
-				{
-					break;
-				}
-
-                tokens.RefreshToken = authTokenService.GenerateRefreshToken();
-                hashedToken = GetHashedRefreshToken(tokens.RefreshToken);
-            }
-
-			if (!isHashUnique)
-			{
-				throw new ServiceUnavailableException(ErrorCodes.Session.CreationFailed);
-            }
+            UserAuthModel tokens = await GenerateUniqueAuthTokensAsync(userId, sessionId, SessionOperationType.Create);
 
             var session = new Session
             {
                 Id = sessionId,
                 UserId = userId,
-                RefreshTokenHash = hashedToken,
+                RefreshTokenHash = GetHashedRefreshToken(tokens.RefreshToken),
                 CreatedAt = DateTime.UtcNow,
                 ExpiresAt = DateTime.UtcNow.Add(sessionSettings.SessionLifetime),
                 IsRevoked = false
@@ -76,7 +51,7 @@ namespace Restaurant_API.Services
             }
             catch (DbUpdateException)
             {
-                // If there is a Race Condition
+                // Race Condition
                 throw new ServiceUnavailableException(ErrorCodes.Session.CreationFailed);
             }
         }
@@ -86,22 +61,29 @@ namespace Restaurant_API.Services
 			string hashedToken = GetHashedRefreshToken(refreshToken);
 			Session? session = await sessionRepo.GetByHashedTokenAsync(hashedToken);
 
-			// Session must be active - exists, isn't expired and isn't revoked
-			if (session == null || session.ExpiresAt < DateTime.UtcNow || session.IsRevoked)
+			if (session == null || IsSessionInactive(session))
 			{
-				throw new UnauthorizedException(ErrorCodes.Session.InvalidSession);
+				throw new ForbiddenException(ErrorCodes.Session.InvalidSession);
 			}
 
-			// Generate new access and refresh tokens
-			UserAuthModel tokens = authTokenService.GenerateAuthTokens(session.UserId, session.Id);
+            // Generate access and unique refresh tokens
+            UserAuthModel tokens = await GenerateUniqueAuthTokensAsync(session.UserId, session.Id, SessionOperationType.Refresh);
 
-			// Update session's refresh token & extend the session
-			session.RefreshTokenHash = GetHashedRefreshToken(tokens.RefreshToken);
-			session.ExpiresAt = DateTime.UtcNow.Add(sessionSettings.SessionLifetime);
-			await sessionRepo.UpdateAsync(session);
+			try
+			{
+                // Update session's refresh token & extend the session
+                session.RefreshTokenHash = GetHashedRefreshToken(tokens.RefreshToken);
+                session.ExpiresAt = DateTime.UtcNow.Add(sessionSettings.SessionLifetime);
+                await sessionRepo.UpdateAsync(session);
 
-			return tokens;
-		}
+                return tokens;
+            }
+            catch (DbUpdateException)
+            {
+                // Race Condition
+                throw new ServiceUnavailableException(ErrorCodes.Session.UpdateFailed);
+            }
+        }
 
 		public async Task EndSessionAsync(string refreshToken)
 		{
@@ -125,11 +107,56 @@ namespace Restaurant_API.Services
 			await sessionRepo.RemoveRangeAsync(oldSessions);
 		}
 
-		private string GetHashedRefreshToken(string refreshToken)
+        private async Task<UserAuthModel> GenerateUniqueAuthTokensAsync(Guid userId, Guid sessionId, SessionOperationType operationType)
+		{
+            const int MaxHashRetries = 3;
+
+            // Generate tokens
+            UserAuthModel tokens = authTokenService.GenerateAuthTokens(userId, sessionId);
+
+            string hashedToken = GetHashedRefreshToken(tokens.RefreshToken);
+            bool isHashUnique = false;
+
+            // Ensure that the refresh token's hash is unique
+            for (int attempt = 0; attempt < MaxHashRetries; attempt++)
+            {
+                if (!await sessionRepo.HashExistsAsync(hashedToken))
+                {
+                    isHashUnique = true;
+					break;
+                }
+                else if (attempt == MaxHashRetries - 1)
+                {
+                    break;
+                }
+
+                tokens.RefreshToken = authTokenService.GenerateRefreshToken();
+                hashedToken = GetHashedRefreshToken(tokens.RefreshToken);
+            }
+
+            if (!isHashUnique)
+            {
+                var errorCode = operationType == SessionOperationType.Create
+                    ? ErrorCodes.Session.CreationFailed
+                    : ErrorCodes.Session.UpdateFailed;
+
+                throw new ServiceUnavailableException(errorCode);
+            }
+
+			return tokens;
+        }
+
+        private string GetHashedRefreshToken(string refreshToken)
 		{
 			using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(sessionSettings.ServerSecretKey));
 			byte[] hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(refreshToken));
 			return Convert.ToBase64String(hashBytes);
 		}
+	
+		private bool IsSessionInactive(Session session)
+		{
+            // Inactive = expired or revoked
+            return session.ExpiresAt < DateTime.UtcNow || session.IsRevoked;
+        }
 	}
 }
