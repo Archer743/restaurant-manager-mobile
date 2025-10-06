@@ -40,7 +40,13 @@ namespace Restaurant_API.Repositories
 								.FirstOrDefaultAsync(session => session.RefreshTokenHash == refreshTokenHash);
 		}
 
-		public async Task<List<Session>> GetOldInactiveSessionsAsync(uint thresholdDays)
+        public async Task<bool> HashExistsAsync(string refreshTokenHash)
+        {
+			return await context.Sessions
+								.AnyAsync(session => session.RefreshTokenHash == refreshTokenHash);
+        }
+
+        public async Task<List<Session>> GetOldInactiveSessionsAsync(uint thresholdDays)
 		{
 			var thresholdDate = DateTime.UtcNow.AddDays(-thresholdDays);
 
@@ -50,5 +56,5 @@ namespace Restaurant_API.Repositories
 									&& session.ExpiresAt < thresholdDate)
 								.ToListAsync();
 		}
-	}
+    }
 }

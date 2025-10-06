@@ -12,6 +12,8 @@ namespace Restaurant_API.Repositories.Interfaces
 
 		Task<Session?> GetByHashedTokenAsync(string refreshTokenHash);
 
-		Task<List<Session>> GetOldInactiveSessionsAsync(uint thresholdDays);
-	}
+        Task<bool> HashExistsAsync(string refreshTokenHash);
+
+        Task<List<Session>> GetOldInactiveSessionsAsync(uint thresholdDays);
+    }
 }
