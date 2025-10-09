@@ -11,7 +11,7 @@ namespace Restaurant_API.Services.Interfaces
 
 		Task<UserAuthModel> RefreshSessionAsync(string refreshToken);
 
-		Task EndSessionAsync(string refreshToken);
+		Task EndCurrSessionAsync(HttpContext ctx);
 
 		Task RemoveOldInactiveSessionsAsync();
 

@@ -9,6 +9,7 @@ using System.Text;
 using Restaurant_API.Constants;
 using Restaurant_API.Data.Models.Auth;
 using Microsoft.EntityFrameworkCore;
+using Restaurant_API.Extensions;
 
 namespace Restaurant_API.Services
 {
@@ -90,20 +91,11 @@ namespace Restaurant_API.Services
             }
         }
 
-		public async Task EndSessionAsync(string refreshToken)
-		{
-			string hashedToken = GetHashedRefreshToken(refreshToken);
-			Session? session = await sessionRepo.GetByHashedTokenAsync(hashedToken);
-
-			// Session must be active - exists, isn't expired and isn't revoked
-			if (session == null || session.ExpiresAt < DateTime.UtcNow || session.IsRevoked)
-			{
-				throw new UnauthorizedException(ErrorCodes.Session.InvalidSession);
-			}
-
-			// End session
-			session.IsRevoked = true;
-			await sessionRepo.UpdateAsync(session);
+		public async Task EndCurrSessionAsync(HttpContext ctx)
+        {
+			Session currSession = ctx.GetCurrSession();
+            currSession.IsRevoked = true;
+			await sessionRepo.UpdateAsync(currSession);
 		}
 
 		public async Task RemoveOldInactiveSessionsAsync()

@@ -4,7 +4,7 @@ using Restaurant_API.Data.Mappers;
 using Restaurant_API.Data.Models.Auth;
 using Restaurant_API.Data.Models.User;
 using Restaurant_API.Exceptions;
-using Restaurant_API.Extentions;
+using Restaurant_API.Extensions;
 using Restaurant_API.Repositories.Interfaces;
 using Restaurant_API.Services.Interfaces;
 

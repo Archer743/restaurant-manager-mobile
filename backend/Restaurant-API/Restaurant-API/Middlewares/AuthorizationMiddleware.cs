@@ -1,5 +1,4 @@
 ﻿using Restaurant_API.Exceptions;
-using Restaurant_API.Extensions;
 using Restaurant_API.Services.Interfaces;
 
 namespace Restaurant_API.Middlewares

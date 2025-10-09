@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Restaurant_API.Attributes;
 using Restaurant_API.Data.Models.Auth;
 using Restaurant_API.Data.Models.User;
 using Restaurant_API.Services.Interfaces;
@@ -39,10 +40,10 @@ namespace Restaurant_API.Controllers
 			return Ok(auth);
 		}
 
-		[HttpPost("logout")]
-		public async Task<IActionResult> LogoutAsync(RefreshTokenRequest refreshModel)
+		[HttpPost("logout"), AppAuthorize]
+		public async Task<IActionResult> LogoutAsync()
 		{
-			await sessionService.EndSessionAsync(refreshModel.RefreshToken);
+			await sessionService.EndCurrSessionAsync(HttpContext);
 			return NoContent();
 		}
 	}

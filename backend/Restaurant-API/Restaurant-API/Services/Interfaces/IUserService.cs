@@ -1,5 +1,4 @@
-﻿using Restaurant_API.Data.Entities;
-using Restaurant_API.Data.Models.Auth;
+﻿using Restaurant_API.Data.Models.Auth;
 using Restaurant_API.Data.Models.User;
 
 namespace Restaurant_API.Services.Interfaces
