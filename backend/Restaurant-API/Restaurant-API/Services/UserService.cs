@@ -4,6 +4,7 @@ using Restaurant_API.Data.Mappers;
 using Restaurant_API.Data.Models.Auth;
 using Restaurant_API.Data.Models.User;
 using Restaurant_API.Exceptions;
+using Restaurant_API.Extentions;
 using Restaurant_API.Repositories.Interfaces;
 using Restaurant_API.Services.Interfaces;
 
@@ -59,17 +60,8 @@ namespace Restaurant_API.Services
 
 		public async Task<UserProfileViewModel> GetCurrUserProfileAsync(HttpContext ctx)
 		{
-			var currUser = await GetCurrUserAsync(ctx);
-			return currUser.ToProfileView();
+			return ctx.GetCurrUser().ToProfileView();
 		}
-
-        public async Task<User> GetCurrUserAsync(HttpContext ctx)
-		{
-			Guid userId = (Guid)ctx.Items["UserId"]!;
-			User? currUser = await userRepo.GetByIdAsync(userId);
-
-			return currUser ?? throw new UnauthorizedException(ErrorCodes.Auth.UserNotFound);
-        }
 
         private async Task<bool> IsUsernameAvailableAsync(string username)
 		{

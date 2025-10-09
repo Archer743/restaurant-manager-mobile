@@ -32,6 +32,14 @@ namespace Restaurant_API.Repositories
 			await context.SaveChangesAsync();
 		}
 
+		public async Task<Session?> GetByIdAsync(Guid id)
+		{
+			return await context.Sessions
+								.Include(session => session.User)
+								.ThenInclude(user => user.Role)
+								.FirstOrDefaultAsync(session => session.Id == id);
+		}
+
 		public async Task<Session?> GetByHashedTokenAsync(string refreshTokenHash)
 		{
 			return await context.Sessions

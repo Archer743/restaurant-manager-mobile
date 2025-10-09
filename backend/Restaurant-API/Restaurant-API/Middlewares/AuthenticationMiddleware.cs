@@ -6,6 +6,7 @@ using System.Text;
 using Restaurant_API.Exceptions;
 using Restaurant_API.Constants;
 using System.IdentityModel.Tokens.Jwt;
+using Restaurant_API.Data.Entities;
 
 namespace Restaurant_API.Middlewares
 {
@@ -30,7 +31,7 @@ namespace Restaurant_API.Middlewares
 			};
 		}
 
-		public async Task InvokeAsync(HttpContext context, IRoleService roleService)
+		public async Task InvokeAsync(HttpContext context, ISessionService sessionService)
 		{
 			var endpointAuth = GetEndpointAuthorization(context);
 
@@ -52,18 +53,24 @@ namespace Restaurant_API.Middlewares
 				// Validate the access token and extract the associated claims
 				var claimsPrincipal = handler.ValidateToken(accessToken, validParams, out _);
 
-				// Retrieve the user ID from the token claims
+				// Retrieve userId and sessionId claims
 				string userIdClaim = claimsPrincipal.FindFirst("userId")!.Value;
+				string sessionIdClaim = claimsPrincipal.FindFirst("sessionId")!.Value;
 
-				// Parse the user ID from string to Guid
+				// Parse the ids from the claims
 				Guid userId = Guid.Parse(userIdClaim);
+				Guid sessionId = Guid.Parse(sessionIdClaim);
 
-				// Retrieve the user's role - it's normalized name (throws if user does not exist)
-				string userRole = await roleService.GetUserRoleNormalizedNameByIdAsync(userId) ?? throw new Exception();
+				// Retrive the session and validate if it's active and belongs to the current user
+				Session? session = await sessionService.GetSessionByIdAsync(sessionId);
 
-				// Store validated user information for downstream use
-				context.Items["UserId"] = userId;
-				context.Items["UserRole"] = userRole;  // Needed for authorization
+				if (session == null || session.UserId != userId || sessionService.IsSessionInactive(session))
+				{
+					throw new Exception();
+				}
+
+				// Store the session for downstream use. It includes information about the user and their role
+				context.Items["Session"] = session;
 			}
 			catch
 			{

@@ -1,4 +1,5 @@
 ﻿using Restaurant_API.Data.Entities;
+using Restaurant_API.Extensions;
 using Restaurant_API.Repositories.Interfaces;
 using Restaurant_API.Services.Interfaces;
 
@@ -7,12 +8,10 @@ namespace Restaurant_API.Services
 	public class RoleService : IRoleService
 	{
 		private readonly IRoleRepo roleRepo;
-		private readonly IUserRepo userRepo;
 
-		public RoleService(IRoleRepo roleRepo, IUserRepo userRepo)
+		public RoleService(IRoleRepo roleRepo)
 		{
 			this.roleRepo = roleRepo;
-			this.userRepo = userRepo;
 		}
 
 		public async Task<Guid> GetRoleIdByNormalizedNameAsync(string normalizedName)
@@ -27,24 +26,16 @@ namespace Restaurant_API.Services
 			return role.Id;
 		}
 
-		public async Task<string?> GetUserRoleNormalizedNameByIdAsync(Guid userId)
+		public bool HasCurrUserRole(HttpContext ctx, string role)
 		{
-			User? user = await userRepo.GetByIdAsync(userId);
-			return user?.Role.NormalizedName;
+			string currUserRoleName = ctx.GetCurrUserRole().NormalizedName;
+			return string.Equals(currUserRoleName, role, StringComparison.OrdinalIgnoreCase);
 		}
-		
-		public bool HasCurrUserRole(HttpContext ctx, string normalizedRole)
+
+		public bool HasCurrUserAnyRole(HttpContext ctx, IEnumerable<string> roles)
 		{
-			// Attempt to retrieve the role set by the authentication middleware
-			string? currUserRole = ctx.Items["UserRole"] as string;
-
-			// If no role is present, this likely means the endpoint doesn't require authenticated access.
-			if (currUserRole == null)
-			{
-				throw new InvalidOperationException("User role is not set in the current context. This method should only be called on authenticated endpoints.");
-			}
-
-			return currUserRole == normalizedRole;
+			string currUserRoleName = ctx.GetCurrUserRole().NormalizedName;
+			return roles.Any(role => string.Equals(currUserRoleName, role, StringComparison.OrdinalIgnoreCase));
 		}
     }
 }

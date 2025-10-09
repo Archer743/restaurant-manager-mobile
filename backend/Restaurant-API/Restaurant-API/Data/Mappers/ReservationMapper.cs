@@ -1,6 +1,5 @@
 ﻿using Restaurant_API.Data.Entities;
 using Restaurant_API.Data.Models.Reservation;
-using System.Xml.Linq;
 
 namespace Restaurant_API.Data.Mappers
 {

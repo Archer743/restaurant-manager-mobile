@@ -27,6 +27,11 @@ namespace Restaurant_API.Services
 			this.sessionRepo = sessionRepo;
 		}
 
+        public async Task<Session?> GetSessionByIdAsync(Guid sessionId)
+        {
+            return await sessionRepo.GetByIdAsync(sessionId);
+        }
+
 		public async Task<UserAuthModel> CreateNewSessionAsync(Guid userId)
 		{
             // Generate access and unique refresh tokens
@@ -67,16 +72,16 @@ namespace Restaurant_API.Services
 			}
 
             // Generate access and unique refresh tokens
-            UserAuthModel tokens = await GenerateUniqueAuthTokensAsync(session.UserId, session.Id, SessionOperationType.Refresh);
+            UserAuthModel newTokens = await GenerateUniqueAuthTokensAsync(session.UserId, session.Id, SessionOperationType.Refresh);
 
 			try
 			{
                 // Update session's refresh token & extend the session
-                session.RefreshTokenHash = GetHashedRefreshToken(tokens.RefreshToken);
+                session.RefreshTokenHash = GetHashedRefreshToken(newTokens.RefreshToken);
                 session.ExpiresAt = DateTime.UtcNow.Add(sessionSettings.SessionLifetime);
                 await sessionRepo.UpdateAsync(session);
 
-                return tokens;
+                return newTokens;
             }
             catch (DbUpdateException)
             {
@@ -107,7 +112,13 @@ namespace Restaurant_API.Services
 			await sessionRepo.RemoveRangeAsync(oldSessions);
 		}
 
-        private async Task<UserAuthModel> GenerateUniqueAuthTokensAsync(Guid userId, Guid sessionId, SessionOperationType operationType)
+        public bool IsSessionInactive(Session session)
+		{
+			// Inactive = expired or revoked
+			return session.ExpiresAt < DateTime.UtcNow || session.IsRevoked;
+		}
+
+		private async Task<UserAuthModel> GenerateUniqueAuthTokensAsync(Guid userId, Guid sessionId, SessionOperationType operationType)
 		{
             const int MaxHashRetries = 3;
 
@@ -152,11 +163,5 @@ namespace Restaurant_API.Services
 			byte[] hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(refreshToken));
 			return Convert.ToBase64String(hashBytes);
 		}
-	
-		private bool IsSessionInactive(Session session)
-		{
-            // Inactive = expired or revoked
-            return session.ExpiresAt < DateTime.UtcNow || session.IsRevoked;
-        }
 	}
 }
