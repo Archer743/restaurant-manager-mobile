@@ -69,7 +69,7 @@ namespace Restaurant_API.Services
 
 			if (session == null || IsSessionInactive(session))
 			{
-				throw new ForbiddenException(ErrorCodes.Session.InvalidSession);
+				throw new UnauthorizedException(ErrorCodes.Session.InvalidSession);
 			}
 
             // Generate access and unique refresh tokens

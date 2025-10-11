@@ -50,10 +50,12 @@ import 'package:restaurant_manager_app/features/splash/data/repository/session_r
 import 'package:restaurant_manager_app/features/splash/domain/repository/session_repository.dart';
 import 'package:restaurant_manager_app/features/splash/domain/usecases/check_auth_status_usecase.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:restaurant_manager_app/features/user_profile/data/data_sources/logout_api_service.dart';
 import 'package:restaurant_manager_app/features/user_profile/data/data_sources/user_profile_api_service.dart';
 import 'package:restaurant_manager_app/features/user_profile/data/repository/user_profile_repository_impl.dart';
 import 'package:restaurant_manager_app/features/user_profile/domain/repository/user_profile_repository.dart';
 import 'package:restaurant_manager_app/features/user_profile/domain/usecases/get_curr_user_profile_usecase.dart';
+import 'package:restaurant_manager_app/features/user_profile/domain/usecases/logout_usecase.dart';
 import 'package:restaurant_manager_app/features/user_profile/presentation/bloc/user_profile_bloc.dart';
 
 final sl = GetIt.instance;
@@ -285,12 +287,16 @@ void _initUserProfileFeature() {
   sl.registerSingleton<UserProfileApiService>(
       UserProfileApiService(sl<Dio>(), baseUrl: usersBaseUrl));
 
+  sl.registerSingleton<LogoutApiService>(
+      LogoutApiService(sl<Dio>(), baseUrl: authBaseUrl));
+
   // [Repositories]
   sl.registerSingleton<UserProfileRepository>(
     UserProfileRepositoryImpl(
       sl<AuthSharedRepository>(),
       sl<TokenStorageService>(),
       sl<UserProfileApiService>(),
+      sl<LogoutApiService>(),
     ),
   );
 
@@ -298,8 +304,13 @@ void _initUserProfileFeature() {
   sl.registerSingleton<GetCurrUserProfileUseCase>(
       GetCurrUserProfileUseCase(sl()));
 
+  sl.registerSingleton<LogoutUseCase>(LogoutUseCase(sl()));
+
   // [Blocs]
   sl.registerFactory<UserProfileBloc>(
-    () => UserProfileBloc(sl()),
+    () => UserProfileBloc(
+      sl<GetCurrUserProfileUseCase>(),
+      sl<LogoutUseCase>(),
+    ),
   );
 }

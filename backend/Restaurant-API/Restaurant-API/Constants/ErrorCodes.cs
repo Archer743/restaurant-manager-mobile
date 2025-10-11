@@ -5,7 +5,6 @@
         public static class Auth
         {
             public const string InvalidAuthorization = "INVALID_AUTHORIZATION";
-            public const string UserNotFound = "USER_NOT_FOUND";
             public const string ForbiddenAccess = "FORBIDDEN_ACCESS";
         }
 

@@ -13,6 +13,8 @@ class UserProfileLoaded extends UserProfileState {
   UserProfileLoaded(this.profile);
 }
 
+class LogoutSuccess extends UserProfileState {}
+
 class UserProfileError extends UserProfileState {
   final Failure failure;
   final UserProfileView? profile;

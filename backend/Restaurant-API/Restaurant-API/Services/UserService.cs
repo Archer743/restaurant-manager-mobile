@@ -58,7 +58,7 @@ namespace Restaurant_API.Services
 			return tokens;
 		}
 
-		public async Task<UserProfileViewModel> GetCurrUserProfileAsync(HttpContext ctx)
+		public UserProfileViewModel GetCurrUserProfile(HttpContext ctx)
 		{
 			return ctx.GetCurrUser().ToProfileView();
 		}

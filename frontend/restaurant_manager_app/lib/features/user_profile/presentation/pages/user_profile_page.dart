@@ -52,6 +52,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
       BuildContext context, UserProfileState state) {
     if (state is UserProfileLoaded) {
       setState(() => _setControllers(state.profile));
+    } else if (state is LogoutSuccess) {
+      SnackBarService.showSuccess(context, "Излязохте от акаунта си успешно.");
+      context.go(AppRoutes.welcome);
     } else if (state is UserProfileError) {
       if (state.hasProfile()) {
         setState(() => _setControllers(state.profile!));
@@ -116,7 +119,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   Widget _buildActions() {
     return ProfileActionsMenu(
-      onLogout: () => debugPrint("Logout"),
+      onLogout: () {
+        context.read<UserProfileBloc>().add(Logout());
+      },
     );
   }
 }

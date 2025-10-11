@@ -4,4 +4,6 @@ import 'package:restaurant_manager_app/features/user_profile/domain/entities/use
 
 abstract class UserProfileRepository {
   Future<Either<Failure, UserProfileView>> getCurrUserProfile();
+
+  Future<Either<Failure, void>> logout();
 }

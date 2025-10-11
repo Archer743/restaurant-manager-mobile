@@ -17,9 +17,9 @@ namespace Restaurant_API.Controllers
 
         /* ======================================================================== GET */
         [HttpGet("current"), AppAuthorize]
-        public async Task<IActionResult> GetCurrUserProfileAsync()
+        public IActionResult GetCurrUserProfile()
         {
-            var profileView = await userService.GetCurrUserProfileAsync(HttpContext);
+            var profileView = userService.GetCurrUserProfile(HttpContext);
             return Ok(profileView);
         }
     }

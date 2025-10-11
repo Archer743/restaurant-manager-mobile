@@ -29,7 +29,7 @@ namespace Restaurant_API.Controllers
 		[HttpPost("login")]
 		public async Task<IActionResult> LoginAsync(UserLoginModel loginModel)
 		{
-			UserAuthModel auth = await userService.LoginAsync(loginModel);
+            UserAuthModel auth = await userService.LoginAsync(loginModel);
 			return Ok(auth);
 		}
 

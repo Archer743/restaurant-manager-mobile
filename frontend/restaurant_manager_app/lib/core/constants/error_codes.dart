@@ -2,11 +2,12 @@ abstract class ErrorCodes {
   // ======================== Server Error Codes
   // Auth
   static const String invalidAuthorization = 'INVALID_AUTHORIZATION';
-  static const String userNotFound = 'USER_NOT_FOUND';
   static const String forbiddenAccess = 'FORBIDDEN_ACCESS';
 
   // Session
   static const String invalidSession = 'INVALID_SESSION';
+  static const String sessionCreationFailed = 'SESSION_CREATION_FAILED';
+  static const String sessionUpdateFailed = 'SESSION_UPDATE_FAILED';
 
   // User
   static const String usernameTaken = 'USERNAME_TAKEN';
