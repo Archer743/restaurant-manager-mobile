@@ -24,10 +24,26 @@ namespace Restaurant_API.Middlewares
 				ValidIssuer = jwtSettings.Issuer,
 				ValidAudience = jwtSettings.Audience,
 				IssuerSigningKey = key,
+
+				// Presence requirements
+				RequireSignedTokens = true,
+				RequireExpirationTime = true,
+				RequireAudience = true,
+
+				// Value validations
 				ValidateIssuer = true,
 				ValidateAudience = true,
 				ValidateIssuerSigningKey = true,
-				ValidateLifetime = true
+				ValidateLifetime = true,
+
+				// A time-tolerant feature that is applied during token validation to compensate for possible
+				// clock differences between different servers
+
+				// Single server				=> 0s
+				// Cloud app					=> 30s - 1min
+				// Microservice environment		=> 2-5 min
+
+				ClockSkew = TimeSpan.FromMinutes(2),
 			};
 		}
 
