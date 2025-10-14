@@ -5,6 +5,7 @@ import 'package:restaurant_manager_app/config/routing/app_routes.dart';
 import 'package:restaurant_manager_app/core/constants/error_codes.dart';
 import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
+import 'package:restaurant_manager_app/core/presentation/widgets/app_refresh_indicator.dart';
 import 'package:restaurant_manager_app/core/utils/datetime_utils.dart';
 import 'package:restaurant_manager_app/core/utils/spacing.dart';
 import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
@@ -191,7 +192,7 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
         // Allow pull-to-refresh only in view mode
         return Scaffold(
           body: _displayMode == ReservationFormMode.view
-              ? RefreshIndicator(onRefresh: widget.onRefresh, child: body)
+              ? AppRefreshIndicator(onRefresh: widget.onRefresh, child: body)
               : body,
         );
       },

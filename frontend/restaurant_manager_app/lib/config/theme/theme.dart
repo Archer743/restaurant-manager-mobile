@@ -300,6 +300,12 @@ final timePickerTheme = ThemeData(
   ),
 );
 
+// Progress Indicator
+final progressIndicatorTheme = ProgressIndicatorThemeData(
+  color: actionColor,
+  circularTrackColor: actionColor.withOpacity(0.3),
+);
+
 ThemeData darkTheme = ThemeData.dark().copyWith(
   scaffoldBackgroundColor: bgColor,
   appBarTheme: darkAppBarTheme,
@@ -312,4 +318,5 @@ ThemeData darkTheme = ThemeData.dark().copyWith(
   popupMenuTheme: darkPopupMenuTheme,
   snackBarTheme: baseSnackBarTheme,
   tabBarTheme: tabBarTheme,
+  progressIndicatorTheme: progressIndicatorTheme,
 );

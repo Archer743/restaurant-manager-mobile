@@ -18,12 +18,13 @@ class ActionButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: isLoading ? null : onPressed,
       child: isLoading
-          ? const SizedBox(
+          ? SizedBox(
               width: 20,
               height: 20,
               child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(inputIconColor),
+                color: accentColor,
+                backgroundColor: accentColor.withOpacity(0.45),
+                strokeWidth: 3,
               ),
             )
           : Text(label),

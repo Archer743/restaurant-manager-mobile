@@ -7,6 +7,7 @@ import 'package:restaurant_manager_app/core/constants/error_codes.dart';
 import 'package:restaurant_manager_app/core/errors/error_mapper.dart';
 import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
+import 'package:restaurant_manager_app/core/presentation/widgets/app_refresh_indicator.dart';
 import 'package:restaurant_manager_app/core/utils/spacing.dart';
 import 'package:restaurant_manager_app/core/domain/entities/table_availability.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_bloc.dart';
@@ -44,7 +45,7 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
       listener: _handleStateChanges,
       builder: (context, state) {
         return Scaffold(
-          body: RefreshIndicator(
+          body: AppRefreshIndicator(
             onRefresh: widget.onRefresh,
             child: _buildContent(context, state),
           ),

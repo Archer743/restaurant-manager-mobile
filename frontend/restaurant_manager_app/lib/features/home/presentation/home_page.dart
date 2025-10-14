@@ -21,8 +21,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final _pageController = PageController(initialPage: 1);
-  int _currIndex = 1;
+  final _pageController = PageController(initialPage: 3);
+  int _currIndex = 3;
 
   late final List<Widget> _pages;
 
@@ -46,8 +46,12 @@ class _HomePageState extends State<HomePage> {
         create: (_) => sl()..add(GetPendingReservations()),
         child: const PendingReservationsInboxPage(),
       ),
+      // const Text("4: Logs (Staff Activity History)")
       const Scaffold(
-          body: Center(child: Text("4: Logs (Staff Activity History)"))),
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      ),
       BlocProvider<UserProfileBloc>(
         create: (_) => sl()..add(GetCurrUserProfile()),
         child: const UserProfilePage(),
