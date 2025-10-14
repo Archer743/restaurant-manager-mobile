@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:restaurant_manager_app/config/routing/app_routes.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
 import 'package:restaurant_manager_app/core/presentation/widgets/app_refresh_indicator.dart';
+import 'package:restaurant_manager_app/core/utils/spacing.dart';
 import 'package:restaurant_manager_app/features/user_profile/domain/entities/user_profile_view.dart';
 import 'package:restaurant_manager_app/features/user_profile/presentation/bloc/user_profile_bloc.dart';
 import 'package:restaurant_manager_app/features/user_profile/presentation/bloc/user_profile_event.dart';
@@ -115,7 +116,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
     }
 
     // Loading and error state
-    return const CircularProgressIndicator();
+    return SizedBox(
+      height: spacingByHeight(context, 0.7),
+      child: const Center(child: CircularProgressIndicator()),
+    );
   }
 
   Widget _buildActions() {

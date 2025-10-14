@@ -306,6 +306,13 @@ final progressIndicatorTheme = ProgressIndicatorThemeData(
   circularTrackColor: actionColor.withOpacity(0.3),
 );
 
+// Text Selection Theme
+final textSelectionTheme = TextSelectionThemeData(
+  cursorColor: actionColor,
+  selectionHandleColor: actionColor,
+  selectionColor: secondaryColor.withOpacity(0.3),
+);
+
 ThemeData darkTheme = ThemeData.dark().copyWith(
   scaffoldBackgroundColor: bgColor,
   appBarTheme: darkAppBarTheme,
@@ -319,4 +326,5 @@ ThemeData darkTheme = ThemeData.dark().copyWith(
   snackBarTheme: baseSnackBarTheme,
   tabBarTheme: tabBarTheme,
   progressIndicatorTheme: progressIndicatorTheme,
+  textSelectionTheme: textSelectionTheme,
 );
