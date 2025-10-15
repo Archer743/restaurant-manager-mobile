@@ -14,16 +14,20 @@ import 'package:restaurant_manager_app/features/reservation_management/presentat
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_state.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/coordinators/reservation_refresh_coordinator.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/view_tabs/reservation_details_tab.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/dialogs/table_selection_warning_dialog.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/shift_display.dart';
 
 class ReservationTablesTab extends StatefulWidget {
   final String reservationId;
+  final ReservationDetailsTabController detailsTabController;
   final ReservationRefreshCoordinator coordinator;
   final Future<void> Function() onRefresh;
 
   const ReservationTablesTab({
     super.key,
     required this.reservationId,
+    required this.detailsTabController,
     required this.coordinator,
     required this.onRefresh,
   });
@@ -84,6 +88,38 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
       widget.coordinator.requireReservationPreviewRefresh();
 
       SnackBarService.showSuccess(context, 'Масите бяха обновени успешно');
+    }
+  }
+
+  void _onSavePressed(ReservationTablesLoaded state, int peopleCount) {
+    void saveTableSelection() {
+      context
+          .read<ReservationTablesBloc>()
+          .add(SaveTableSelection(widget.reservationId));
+    }
+
+    final int maxAcceptableCapacity = peopleCount + 5;
+
+    final totalCapacity = state.shiftView.tables.where(
+      (table) {
+        bool isSelected = state.selectedTableIds.contains(table.id);
+
+        // Reserved tables that aren't removed and new added tables
+        return (table.status == TableStatus.reservedByCurrent && !isSelected) ||
+            (table.status == TableStatus.available && isSelected);
+      },
+    ).fold(0, (currCapacity, table) => currCapacity + table.capacity);
+
+    if (totalCapacity < peopleCount || totalCapacity > maxAcceptableCapacity) {
+      showTableSelectionWarningDialog(
+        context: context,
+        onConfirm: saveTableSelection,
+        peopleCount: peopleCount,
+        totalCapacity: totalCapacity,
+        maxAcceptableCapacity: maxAcceptableCapacity,
+      );
+    } else {
+      saveTableSelection();
     }
   }
 
@@ -162,28 +198,34 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
     return SafeArea(
       child: BlocBuilder<ReservationTablesBloc, ReservationTablesState>(
         builder: (context, state) {
+          final bool tablesSelected = (state is ReservationTablesLoaded &&
+              state.selectedTableIds.isNotEmpty);
+
           return AnimatedSwitcher(
             duration: const Duration(milliseconds: 250),
             transitionBuilder: (child, animation) =>
                 FadeTransition(opacity: animation, child: child),
-            child: (state is ReservationTablesLoaded &&
-                    state.selectedTableIds.isNotEmpty)
+            child: tablesSelected
                 ? Padding(
                     padding: const EdgeInsets.all(16),
                     child: SizedBox(
                       width: double.infinity,
                       height: 50,
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          context
-                              .read<ReservationTablesBloc>()
-                              .add(SaveTableSelection(widget.reservationId));
+                      child: ValueListenableBuilder<int?>(
+                        valueListenable:
+                            widget.detailsTabController.peopleCountNotifier,
+                        builder: (context, peopleCount, _) {
+                          return ElevatedButton.icon(
+                            onPressed: peopleCount != null
+                                ? () => _onSavePressed(state, peopleCount)
+                                : null,
+                            icon: const Icon(Icons.save),
+                            label: const Text('Запази промените'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: actionColor,
+                            ),
+                          );
                         },
-                        icon: const Icon(Icons.save),
-                        label: const Text('Запази промените'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: actionColor,
-                        ),
                       ),
                     ),
                   )

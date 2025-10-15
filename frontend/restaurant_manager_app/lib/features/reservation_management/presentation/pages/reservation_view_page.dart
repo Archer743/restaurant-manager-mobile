@@ -44,9 +44,7 @@ class _ReservationViewPageState extends State<ReservationViewPage>
     widget.coordinator.executeRefresh();
 
     _tabController.dispose();
-    _detailsTabController.displayModeNotifier.dispose();
-    _detailsTabController.tagNotifier.dispose();
-    _detailsTabController.isClosedNotifier.dispose();
+    _detailsTabController.dispose();
 
     super.dispose();
   }
@@ -150,6 +148,7 @@ class _ReservationViewPageState extends State<ReservationViewPage>
             ),
             ReservationTablesTab(
               reservationId: widget.reservationId,
+              detailsTabController: _detailsTabController,
               coordinator: widget.coordinator,
               onRefresh: _handleRefresh,
             ),

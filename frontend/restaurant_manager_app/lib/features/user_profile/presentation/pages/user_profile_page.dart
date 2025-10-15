@@ -90,7 +90,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   ),
                 ),
                 if (_isProfileAvailable(state)) ...[
-                  Positioned(top: 6, right: 6, child: _buildActions()),
+                  Positioned(top: 6, right: 6, child: _buildActionsMenu()),
                 ]
               ],
             ),
@@ -122,7 +122,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
   }
 
-  Widget _buildActions() {
+  Widget _buildActionsMenu() {
     return ProfileActionsMenu(
       onLogout: () {
         context.read<UserProfileBloc>().add(Logout());
