@@ -65,16 +65,26 @@ namespace Restaurant_API
 			});
 
 
-			// Allows receiving requests from other domains
+			// Cors policies
 			builder.Services.AddCors(options =>
 			{
-				options.AddDefaultPolicy(
-					builder =>
-					{
-						builder.WithOrigins("*")
-							   .AllowAnyHeader()
-							   .AllowAnyMethod();
-					});
+				// All browser requests from external websites will receive a CORS error.
+				// The mobile app will not have any problems — it uses native http client (it's not a browser)
+				// so it will bypass the CORS.
+				options.AddPolicy("StrictPolicy", policy =>
+				{
+					policy.DisallowCredentials();  // Prohibits sending "credentials" (cookies, auth header)
+				});
+
+				// !!! ONLY USED IN DEVELOPMENT !!!
+				// Allows receiving requests from other domains.
+				options.AddPolicy("DevPolicy", policy =>
+				{
+					policy
+						.AllowAnyOrigin()
+						.AllowAnyHeader()
+						.AllowAnyMethod();
+				});
 			});
 
 
@@ -83,7 +93,6 @@ namespace Restaurant_API
 			 * .AddScoped		=> One instance per HTTP request.
 			 * .AddTransient	=> New instance every time it’s requested.
 			 */
-
 
 			// Database Setup
 			var connectionStrings = builder.Services.BuildServiceProvider()
@@ -130,37 +139,45 @@ namespace Restaurant_API
 
 		private static void ConfigureApp(WebApplication app)
 		{
-			// Swagger & Hangfire Setup in Dev Environment
+			// Swagger, Hangfire and Cors setup
+			/// Dev environment
 			if (app.Environment.IsDevelopment())
 			{
 				app.UseSwagger();
 				app.UseSwaggerUI();
-
 				app.UseHangfireDashboard("/hangfire");
+
+				app.UseCors("DevPolicy");
+			} else
+			{
+				/// Production environment
+				app.UseCors("StrictPolicy");
+				// TODO: Fix in Production !!!!!
+				// app.UseHttpsRedirection();  // Redirects all HTTP requests to HTTPS
 			}
 
 
-			app.UseCors();  // Enables CORS
-			// TODO: Fix in Production !!!!!
-			// app.UseHttpsRedirection();  // Redirects all HTTP requests to HTTPS
-
-
-			/*
-			 * Middleware ordering is critical:
-			 * GlobalExceptionHandler -> Authentication -> Authorization
-			 */
-
+			// Middlewares setup
+			// Ordering is critical: GlobalExceptionHandler -> Authentication -> Authorization
 			app.UseGlobalExceptionHandler();
 			app.UseAppAuthentication();
 			app.UseAppAuthorization();
 
 
-			app.MapControllers();  // Routes requests to controller actions
+			// Routes requests to controller actions
+			app.MapControllers();
 
 
-			// Hangfire Recurring Jobs
+			// Hangfire Recurring Jobs setup
+			using var scope = app.Services.CreateScope();
+			var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+
 			// Will remove old inactive sessions at midnight UTC everyday
-			RecurringJob.AddOrUpdate<ISessionService>("rm-old-inactive-sessions-job", service => service.RemoveOldInactiveSessionsAsync(), Cron.Daily());
+			recurringJobManager.AddOrUpdate<ISessionService>(
+				"rm-old-inactive-sessions-job",
+				service => service.RemoveOldInactiveSessionsAsync(),
+				Cron.Daily()
+			);
 
 
 			// TODO: Enable Database Seeding
@@ -177,8 +194,9 @@ namespace Restaurant_API
 
 			// Create an app based on the builder
 			var app = builder.Build();
-			ConfigureApp(app);
+			app.Logger.LogInformation("Server running in environment: {env}", app.Environment.EnvironmentName);
 
+			ConfigureApp(app);
 			app.Run();
 		}
 	}

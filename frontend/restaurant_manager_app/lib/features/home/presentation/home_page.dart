@@ -47,11 +47,11 @@ class _HomePageState extends State<HomePage> {
         child: const PendingReservationsInboxPage(),
       ),
       // const Text("4: Logs (Staff Activity History)")
-      const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      ),
+      // const Scaffold(
+      //   body: Center(
+      //     child: CircularProgressIndicator(),
+      //   ),
+      // ),
       BlocProvider<UserProfileBloc>(
         create: (_) => sl()..add(GetCurrUserProfile()),
         child: const UserProfilePage(),
@@ -89,7 +89,7 @@ class _HomePageState extends State<HomePage> {
           NavigationDestination(
               icon: Icon(Icons.table_restaurant_sharp), label: ''),
           NavigationDestination(icon: Icon(Icons.check_circle), label: ''),
-          NavigationDestination(icon: Icon(Icons.history), label: ''),
+          // NavigationDestination(icon: Icon(Icons.history), label: ''),
           NavigationDestination(icon: Icon(Icons.person), label: ''),
         ],
       ),
