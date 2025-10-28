@@ -4,3 +4,5 @@
 /.vscode
 
 /frontend/restaurant_manager_app/android/gradle.properties
+
+/.env

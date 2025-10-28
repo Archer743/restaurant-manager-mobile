@@ -13,6 +13,11 @@ using Restaurant_API.Services.Interfaces;
 using Restaurant_API.Settings;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Hangfire.PostgreSql.Utils;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using static System.Net.Mime.MediaTypeNames;
+using static System.Net.WebRequestMethods;
+using System;
 
 namespace Restaurant_API
 {
@@ -88,12 +93,6 @@ namespace Restaurant_API
 			});
 
 
-			/* builder.Services
-			 * .AddSingleton	=> One instance is created and shared across the entire app lifetime.
-			 * .AddScoped		=> One instance per HTTP request.
-			 * .AddTransient	=> New instance every time it’s requested.
-			 */
-
 			// Database Setup
 			var connectionStrings = builder.Services.BuildServiceProvider()
 													.GetService<IOptions<ConnectionStrings>>()!.Value;
@@ -111,6 +110,12 @@ namespace Restaurant_API
 
 			builder.Services.AddHangfireServer();  // Adds a background worker that processes jobs
 
+
+			/* builder.Services
+			 * .AddSingleton	=> One instance is created and shared across the entire app lifetime.
+			 * .AddScoped		=> One instance per HTTP request.
+			 * .AddTransient	=> New instance every time it’s requested.
+			 */
 
 			// Repositories Setup
 			builder.Services.AddScoped<IUserRepo, UserRepo>();
@@ -139,25 +144,37 @@ namespace Restaurant_API
 
 		private static void ConfigureApp(WebApplication app)
 		{
-			// Swagger, Hangfire and Cors setup
-			/// Dev environment
+			// Middlewares setup
 			if (app.Environment.IsDevelopment())
 			{
+				/// Dev environment
 				app.UseSwagger();
 				app.UseSwaggerUI();
 				app.UseHangfireDashboard("/hangfire");
 
 				app.UseCors("DevPolicy");
-			} else
+			} else if (app.Environment.IsStaging())
+			{
+				/// Staging environment
+				app.UseCors("StrictPolicy");
+				app.UseHttpsRedirection();  // Redirects all HTTP requests to HTTPS
+			} else if (app.Environment.IsProduction())
 			{
 				/// Production environment
 				app.UseCors("StrictPolicy");
-				// TODO: Fix in Production !!!!!
-				// app.UseHttpsRedirection();  // Redirects all HTTP requests to HTTPS
+
+				// HTTP Strict Transport Security - forces the browser to always use HTTPS
+				// for that domain for a set time (max-age)
+
+				// !!! Problem for testing: If applied to a local or staging domain, the browser will cache
+				// the HTTPS requirement, making it impossible to test HTTP or different local certificates
+				// on that domain until the cache expires !!!
+
+				// TODO: Activate before release
+				// app.UseHsts();
+				app.UseHttpsRedirection();  // Redirects all HTTP requests to HTTPS
 			}
 
-
-			// Middlewares setup
 			// Ordering is critical: GlobalExceptionHandler -> Authentication -> Authorization
 			app.UseGlobalExceptionHandler();
 			app.UseAppAuthentication();
@@ -174,21 +191,19 @@ namespace Restaurant_API
 
 			// Will remove old inactive sessions at midnight UTC everyday
 			recurringJobManager.AddOrUpdate<ISessionService>(
-				"rm-old-inactive-sessions-job",
-				service => service.RemoveOldInactiveSessionsAsync(),
-				Cron.Daily()
+			"rm-old-inactive-sessions-job",
+			service => service.RemoveOldInactiveSessionsAsync(),
+			Cron.Daily()
 			);
 
 
 			// TODO: Enable Database Seeding
 			// app.SeedDbAsync().GetAwaiter().GetResult();
 		}
-
 		public static void Main(string[] args)
 		{
 			// Create an app builder
 			var builder = WebApplication.CreateBuilder(args);
-
 			ConfigureSettings(builder);
 			ConfigureServices(builder);
 
