@@ -13,11 +13,8 @@ using Restaurant_API.Services.Interfaces;
 using Restaurant_API.Settings;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Hangfire.PostgreSql.Utils;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Net.WebRequestMethods;
-using System;
+using Restaurant_API.Extensions;
 
 namespace Restaurant_API
 {
@@ -130,6 +127,7 @@ namespace Restaurant_API
             builder.Services.AddScoped<IReservationRepo, ReservationRepo>();
 
             // Services Setup
+			builder.Services.AddScoped<IPasswordHasherService, PasswordHasherService>();
             builder.Services.AddScoped<IUserService, UserService>();
 			builder.Services.AddScoped<IRoleService, RoleService>();
 			builder.Services.AddScoped<IAuthTokenService, AuthTokenService>();
@@ -191,16 +189,13 @@ namespace Restaurant_API
 
 			// Will remove old inactive sessions at midnight UTC everyday
 			recurringJobManager.AddOrUpdate<ISessionService>(
-			"rm-old-inactive-sessions-job",
-			service => service.RemoveOldInactiveSessionsAsync(),
-			Cron.Daily()
+				"rm-old-inactive-sessions-job",
+				service => service.RemoveOldInactiveSessionsAsync(),
+				Cron.Daily()
 			);
-
-
-			// TODO: Enable Database Seeding
-			// app.SeedDbAsync().GetAwaiter().GetResult();
 		}
-		public static void Main(string[] args)
+
+		public static async Task Main(string[] args)
 		{
 			// Create an app builder
 			var builder = WebApplication.CreateBuilder(args);
@@ -209,10 +204,20 @@ namespace Restaurant_API
 
 			// Create an app based on the builder
 			var app = builder.Build();
-			app.Logger.LogInformation("Server running in environment: {env}", app.Environment.EnvironmentName);
+			app.Logger.LogInformation("==================================== Server running in environment: {env}", app.Environment.EnvironmentName);
+
+			// If the app environment is `Migration` the app will apply db migrations, seed the db
+			// and exit gracefully without running the server.
+			if (app.Environment.EnvironmentName.Equals("Migration", StringComparison.OrdinalIgnoreCase))
+			{
+				await app.MigrateAndSeedDbAsync();
+
+				Environment.Exit(0);
+				return;
+			}
 
 			ConfigureApp(app);
-			app.Run();
+			await app.RunAsync();
 		}
 	}
 }

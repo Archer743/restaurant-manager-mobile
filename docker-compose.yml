@@ -30,18 +30,26 @@ services:
       - restaurant-network
 
   migrator:
-    build:
-      context: ./backend/Restaurant-API/Restaurant-API
-      dockerfile: Dockerfile
-      # The 'build' stage has the full SDK, all source files and EF Core tools.
-      target: build
+    image: restaurant-manager-api:latest
     container_name: restaurant-manager-migrator
-    restart: on-failure:3
+    restart: "no"
     # profiles: ["migrate"] # Allows manual migration control
     environment:
+      - ASPNETCORE_URLS=http://+:8080
+      # In order to run the app as a migrator the env must be `Migration`
+      - ASPNETCORE_ENVIRONMENT=Migration
       - ConnectionStrings__PostgresConnection=Server=db;Database=${POSTGRES_DB};Port=5432;User Id=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};
-    # Override the default ENTRYPOINT
-    entrypoint: ["dotnet", "ef", "database", "update", "--project", "Restaurant-API.csproj"]
+      - JwtSettings__Issuer=${JWT_ISSUER}
+      - JwtSettings__Audience=${JWT_AUDIENCE}
+      - JwtSettings__ServerSecretKey=${JWT_SERVER_SECRET_KEY}
+      - JwtSettings__AccessTokenLifetime=${JWT_ACCESS_TOKEN_LIFETIME}
+      - SessionSettings__RefreshTokenLength=${SESSION_REFRESH_TOKEN_LENGTH}
+      - SessionSettings__ServerSecretKey=${SESSION_SERVER_SECRET_KEY}
+      - SessionSettings__SessionLifetime=${SESSION_LIFETIME}
+      - SessionSettings__RetentionDays=${SESSION_RETENTION_DAYS}
+      - Logging__LogLevel__Default=${LOGGING_LOG_LEVEL_DEFAULT}
+      - Logging__LogLevel__Microsoft.AspNetCore=${LOGGING_LOG_LEVEL_MICROSOFT_ASPNETCORE}
+      - ASPNETCORE_ALLOWEDHOSTS=${ASPNETCORE_ALLOWED_HOSTS}
     depends_on:
       db:
         condition: service_healthy # Ensure DB is ready

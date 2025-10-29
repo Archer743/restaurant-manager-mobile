@@ -12,12 +12,14 @@ namespace Restaurant_API.Services
 {
     public class UserService : IUserService
 	{
+		private readonly IPasswordHasherService passwordHasherService;
 		private readonly IRoleService roleService;
 		private readonly ISessionService sessionService;
 		private readonly IUserRepo userRepo;
 
-		public UserService(IRoleService roleService, ISessionService sessionService, IUserRepo userRepo)
+		public UserService(IPasswordHasherService passwordHasherService, IRoleService roleService, ISessionService sessionService, IUserRepo userRepo)
 		{
+			this.passwordHasherService = passwordHasherService;
 			this.roleService = roleService;
 			this.sessionService = sessionService;
 			this.userRepo = userRepo;
@@ -33,7 +35,7 @@ namespace Restaurant_API.Services
 			// User Setup
 			User user = registerModel.ToEntity();
 			user.Id = Guid.NewGuid();
-			user.PasswordHash = GetHashedPassword(registerModel.Password);
+			user.PasswordHash = passwordHasherService.HashPassword(registerModel.Password);
 			user.RoleId = await roleService.GetRoleIdByNormalizedNameAsync(Roles.Staff);
 
 			// Save the user in the database
@@ -48,7 +50,7 @@ namespace Restaurant_API.Services
 		{
 			User? user = await userRepo.GetByUsernameAsync(loginModel.Username);
 
-			if (user == null || !IsPasswordCorrect(loginModel.Password, user.PasswordHash))
+			if (user == null || !passwordHasherService.VerifyPassword(loginModel.Password, user.PasswordHash))
 			{
 				throw new UnauthorizedException(ErrorCodes.User.InvalidCredentials);
 			}
@@ -66,16 +68,6 @@ namespace Restaurant_API.Services
         private async Task<bool> IsUsernameAvailableAsync(string username)
 		{
 			return (await userRepo.GetByUsernameAsync(username)) == null;
-		}
-
-		private string GetHashedPassword(string password)
-		{
-			return BCrypt.Net.BCrypt.EnhancedHashPassword(password, 13);
-		}
-
-		private bool IsPasswordCorrect(string plainPassword, string hashedPassword)
-		{
-			return BCrypt.Net.BCrypt.EnhancedVerify(plainPassword, hashedPassword);
 		}
 	}
 }
