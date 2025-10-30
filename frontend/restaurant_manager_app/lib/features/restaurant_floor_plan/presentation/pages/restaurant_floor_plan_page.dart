@@ -7,6 +7,7 @@ import 'package:restaurant_manager_app/core/constants/error_codes.dart';
 import 'package:restaurant_manager_app/core/errors/error_mapper.dart';
 import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
+import 'package:restaurant_manager_app/core/presentation/widgets/app_refresh_indicator.dart';
 import 'package:restaurant_manager_app/core/utils/spacing.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/coordinators/reservation_refresh_coordinator.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/domain/entities/floor_plan_view.dart';
@@ -133,7 +134,7 @@ class _RestaurantFloorPlanPageState extends State<RestaurantFloorPlanPage> {
                 children: [
                   _buildFilters(state is FloorPlanLoading),
                   Expanded(
-                    child: RefreshIndicator(
+                    child: AppRefreshIndicator(
                       onRefresh: () async {
                         _getFloorPlan(isRefresh: true);
                       },

@@ -177,6 +177,9 @@ namespace Restaurant_API.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("RefreshTokenHash")
+                        .IsUnique();
+
                     b.HasIndex("UserId");
 
                     b.ToTable("Sessions");

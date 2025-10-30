@@ -10,8 +10,12 @@ namespace Restaurant_API.Repositories.Interfaces
 
 		Task RemoveRangeAsync(IEnumerable<Session> sessions);
 
+		Task<Session?> GetByIdAsync(Guid id);
+
 		Task<Session?> GetByHashedTokenAsync(string refreshTokenHash);
 
-		Task<List<Session>> GetOldInactiveSessionsAsync(uint thresholdDays);
-	}
+        Task<bool> HashExistsAsync(string refreshTokenHash);
+
+        Task<List<Session>> GetOldInactiveSessionsAsync(uint thresholdDays);
+    }
 }

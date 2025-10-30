@@ -359,6 +359,8 @@ namespace Restaurant_API.Services
         // over 2 billion possible unique combinations (36^6 = 2,176,782,336). This vast
         // number ensures an extremely low probability of collision, making the generation
         // process efficient and reliable.
+
+        // TODO: FIX - set limited tries
         private async Task<string> GenerateTagAsync(Guid restaurantId)
         {
             string tag;

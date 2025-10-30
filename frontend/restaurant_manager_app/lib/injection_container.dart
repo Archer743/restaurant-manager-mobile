@@ -50,6 +50,13 @@ import 'package:restaurant_manager_app/features/splash/data/repository/session_r
 import 'package:restaurant_manager_app/features/splash/domain/repository/session_repository.dart';
 import 'package:restaurant_manager_app/features/splash/domain/usecases/check_auth_status_usecase.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:restaurant_manager_app/features/user_profile/data/data_sources/logout_api_service.dart';
+import 'package:restaurant_manager_app/features/user_profile/data/data_sources/user_profile_api_service.dart';
+import 'package:restaurant_manager_app/features/user_profile/data/repository/user_profile_repository_impl.dart';
+import 'package:restaurant_manager_app/features/user_profile/domain/repository/user_profile_repository.dart';
+import 'package:restaurant_manager_app/features/user_profile/domain/usecases/get_curr_user_profile_usecase.dart';
+import 'package:restaurant_manager_app/features/user_profile/domain/usecases/logout_usecase.dart';
+import 'package:restaurant_manager_app/features/user_profile/presentation/bloc/user_profile_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -58,7 +65,21 @@ final sl = GetIt.instance;
 * singleton -> creates one instance for the rest of app's lifetime
 * factory   -> creates new instance every time it's needed
 */
+
 Future<void> initDependencies() async {
+  await _initCoreDependencies();
+
+  // Features
+  _initAuthFeature();
+  _initSplashFeature();
+  _initCalendarFeature();
+  _initReservationManagementFeature();
+  _initFloorPlanFeature();
+  _initPendingInboxFeature();
+  _initUserProfileFeature();
+}
+
+Future<void> _initCoreDependencies() async {
   // ================ Dio ================
   sl.registerSingleton<Dio>(Dio(
     BaseOptions(
@@ -69,10 +90,10 @@ Future<void> initDependencies() async {
   ));
 
   // ================ Flutter Secure Storage ================
+  // Kept async context due to this dependency
   sl.registerSingleton<FlutterSecureStorage>(const FlutterSecureStorage());
 
   // ================ Shared ================
-
   // [Data Sources]
   sl.registerSingleton<TokenStorageService>(TokenStorageService(sl()));
   sl.registerSingleton<AuthSharedApiService>(
@@ -81,10 +102,9 @@ Future<void> initDependencies() async {
   // [Repositories]
   sl.registerSingleton<AuthSharedRepository>(AuthSharedRepositoryImpl(
       sl<AuthSharedApiService>(), sl<TokenStorageService>()));
+}
 
-  // ================ Features ================
-
-  // ---------------- Auth Feature ----------------
+void _initAuthFeature() {
   // [Data Sources]
   sl.registerSingleton<AuthApiService>(
       AuthApiService(sl<Dio>(), baseUrl: authBaseUrl));
@@ -100,8 +120,9 @@ Future<void> initDependencies() async {
   // [Blocs]
   sl.registerFactory<LoginBloc>(() => LoginBloc(sl()));
   sl.registerFactory<RegisterBloc>(() => RegisterBloc(sl()));
+}
 
-  // ---------------- Splash Feature ----------------
+void _initSplashFeature() {
   // [Repositories]
   sl.registerSingleton<SessionRepository>(SessionRepositoryImpl(
       sl<AuthSharedRepository>(), sl<TokenStorageService>()));
@@ -111,8 +132,9 @@ Future<void> initDependencies() async {
 
   // [Blocs]
   sl.registerFactory<SplashBloc>(() => SplashBloc(sl()));
+}
 
-  // ---------------- Confirmed Reservations Calendar Feature ----------------
+void _initCalendarFeature() {
   // [Data Sources]
   sl.registerSingleton<ConfirmedReservationsApiService>(
       ConfirmedReservationsApiService(sl<Dio>(), baseUrl: reservationsBaseUrl));
@@ -132,8 +154,9 @@ Future<void> initDependencies() async {
 
   // [Blocs]
   sl.registerFactory<CalendarBloc>(() => CalendarBloc(sl()));
+}
 
-  // ---------------- Reservation Management Feature ----------------
+void _initReservationManagementFeature() {
   // [Data Sources]
   sl.registerSingleton<ReservationApiService>(
       ReservationApiService(sl<Dio>(), baseUrl: reservationsBaseUrl));
@@ -195,8 +218,9 @@ Future<void> initDependencies() async {
       sl<UpdateReservationTablesUseCase>(),
     ),
   );
+}
 
-  // ---------------- Restaurant Floor Plan Feature ----------------
+void _initFloorPlanFeature() {
   // [Data Sources]
   sl.registerSingleton<FloorPlanApiService>(
       FloorPlanApiService(sl<Dio>(), baseUrl: apiBaseUrl));
@@ -232,8 +256,9 @@ Future<void> initDependencies() async {
       sl<GetReservationPreviewUseCase>(),
     ),
   );
+}
 
-  // ---------------- Pending Reservations Inbox Feature ----------------
+void _initPendingInboxFeature() {
   // [Data Sources]
   sl.registerSingleton<PendingReservationsApiService>(
       PendingReservationsApiService(sl<Dio>(), baseUrl: reservationsBaseUrl));
@@ -254,5 +279,38 @@ Future<void> initDependencies() async {
   // [Blocs]
   sl.registerFactory<PendingInboxBloc>(
     () => PendingInboxBloc(sl()),
+  );
+}
+
+void _initUserProfileFeature() {
+  // [Data Sources]
+  sl.registerSingleton<UserProfileApiService>(
+      UserProfileApiService(sl<Dio>(), baseUrl: usersBaseUrl));
+
+  sl.registerSingleton<LogoutApiService>(
+      LogoutApiService(sl<Dio>(), baseUrl: authBaseUrl));
+
+  // [Repositories]
+  sl.registerSingleton<UserProfileRepository>(
+    UserProfileRepositoryImpl(
+      sl<AuthSharedRepository>(),
+      sl<TokenStorageService>(),
+      sl<UserProfileApiService>(),
+      sl<LogoutApiService>(),
+    ),
+  );
+
+  // [UseCases]
+  sl.registerSingleton<GetCurrUserProfileUseCase>(
+      GetCurrUserProfileUseCase(sl()));
+
+  sl.registerSingleton<LogoutUseCase>(LogoutUseCase(sl()));
+
+  // [Blocs]
+  sl.registerFactory<UserProfileBloc>(
+    () => UserProfileBloc(
+      sl<GetCurrUserProfileUseCase>(),
+      sl<LogoutUseCase>(),
+    ),
   );
 }

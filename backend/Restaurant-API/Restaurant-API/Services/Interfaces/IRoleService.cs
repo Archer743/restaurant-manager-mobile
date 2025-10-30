@@ -4,8 +4,8 @@
 	{
 		Task<Guid> GetRoleIdByNormalizedNameAsync(string normalizedName);
 
-		Task<string?> GetUserRoleNormalizedNameByIdAsync(Guid userId);
+		bool HasCurrUserRole(HttpContext ctx, string role);
 
-		bool HasCurrUserRole(HttpContext ctx, string normalizedRole);
+		bool HasCurrUserAnyRole(HttpContext ctx, IEnumerable<string> roles);
     }
 }

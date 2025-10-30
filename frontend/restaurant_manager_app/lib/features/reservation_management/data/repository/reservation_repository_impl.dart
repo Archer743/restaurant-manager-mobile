@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:dartz/dartz.dart';
 import 'package:restaurant_manager_app/core/data/data_sources/local/token_storage_service.dart';
 import 'package:restaurant_manager_app/core/domain/repository/auth_shared_repository.dart';

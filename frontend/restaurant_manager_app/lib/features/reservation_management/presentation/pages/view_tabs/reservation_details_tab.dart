@@ -5,6 +5,7 @@ import 'package:restaurant_manager_app/config/routing/app_routes.dart';
 import 'package:restaurant_manager_app/core/constants/error_codes.dart';
 import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
+import 'package:restaurant_manager_app/core/presentation/widgets/app_refresh_indicator.dart';
 import 'package:restaurant_manager_app/core/utils/datetime_utils.dart';
 import 'package:restaurant_manager_app/core/utils/spacing.dart';
 import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
@@ -22,10 +23,18 @@ import 'package:restaurant_manager_app/features/reservation_management/presentat
 /// Acts as a bridge between the ReservationDetailsTab and the ReservationViewPage
 /// by holding shared state
 class ReservationDetailsTabController {
+  static const ReservationFormMode _defaultDisplayMode =
+      ReservationFormMode.view;
+  static const bool? _defaultIsClosed = null;
+  static const String _defaultTag = "";
+  static const int? _defaultPeopleCount = null;
+
   final ValueNotifier<ReservationFormMode> displayModeNotifier =
-      ValueNotifier(ReservationFormMode.view);
-  final ValueNotifier<bool?> isClosedNotifier = ValueNotifier(null);
-  final ValueNotifier<String> tagNotifier = ValueNotifier("");
+      ValueNotifier(_defaultDisplayMode);
+  final ValueNotifier<bool?> isClosedNotifier = ValueNotifier(_defaultIsClosed);
+  final ValueNotifier<String> tagNotifier = ValueNotifier(_defaultTag);
+  final ValueNotifier<int?> peopleCountNotifier =
+      ValueNotifier(_defaultPeopleCount);
 
   void updateDisplayMode(ReservationFormMode newMode) {
     displayModeNotifier.value = newMode;
@@ -37,6 +46,24 @@ class ReservationDetailsTabController {
 
   void updateTag(String tag) {
     tagNotifier.value = tag;
+  }
+
+  void updatePeopleCount(int peopleCount) {
+    peopleCountNotifier.value = peopleCount;
+  }
+
+  void reset() {
+    displayModeNotifier.value = _defaultDisplayMode;
+    isClosedNotifier.value = _defaultIsClosed;
+    tagNotifier.value = _defaultTag;
+    peopleCountNotifier.value = _defaultPeopleCount;
+  }
+
+  void dispose() {
+    displayModeNotifier.dispose();
+    tagNotifier.dispose();
+    isClosedNotifier.dispose();
+    peopleCountNotifier.dispose();
   }
 }
 
@@ -181,7 +208,7 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
             _buildContent(context, state),
             if (_isReservationDataAvailable(state)) ...[
               if (_displayMode == ReservationFormMode.view)
-                _buildActions(context, state),
+                _buildActionsMenu(context, state),
               if (_displayMode == ReservationFormMode.edit)
                 _buildEditActions(context),
             ],
@@ -191,7 +218,7 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
         // Allow pull-to-refresh only in view mode
         return Scaffold(
           body: _displayMode == ReservationFormMode.view
-              ? RefreshIndicator(onRefresh: widget.onRefresh, child: body)
+              ? AppRefreshIndicator(onRefresh: widget.onRefresh, child: body)
               : body,
         );
       },
@@ -229,9 +256,12 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
         _originalReservation = state.reservation;
         _setControllers(state.reservation);
         _hasChangesNotifier.value = false;
-
         _displayMode = ReservationFormMode.view;
+
         widget.controller.updateDisplayMode(_displayMode);
+        widget.controller.updateTag(state.reservation.tag);
+        widget.controller.updateIsClosed(state.reservation.isClosed);
+        widget.controller.updatePeopleCount(state.reservation.peopleCount);
       });
 
       widget.coordinator.requireCalendarRefresh(state.originalStartTimeUtc);
@@ -247,8 +277,9 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
       SnackBarService.showSuccess(
           context, 'Резервацията беше обновена успешно');
     } else if (state is ReservationDetailsLoaded) {
-      widget.controller.updateIsClosed(state.reservation.isClosed);
       widget.controller.updateTag(state.reservation.tag);
+      widget.controller.updateIsClosed(state.reservation.isClosed);
+      widget.controller.updatePeopleCount(state.reservation.peopleCount);
 
       setState(() {
         _isCreatedByStaff = state.reservation.isCreatedByStaff;
@@ -263,6 +294,8 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
       SnackBarService.showSuccess(context, 'Резервацията беше изтрита успешно');
 
       context.pop(); // Go back to prev page
+    } else if (state is ReservationDetailsLoading) {
+      widget.controller.reset();
     } else if (state is ReservationDetailsError) {
       // TODO: Handle error codes when reservation is not accessible - update prev page
 
@@ -329,7 +362,8 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
     );
   }
 
-  Widget _buildActions(BuildContext context, ReservationDetailsState state) {
+  Widget _buildActionsMenu(
+      BuildContext context, ReservationDetailsState state) {
     bool isReservationClosed = false;
 
     // _isReservationDataAvailable(state) guarantees it's one of these states

@@ -6,12 +6,11 @@ import 'package:restaurant_manager_app/config/routing/app_router.dart';
 import 'package:restaurant_manager_app/injection_container.dart';
 
 Future<void> main() async {
-  await initDependencies();
   WidgetsFlutterBinding.ensureInitialized();
+  await initDependencies();
 
   // Enable immersive fullscreen
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-
   runApp(const MainApp());
 }
 

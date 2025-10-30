@@ -5,13 +5,14 @@
         public static class Auth
         {
             public const string InvalidAuthorization = "INVALID_AUTHORIZATION";
-            public const string UserNotFound = "USER_NOT_FOUND";
             public const string ForbiddenAccess = "FORBIDDEN_ACCESS";
         }
 
         public static class Session
         {
             public const string InvalidSession = "INVALID_SESSION";
+            public const string CreationFailed = "SESSION_CREATION_FAILED";
+            public const string UpdateFailed = "SESSION_UPDATE_FAILED";
         }
 
         public static class User

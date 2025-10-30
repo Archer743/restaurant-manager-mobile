@@ -33,11 +33,12 @@ Future<Either<Failure, T>> handleRequest<T>(
     if (statusCode == null ||
         errorCode == null ||
         errorCode.isEmpty ||
-        statusCode == HttpStatus.internalServerError) {
+        statusCode == HttpStatus.internalServerError ||
+        statusCode == HttpStatus.serviceUnavailable) {
       return Left(UnknownFailure());
     }
 
-    // Returned when refresh / logout request failed
+    // Returned when refresh request failed
     if (errorCode == ErrorCodes.invalidSession) {
       return Left(InvalidSessionFailure());
     }

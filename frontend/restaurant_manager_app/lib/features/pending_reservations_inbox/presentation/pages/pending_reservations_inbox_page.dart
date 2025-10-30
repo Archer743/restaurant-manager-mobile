@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:restaurant_manager_app/config/routing/app_routes.dart';
+import 'package:restaurant_manager_app/config/theme/theme.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
+import 'package:restaurant_manager_app/core/presentation/widgets/app_refresh_indicator.dart';
 import 'package:restaurant_manager_app/core/utils/spacing.dart';
 import 'package:restaurant_manager_app/features/pending_reservations_inbox/domain/entities/pending_reservation_preview.dart';
 import 'package:restaurant_manager_app/features/pending_reservations_inbox/presentation/bloc/pending_inbox_bloc.dart';
@@ -66,7 +68,7 @@ class _PendingReservationsInboxPageState
             final bool hasNextPage = state.hasNextPage;
             final bool isLoadingMore = state is PendingInboxLoadingMore;
 
-            return RefreshIndicator(
+            return AppRefreshIndicator(
               onRefresh: () async {
                 context
                     .read<PendingInboxBloc>()
@@ -95,7 +97,13 @@ class _PendingReservationsInboxPageState
       physics: const AlwaysScrollableScrollPhysics(),
       child: SizedBox(
         height: spacingByHeight(context, 0.7),
-        child: const Center(child: Text('Няма чакащи резервации')),
+        child: Center(
+          child: Text(
+            'Няма чакащи резервации',
+            style: defaultTextStyle,
+            textAlign: TextAlign.center,
+          ),
+        ),
       ),
     );
   }

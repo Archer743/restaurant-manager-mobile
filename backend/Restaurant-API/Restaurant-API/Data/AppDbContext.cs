@@ -39,6 +39,11 @@ namespace Restaurant_API.Data
 						.HasIndex(r => r.NormalizedName)
 						.IsUnique();
 
+            // Makes Session.RefreshTokenHash Unique
+            modelBuilder.Entity<Session>()
+                        .HasIndex(s => s.RefreshTokenHash)
+                        .IsUnique();
+
             // Makes composite primary key (RestaurantId + UserId)
             modelBuilder.Entity<RestaurantUser>()
 						.HasKey(ru => new { ru.RestaurantId, ru.UserId });

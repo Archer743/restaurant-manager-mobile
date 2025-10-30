@@ -21,22 +21,33 @@ namespace Restaurant_API.Services
 			this.sessionSettings = sessionSettings.Value;
 		}
 
-		public UserAuthModel GenerateAuthTokens(Guid userId)
-		{
+		public UserAuthModel GenerateAuthTokens(Guid userId, Guid sessionId)
+        {
 			return new UserAuthModel
 			{
-				AccessToken = GenerateAccessToken(userId),
+				AccessToken = GenerateAccessToken(userId, sessionId),
 				RefreshToken = GenerateRefreshToken()
 			};
 		}
 
-		// Access Token is a JWT token
-		private string GenerateAccessToken(Guid userId)
+        // Refresh token is a random string
+        public string GenerateRefreshToken()
+        {
+            var randomBytes = new byte[sessionSettings.RefreshTokenLength];
+            using var rng = RandomNumberGenerator.Create();  // Creates a cryptographically secure random number generator
+            rng.GetBytes(randomBytes);  // Fills the randomBytes array with secure random values
+
+            return Convert.ToBase64String(randomBytes);  // Base64 string is URL-safe
+        }
+
+        // Access Token is a JWT token
+        private string GenerateAccessToken(Guid userId, Guid sessionId)
 		{
 			var expiration = DateTime.UtcNow.Add(jwtSettings.AccessTokenLifetime);
 
 			Claim[] claims = [
-				new Claim("userId", userId.ToString())
+				new Claim("userId", userId.ToString()),
+				new Claim("sessionId", sessionId.ToString()),
 			];
 
 			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.ServerSecretKey));
@@ -52,16 +63,6 @@ namespace Restaurant_API.Services
 			var tokenHandler = new JwtSecurityTokenHandler();
 
 			return tokenHandler.WriteToken(token);
-		}
-
-		// Refresh token is a random string
-		private string GenerateRefreshToken()
-		{
-			var randomBytes = new byte[sessionSettings.RefreshTokenLength];
-			using var rng = RandomNumberGenerator.Create();  // Creates a cryptographically secure random number generator
-			rng.GetBytes(randomBytes);  // Fills the randomBytes array with secure random values
-
-			return Convert.ToBase64String(randomBytes);  // Base64 string is URL-safe
 		}
 	}
 }

@@ -8,6 +8,9 @@ import 'package:restaurant_manager_app/features/pending_reservations_inbox/prese
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/floor_plan/floor_plan_bloc.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/bloc/reservation_preview/reservation_preview_bloc.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentation/pages/restaurant_floor_plan_page.dart';
+import 'package:restaurant_manager_app/features/user_profile/presentation/bloc/user_profile_bloc.dart';
+import 'package:restaurant_manager_app/features/user_profile/presentation/bloc/user_profile_event.dart';
+import 'package:restaurant_manager_app/features/user_profile/presentation/pages/user_profile_page.dart';
 import 'package:restaurant_manager_app/injection_container.dart';
 
 class HomePage extends StatefulWidget {
@@ -43,9 +46,16 @@ class _HomePageState extends State<HomePage> {
         create: (_) => sl()..add(GetPendingReservations()),
         child: const PendingReservationsInboxPage(),
       ),
-      const Scaffold(
-          body: Center(child: Text("4: Logs (Staff Activity History)"))),
-      const Scaffold(body: Center(child: Text("5: Profile"))),
+      // const Text("4: Logs (Staff Activity History)")
+      // const Scaffold(
+      //   body: Center(
+      //     child: CircularProgressIndicator(),
+      //   ),
+      // ),
+      BlocProvider<UserProfileBloc>(
+        create: (_) => sl()..add(GetCurrUserProfile()),
+        child: const UserProfilePage(),
+      ),
     ];
   }
 
@@ -79,7 +89,7 @@ class _HomePageState extends State<HomePage> {
           NavigationDestination(
               icon: Icon(Icons.table_restaurant_sharp), label: ''),
           NavigationDestination(icon: Icon(Icons.check_circle), label: ''),
-          NavigationDestination(icon: Icon(Icons.history), label: ''),
+          // NavigationDestination(icon: Icon(Icons.history), label: ''),
           NavigationDestination(icon: Icon(Icons.person), label: ''),
         ],
       ),

@@ -16,7 +16,8 @@ namespace Restaurant_API.Data.Entities
 		public User User { get; set; }
 
 
-		[Required]
+        // Unique
+        [Required]
 		public string RefreshTokenHash { get; set; }
 
 

@@ -13,6 +13,8 @@ using Restaurant_API.Services.Interfaces;
 using Restaurant_API.Settings;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Restaurant_API.Extensions;
 
 namespace Restaurant_API
 {
@@ -65,24 +67,27 @@ namespace Restaurant_API
 			});
 
 
-			// Allows receiving requests from other domains
+			// Cors policies
 			builder.Services.AddCors(options =>
 			{
-				options.AddDefaultPolicy(
-					builder =>
-					{
-						builder.WithOrigins("*")
-							   .AllowAnyHeader()
-							   .AllowAnyMethod();
-					});
+				// All browser requests from external websites will receive a CORS error.
+				// The mobile app will not have any problems — it uses native http client (it's not a browser)
+				// so it will bypass the CORS.
+				options.AddPolicy("StrictPolicy", policy =>
+				{
+					policy.DisallowCredentials();  // Prohibits sending "credentials" (cookies, auth header)
+				});
+
+				// !!! ONLY USED IN DEVELOPMENT !!!
+				// Allows receiving requests from other domains.
+				options.AddPolicy("DevPolicy", policy =>
+				{
+					policy
+						.AllowAnyOrigin()
+						.AllowAnyHeader()
+						.AllowAnyMethod();
+				});
 			});
-
-
-			/* builder.Services
-			 * .AddSingleton	=> One instance is created and shared across the entire app lifetime.
-			 * .AddScoped		=> One instance per HTTP request.
-			 * .AddTransient	=> New instance every time it’s requested.
-			 */
 
 
 			// Database Setup
@@ -103,6 +108,12 @@ namespace Restaurant_API
 			builder.Services.AddHangfireServer();  // Adds a background worker that processes jobs
 
 
+			/* builder.Services
+			 * .AddSingleton	=> One instance is created and shared across the entire app lifetime.
+			 * .AddScoped		=> One instance per HTTP request.
+			 * .AddTransient	=> New instance every time it’s requested.
+			 */
+
 			// Repositories Setup
 			builder.Services.AddScoped<IUserRepo, UserRepo>();
 			builder.Services.AddScoped<IRoleRepo, RoleRepo>();
@@ -116,6 +127,7 @@ namespace Restaurant_API
             builder.Services.AddScoped<IReservationRepo, ReservationRepo>();
 
             // Services Setup
+			builder.Services.AddScoped<IPasswordHasherService, PasswordHasherService>();
             builder.Services.AddScoped<IUserService, UserService>();
 			builder.Services.AddScoped<IRoleService, RoleService>();
 			builder.Services.AddScoped<IAuthTokenService, AuthTokenService>();
@@ -130,56 +142,82 @@ namespace Restaurant_API
 
 		private static void ConfigureApp(WebApplication app)
 		{
-			// Swagger & Hangfire Setup in Dev Environment
+			// Middlewares setup
 			if (app.Environment.IsDevelopment())
 			{
+				/// Dev environment
 				app.UseSwagger();
 				app.UseSwaggerUI();
-
 				app.UseHangfireDashboard("/hangfire");
+
+				app.UseCors("DevPolicy");
+			} else if (app.Environment.IsStaging())
+			{
+				/// Staging environment
+				app.UseCors("StrictPolicy");
+				app.UseHttpsRedirection();  // Redirects all HTTP requests to HTTPS
+			} else if (app.Environment.IsProduction())
+			{
+				/// Production environment
+				app.UseCors("StrictPolicy");
+
+				// HTTP Strict Transport Security - forces the browser to always use HTTPS
+				// for that domain for a set time (max-age)
+
+				// !!! Problem for testing: If applied to a local or staging domain, the browser will cache
+				// the HTTPS requirement, making it impossible to test HTTP or different local certificates
+				// on that domain until the cache expires !!!
+
+				// TODO: Activate before release
+				// app.UseHsts();
+				app.UseHttpsRedirection();  // Redirects all HTTP requests to HTTPS
 			}
 
-
-			app.UseCors();  // Enables CORS
-			// TODO: Fix in Production !!!!!
-			// app.UseHttpsRedirection();  // Redirects all HTTP requests to HTTPS
-
-
-			/*
-			 * Middleware ordering is critical:
-			 * GlobalExceptionHandler -> Authentication -> Authorization
-			 */
-
+			// Ordering is critical: GlobalExceptionHandler -> Authentication -> Authorization
 			app.UseGlobalExceptionHandler();
 			app.UseAppAuthentication();
 			app.UseAppAuthorization();
 
 
-			app.MapControllers();  // Routes requests to controller actions
+			// Routes requests to controller actions
+			app.MapControllers();
 
 
-			// Hangfire Recurring Jobs
+			// Hangfire Recurring Jobs setup
+			using var scope = app.Services.CreateScope();
+			var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+
 			// Will remove old inactive sessions at midnight UTC everyday
-			RecurringJob.AddOrUpdate<ISessionService>("rm-old-inactive-sessions-job", service => service.RemoveOldInactiveSessionsAsync(), Cron.Daily());
-
-
-			// TODO: Enable Database Seeding
-			// app.SeedDbAsync().GetAwaiter().GetResult();
+			recurringJobManager.AddOrUpdate<ISessionService>(
+				"rm-old-inactive-sessions-job",
+				service => service.RemoveOldInactiveSessionsAsync(),
+				Cron.Daily()
+			);
 		}
 
-		public static void Main(string[] args)
+		public static async Task Main(string[] args)
 		{
 			// Create an app builder
 			var builder = WebApplication.CreateBuilder(args);
-
 			ConfigureSettings(builder);
 			ConfigureServices(builder);
 
 			// Create an app based on the builder
 			var app = builder.Build();
-			ConfigureApp(app);
+			app.Logger.LogInformation("==================================== Server running in environment: {env}", app.Environment.EnvironmentName);
 
-			app.Run();
+			// If the app environment is `Migration` the app will apply db migrations, seed the db
+			// and exit gracefully without running the server.
+			if (app.Environment.EnvironmentName.Equals("Migration", StringComparison.OrdinalIgnoreCase))
+			{
+				await app.MigrateAndSeedDbAsync();
+
+				Environment.Exit(0);
+				return;
+			}
+
+			ConfigureApp(app);
+			await app.RunAsync();
 		}
 	}
 }

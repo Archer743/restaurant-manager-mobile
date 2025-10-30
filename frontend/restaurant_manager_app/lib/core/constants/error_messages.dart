@@ -4,7 +4,6 @@ const Map<String, String> errorMessages = {
   // Auth
   ErrorCodes.invalidAuthorization:
       "Невалидна авторизация. Моля, влезте отново.",
-  ErrorCodes.userNotFound: "Невалидна авторизация. Моля, влезте отново.",
   ErrorCodes.forbiddenAccess: "Нямате достъп до тази операция.",
 
   // Session
@@ -63,5 +62,5 @@ const Map<String, String> errorMessages = {
 
   // App Error Codes
   ErrorCodes.network: "Проблем с интернет връзката. Моля, опитайте отново.",
-  ErrorCodes.unknown: "Нещо се обърка. Моля, опитайте по-късно.",
+  ErrorCodes.unknown: "Нещо се обърка. Моля, опитайте отново по-късно.",
 };

@@ -1,5 +1,5 @@
-﻿using Restaurant_API.Constants;
-using Restaurant_API.Exceptions;
+﻿using Restaurant_API.Exceptions;
+using Restaurant_API.Services.Interfaces;
 
 namespace Restaurant_API.Middlewares
 {
@@ -7,7 +7,7 @@ namespace Restaurant_API.Middlewares
 	{
 		public AuthorizationMiddleware(RequestDelegate next) : base(next) { }
 
-		public async Task InvokeAsync(HttpContext context)
+		public async Task InvokeAsync(HttpContext context, IRoleService roleService)
 		{
 			var endpointAuth = GetEndpointAuthorization(context);
 
@@ -18,14 +18,7 @@ namespace Restaurant_API.Middlewares
 				return;
 			}
 
-			// The userRole is expected to be set by AuthenticationMiddleware.
-			// Middleware ordering is critical: AuthenticationMiddleware must run before this one.
-			if (context.Items["UserRole"] is not string userRole)
-			{
-				throw new InvalidOperationException("UserRole not found in HttpContext.Items. Ensure AuthenticationMiddleware is executed before AuthorizationMiddleware.");
-			}
-
-			if (!endpointAuth.Roles.Contains(userRole))
+			if (!roleService.HasCurrUserAnyRole(context, endpointAuth.Roles))
 			{
 				throw new ForbiddenException();
 			}

@@ -40,7 +40,8 @@ Future<Either<Failure, T>> handleAuthRequest<T>(
     if (statusCode == null ||
         errorCode == null ||
         errorCode.isEmpty ||
-        statusCode == HttpStatus.internalServerError) {
+        statusCode == HttpStatus.internalServerError ||
+        statusCode == HttpStatus.serviceUnavailable) {
       return Left(UnknownFailure());
     }
 
