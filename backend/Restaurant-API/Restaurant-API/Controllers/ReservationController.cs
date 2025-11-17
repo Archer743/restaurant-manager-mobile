@@ -18,12 +18,13 @@ namespace Restaurant_API.Controllers
         }
 
         /* ======================================================================== POST */
-        [HttpPost]
-        public async Task<IActionResult> CreateClientReservationAsync(ClientCreateReservationModel createModel)
-        {
-            await reservationService.CreateClientReservationAsync(createModel);
-            return NoContent();
-        }
+        // TODO: Add when connecting the website to the mobile app
+        // [HttpPost]
+        // public async Task<IActionResult> CreateClientReservationAsync(ClientCreateReservationModel createModel)
+        // {
+        //     await reservationService.CreateClientReservationAsync(createModel);
+        //     return NoContent();
+        // }
 
         [HttpPost("confirmed"), AppAuthorize]
         public async Task<IActionResult> CreateConfirmedReservationAsync(ReservationCreateModel createModel)

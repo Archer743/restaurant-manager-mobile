@@ -2,10 +2,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
-# Install EF Core CLI tools
-RUN dotnet tool install --global dotnet-ef
-ENV PATH="$PATH:/root/.dotnet/tools"
-
 # Copy csproj and restore dependencies
 COPY *.csproj .
 RUN dotnet restore

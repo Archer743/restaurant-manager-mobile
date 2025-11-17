@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Hangfire;
@@ -142,6 +143,21 @@ namespace Restaurant_API
 
 		private static void ConfigureApp(WebApplication app)
 		{
+			// Allow Nginx to forward HTTPS and client IP info
+			var forwardedHeaderOptions = new ForwardedHeadersOptions
+			{
+				ForwardedHeaders = ForwardedHeaders.XForwardedFor |
+								ForwardedHeaders.XForwardedProto |
+        						ForwardedHeaders.XForwardedHost
+			};
+
+			// Allow internal Docker network
+			forwardedHeaderOptions.KnownNetworks.Clear();
+			forwardedHeaderOptions.KnownProxies.Clear();
+
+			app.UseForwardedHeaders(forwardedHeaderOptions);
+
+
 			// Middlewares setup
 			if (app.Environment.IsDevelopment())
 			{
@@ -151,26 +167,10 @@ namespace Restaurant_API
 				app.UseHangfireDashboard("/hangfire");
 
 				app.UseCors("DevPolicy");
-			} else if (app.Environment.IsStaging())
-			{
-				/// Staging environment
-				app.UseCors("StrictPolicy");
-				app.UseHttpsRedirection();  // Redirects all HTTP requests to HTTPS
-			} else if (app.Environment.IsProduction())
+			} else if (app.Environment.IsProduction() || app.Environment.IsStaging())
 			{
 				/// Production environment
 				app.UseCors("StrictPolicy");
-
-				// HTTP Strict Transport Security - forces the browser to always use HTTPS
-				// for that domain for a set time (max-age)
-
-				// !!! Problem for testing: If applied to a local or staging domain, the browser will cache
-				// the HTTPS requirement, making it impossible to test HTTP or different local certificates
-				// on that domain until the cache expires !!!
-
-				// TODO: Activate before release
-				// app.UseHsts();
-				app.UseHttpsRedirection();  // Redirects all HTTP requests to HTTPS
 			}
 
 			// Ordering is critical: GlobalExceptionHandler -> Authentication -> Authorization
@@ -211,7 +211,6 @@ namespace Restaurant_API
 			if (app.Environment.EnvironmentName.Equals("Migration", StringComparison.OrdinalIgnoreCase))
 			{
 				await app.MigrateAndSeedDbAsync();
-
 				Environment.Exit(0);
 				return;
 			}
