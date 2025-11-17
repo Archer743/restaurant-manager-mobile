@@ -1,5 +1,5 @@
 # Custom
-/android/gradle.properties
+# /android/gradle.properties
 /lib/core/constants/api_urls.dart
 
 # Miscellaneous
