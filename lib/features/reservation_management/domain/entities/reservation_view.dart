@@ -2,7 +2,7 @@ class ReservationView {
   final String id;
   final String tag;
   final String name;
-  final DateTime startTimeUtc;
+  final DateTime startUtc;
   final int peopleCount;
   final String? email;
   final String? phone;
@@ -14,7 +14,7 @@ class ReservationView {
     required this.id,
     required this.tag,
     required this.name,
-    required this.startTimeUtc,
+    required this.startUtc,
     required this.peopleCount,
     required this.isCreatedByStaff,
     required this.isClosed,
@@ -29,7 +29,7 @@ class ReservationView {
     String? name,
     String? email,
     String? phone,
-    DateTime? startTimeUtc,
+    DateTime? startUtc,
     int? peopleCount,
     String? comment,
     bool? isCreatedByStaff,
@@ -41,7 +41,7 @@ class ReservationView {
       name: name ?? this.name,
       email: email ?? this.email,
       phone: phone ?? this.phone,
-      startTimeUtc: startTimeUtc ?? this.startTimeUtc,
+      startUtc: startUtc ?? this.startUtc,
       peopleCount: peopleCount ?? this.peopleCount,
       comment: comment ?? this.comment,
       isCreatedByStaff: isCreatedByStaff ?? this.isCreatedByStaff,

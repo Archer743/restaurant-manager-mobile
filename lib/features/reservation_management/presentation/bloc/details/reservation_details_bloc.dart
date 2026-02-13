@@ -90,8 +90,7 @@ class ReservationDetailsBloc
     result.fold(
       (failure) => emit(ReservationDetailsError(failure, originalReservation)),
       (reservation) => emit(
-        ReservationDetailsUpdated(
-            reservation, originalReservation.startTimeUtc),
+        ReservationDetailsUpdated(reservation, originalReservation.startUtc),
       ),
     );
   }
@@ -104,10 +103,10 @@ class ReservationDetailsBloc
     late final DateTime affectedDateUtc;
 
     if (currState is ReservationDetailsLoaded) {
-      affectedDateUtc = currState.reservation.startTimeUtc;
+      affectedDateUtc = currState.reservation.startUtc;
     } else if (currState is ReservationDetailsError &&
         currState.hasReservation) {
-      affectedDateUtc = currState.originalReservation!.startTimeUtc;
+      affectedDateUtc = currState.originalReservation!.startUtc;
     } else {
       return;
     }
@@ -198,11 +197,11 @@ class ReservationDetailsBloc
 
     final DateTime localDate = DateTime.parse(event.dateString);
     final TimeOfDay localTime = parseTimeOfDay(event.timeString);
-    final DateTime startTimeUtc =
+    final DateTime startUtc =
         buildUtcDateTimeFromLocalComponents(localDate, localTime);
 
-    final DateTime? newStartTimeUtc =
-        startTimeUtc != original.startTimeUtc ? startTimeUtc : null;
+    final DateTime? newStartUtc =
+        startUtc != original.startUtc ? startUtc : null;
 
     final int? peopleCountInt = int.tryParse(event.peopleCountString);
     final int? newPeopleCount =
@@ -221,7 +220,7 @@ class ReservationDetailsBloc
 
     return ReservationUpdate(
       name: newName,
-      startTimeUtc: newStartTimeUtc,
+      startUtc: newStartUtc,
       peopleCount: newPeopleCount,
       email: newEmail,
       phone: newPhone,

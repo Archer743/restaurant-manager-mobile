@@ -10,8 +10,8 @@ ReservationCreateModel _$ReservationCreateModelFromJson(
         Map<String, dynamic> json) =>
     ReservationCreateModel(
       name: json['name'] as String,
-      startTimeUtc: const AppDateTimeUtcConverter()
-          .fromJson(json['startTimeUtc'] as String),
+      startUtc:
+          const AppDateTimeUtcConverter().fromJson(json['startUtc'] as String),
       peopleCount: (json['peopleCount'] as num).toInt(),
       email: json['email'] as String?,
       phone: json['phone'] as String?,
@@ -26,6 +26,5 @@ Map<String, dynamic> _$ReservationCreateModelToJson(
       'email': instance.email,
       'phone': instance.phone,
       'comment': instance.comment,
-      'startTimeUtc':
-          const AppDateTimeUtcConverter().toJson(instance.startTimeUtc),
+      'startUtc': const AppDateTimeUtcConverter().toJson(instance.startUtc),
     };

@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/typedefs.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/data/models/reservation_preview_model.dart';
 
@@ -11,9 +10,9 @@ abstract class ConfirmedReservationsApiService {
       _ConfirmedReservationsApiService;
 
   @GET("/confirmed")
-  Future<HttpResponse<ApiConfirmedReservationsMap>> getConfirmedReservations(
+  Future<HttpResponse<List<ReservationPreviewModel>>> getConfirmedReservations(
     @Header('Authorization') String authorization,
-    @Query('start') String startDate,
-    @Query('end') String endDate,
+    @Query('startUtc') DateTime startUtc,
+    @Query('endUtc') DateTime endUtc,
   );
 }

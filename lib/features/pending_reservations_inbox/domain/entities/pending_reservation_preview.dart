@@ -1,14 +1,14 @@
 class PendingReservationPreview {
   final String id;
   final String name;
-  final DateTime startTimeUtc;
+  final DateTime startUtc;
   final DateTime createdAtUtc;
   final int peopleCount;
 
   PendingReservationPreview({
     required this.id,
     required this.name,
-    required this.startTimeUtc,
+    required this.startUtc,
     required this.createdAtUtc,
     required this.peopleCount,
   });

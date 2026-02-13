@@ -2,7 +2,7 @@ class ReservationUpdate {
   final String? name;
   final String? email;
   final String? phone;
-  final DateTime? startTimeUtc;
+  final DateTime? startUtc;
   final int? peopleCount;
   final String? comment;
 
@@ -10,7 +10,7 @@ class ReservationUpdate {
     this.name,
     this.email,
     this.phone,
-    this.startTimeUtc,
+    this.startUtc,
     this.peopleCount,
     this.comment,
   });

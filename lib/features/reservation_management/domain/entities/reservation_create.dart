@@ -1,6 +1,6 @@
 class ReservationCreate {
   final String name;
-  final DateTime startTimeUtc;
+  final DateTime startUtc;
   final int peopleCount;
   final String? email;
   final String? phone;
@@ -8,7 +8,7 @@ class ReservationCreate {
 
   ReservationCreate({
     required this.name,
-    required this.startTimeUtc,
+    required this.startUtc,
     required this.peopleCount,
     required this.email,
     required this.phone,

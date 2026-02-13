@@ -114,7 +114,7 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
     _commentController.text = reservation.comment ?? '';
 
     final (localDate, localTime) =
-        extractLocalComponentsFromUtc(reservation.startTimeUtc);
+        extractLocalComponentsFromUtc(reservation.startUtc);
 
     _dateController.text = localDate.toYYYYMMDDString();
     _timeController.text = localTime.toHHMMSSString();
@@ -124,7 +124,7 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
     if (_originalReservation == null) return;
 
     final (originalLocalDate, originalLocalTime) =
-        extractLocalComponentsFromUtc(_originalReservation!.startTimeUtc);
+        extractLocalComponentsFromUtc(_originalReservation!.startUtc);
 
     final hasChanges = _nameController.text != _originalReservation!.name ||
         _peopleCountController.text !=
@@ -230,7 +230,7 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
     if (state is ReservationClosed) {
       widget.controller.updateIsClosed(state.reservation.isClosed);
 
-      widget.coordinator.requireCalendarRefresh(state.reservation.startTimeUtc);
+      widget.coordinator.requireCalendarRefresh(state.reservation.startUtc);
       widget.coordinator.requireFloorPlanRefresh();
       widget.coordinator.requirePreviewDismiss();
 
@@ -241,7 +241,7 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
           context, 'Резервацията беше приключена успешно.');
     } else if (state is ReservationActivated) {
       widget.controller.updateIsClosed(state.reservation.isClosed);
-      widget.coordinator.requireCalendarRefresh(state.reservation.startTimeUtc);
+      widget.coordinator.requireCalendarRefresh(state.reservation.startUtc);
 
       // Reload tables tab
       context
@@ -264,8 +264,8 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
         widget.controller.updatePeopleCount(state.reservation.peopleCount);
       });
 
-      widget.coordinator.requireCalendarRefresh(state.originalStartTimeUtc);
-      widget.coordinator.requireCalendarRefresh(state.reservation.startTimeUtc);
+      widget.coordinator.requireCalendarRefresh(state.originalStartUtc);
+      widget.coordinator.requireCalendarRefresh(state.reservation.startUtc);
       widget.coordinator.requireFloorPlanRefresh();
       widget.coordinator.requireReservationPreviewRefresh();
 

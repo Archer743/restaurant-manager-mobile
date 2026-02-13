@@ -8,21 +8,21 @@ part 'reservation_create_model.g.dart';
 class ReservationCreateModel extends ReservationCreate {
   @override
   @AppDateTimeUtcConverter()
-  final DateTime startTimeUtc;
+  final DateTime startUtc;
 
   ReservationCreateModel({
     required super.name,
-    required this.startTimeUtc,
+    required this.startUtc,
     required super.peopleCount,
     required super.email,
     required super.phone,
     required super.comment,
-  }) : super(startTimeUtc: startTimeUtc);
+  }) : super(startUtc: startUtc);
 
   factory ReservationCreateModel.fromEntity(ReservationCreate entity) {
     return ReservationCreateModel(
       name: entity.name,
-      startTimeUtc: entity.startTimeUtc,
+      startUtc: entity.startUtc,
       peopleCount: entity.peopleCount,
       email: entity.email,
       phone: entity.phone,

@@ -24,36 +24,34 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
     GetReservationsForMonth event,
     Emitter<CalendarState> emit,
   ) async {
-    final bool isCached = _monthCache.containsKey(event.monthStart);
-    final DateTime? expiry = _cacheExpiry[event.monthStart];
+    final bool isCached = _monthCache.containsKey(event.monthKey);
+    final DateTime? expiry = _cacheExpiry[event.monthKey];
     final bool isStale = expiry == null || DateTime.now().isAfter(expiry);
 
     // If data for the requested month is available in cache (even if stale), emit it immediately.
     // This provides a "stale-while-revalidate" (SWR) experience.
     if (isCached) {
-      if (isClosed) return;
-      emit(CalendarLoaded(_monthCache[event.monthStart]!));
+      emit(CalendarLoaded(_monthCache[event.monthKey]!));
 
       // If data is fresh, we're done. Otherwise, we'll proceed to fetch fresh data.
       if (!isStale) return;
     } else {
       // If no data is available for the requested month, show loading.
-      if (isClosed) return;
       emit(CalendarLoading());
     }
 
     // Fetch the current month's data if not cached or stale
-    if (isClosed) return;
     final result =
-        await minDelayRun(_getConfReservationsUsecase(event.toDateRange()));
+        await minDelayRun(_getConfReservationsUsecase(event.utcRange));
 
-    if (isClosed) return;
+    if (emit.isDone) return;
+
     result.fold(
       (failure) => emit(CalendarError(failure)),
       (reservations) {
         // Store in cache
-        _monthCache[event.monthStart] = reservations;
-        _cacheExpiry[event.monthStart] = DateTime.now().add(_monthDataTTL);
+        _monthCache[event.monthKey] = reservations;
+        _cacheExpiry[event.monthKey] = DateTime.now().add(_monthDataTTL);
 
         // Emit the newly fetched (and now fresh) data
         emit(CalendarLoaded(reservations));
@@ -68,14 +66,14 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
     bool isCacheExpiryModified = false;
 
     // Expire modified months so they are fetched again
-    for (var monthStart in event.affectedMonths) {
-      if (_cacheExpiry.containsKey(monthStart)) {
-        _cacheExpiry[monthStart] = DateTime.now();
+    for (var monthKey in event.affectedMonthKeys) {
+      if (_cacheExpiry.containsKey(monthKey)) {
+        _cacheExpiry[monthKey] = DateTime.now();
         isCacheExpiryModified = true;
       }
     }
 
-    // Trigger the reload proccess for the current month displayed
+    // Trigger the reload process for the current month displayed
     if (isCacheExpiryModified && !isClosed) {
       emit(CalendarReload());
     }

@@ -11,8 +11,8 @@ PendingReservationPreviewModel _$PendingReservationPreviewModelFromJson(
     PendingReservationPreviewModel(
       id: json['id'] as String,
       name: json['name'] as String,
-      startTimeUtc: const AppDateTimeUtcConverter()
-          .fromJson(json['startTimeUtc'] as String),
+      startUtc:
+          const AppDateTimeUtcConverter().fromJson(json['startUtc'] as String),
       createdAtUtc: const AppDateTimeUtcConverter()
           .fromJson(json['createdAtUtc'] as String),
       peopleCount: (json['peopleCount'] as num).toInt(),
@@ -24,8 +24,7 @@ Map<String, dynamic> _$PendingReservationPreviewModelToJson(
       'id': instance.id,
       'name': instance.name,
       'peopleCount': instance.peopleCount,
-      'startTimeUtc':
-          const AppDateTimeUtcConverter().toJson(instance.startTimeUtc),
+      'startUtc': const AppDateTimeUtcConverter().toJson(instance.startUtc),
       'createdAtUtc':
           const AppDateTimeUtcConverter().toJson(instance.createdAtUtc),
     };

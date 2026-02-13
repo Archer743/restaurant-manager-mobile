@@ -8,7 +8,7 @@ part 'pending_reservation_preview_model.g.dart';
 class PendingReservationPreviewModel extends PendingReservationPreview {
   @override
   @AppDateTimeUtcConverter()
-  final DateTime startTimeUtc;
+  final DateTime startUtc;
 
   @override
   @AppDateTimeUtcConverter()
@@ -17,10 +17,10 @@ class PendingReservationPreviewModel extends PendingReservationPreview {
   PendingReservationPreviewModel({
     required super.id,
     required super.name,
-    required this.startTimeUtc,
+    required this.startUtc,
     required this.createdAtUtc,
     required super.peopleCount,
-  }) : super(startTimeUtc: startTimeUtc, createdAtUtc: createdAtUtc);
+  }) : super(startUtc: startUtc, createdAtUtc: createdAtUtc);
 
   factory PendingReservationPreviewModel.fromJson(Map<String, dynamic> json) =>
       _$PendingReservationPreviewModelFromJson(json);

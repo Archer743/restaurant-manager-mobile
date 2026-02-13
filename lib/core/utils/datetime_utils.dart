@@ -1,20 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-/// Returns a new [DateTime] object representing the first day of the month
-/// for the given [localDate], with time set to midnight (00:00:00).
-/// The returned DateTime will be in the local timezone.
-DateTime getFirstDayOfMonth(DateTime localDate) {
-  return DateTime(localDate.year, localDate.month, 1);
-}
-
-/// Returns a new [DateTime] object representing the last day of the month
-/// for the given [localDate], with time set to midnight (00:00:00).
-/// The returned DateTime will be in the local timezone.
-DateTime getLastDayOfMonth(DateTime localDate) {
-  return DateTime(localDate.year, localDate.month + 1, 0);
-}
-
 /// Converts a local [DateTime] object to a UTC [DateTime] object,
 /// and then formats it as an ISO 8601 string, suitable for API submission.
 String convertLocalToUtcIsoString(DateTime localDateTime) {

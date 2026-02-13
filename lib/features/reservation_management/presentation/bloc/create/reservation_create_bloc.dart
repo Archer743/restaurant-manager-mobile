@@ -52,7 +52,7 @@ class ReservationCreateBloc
 
     return ReservationCreate(
       name: event.name,
-      startTimeUtc: buildUtcDateTimeFromLocalComponents(date, time),
+      startUtc: buildUtcDateTimeFromLocalComponents(date, time),
       peopleCount: int.parse(event.peopleCountString),
       email: email,
       phone: phone,

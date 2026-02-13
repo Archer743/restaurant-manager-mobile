@@ -63,7 +63,7 @@ class PendingReservationCard extends StatelessWidget {
 
   Widget _buildTimeBlock(BuildContext context) {
     final (localDate, localTime) =
-        extractLocalComponentsFromUtc(reservation.startTimeUtc);
+        extractLocalComponentsFromUtc(reservation.startUtc);
 
     return Container(
       width: 70,

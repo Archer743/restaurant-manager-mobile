@@ -23,46 +23,43 @@ class _ConfirmedReservationsApiService
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<HttpResponse<Map<String, List<ReservationPreviewModel>>>>
-      getConfirmedReservations(
+  Future<HttpResponse<List<ReservationPreviewModel>>> getConfirmedReservations(
     String authorization,
-    String startDate,
-    String endDate,
+    DateTime startUtc,
+    DateTime endUtc,
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
-      r'start': startDate,
-      r'end': endDate,
+      r'startUtc': startUtc.toIso8601String(),
+      r'endUtc': endUtc.toIso8601String(),
     };
     final _headers = <String, dynamic>{r'Authorization': authorization};
     _headers.removeWhere((k, v) => v == null);
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<
-        HttpResponse<Map<String, List<ReservationPreviewModel>>>>(Options(
+    final _options =
+        _setStreamType<HttpResponse<List<ReservationPreviewModel>>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
     )
-        .compose(
-          _dio.options,
-          '/confirmed',
-          queryParameters: queryParameters,
-          data: _data,
-        )
-        .copyWith(
-            baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        )));
-    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late Map<String, List<ReservationPreviewModel>> _value;
+            .compose(
+              _dio.options,
+              '/confirmed',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            )));
+    final _result = await _dio.fetch<List<dynamic>>(_options);
+    late List<ReservationPreviewModel> _value;
     try {
-      _value = _result.data!.map((k, dynamic v) => MapEntry(
-          k,
-          (v as List)
-              .map((i) =>
-                  ReservationPreviewModel.fromJson(i as Map<String, dynamic>))
-              .toList()));
+      _value = _result.data!
+          .map((dynamic i) =>
+              ReservationPreviewModel.fromJson(i as Map<String, dynamic>))
+          .toList();
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
       rethrow;

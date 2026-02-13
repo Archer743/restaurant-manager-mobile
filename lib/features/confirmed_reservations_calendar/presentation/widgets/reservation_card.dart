@@ -71,7 +71,7 @@ class ReservationCard extends StatelessWidget {
             const Icon(Icons.access_time, size: 18),
             const SizedBox(width: 4),
             Text(
-              reservation.time.toHHMMString(),
+              reservation.startTimeLocal.toHHMMString(),
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

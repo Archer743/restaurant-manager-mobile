@@ -8,23 +8,23 @@ part 'reservation_update_model.g.dart';
 class ReservationUpdateModel extends ReservationUpdate {
   @override
   @AppDateTimeUtcConverter()
-  final DateTime? startTimeUtc;
+  final DateTime? startUtc;
 
   ReservationUpdateModel({
     required super.name,
     required super.email,
     required super.phone,
-    required this.startTimeUtc,
+    required this.startUtc,
     required super.peopleCount,
     required super.comment,
-  }) : super(startTimeUtc: startTimeUtc);
+  }) : super(startUtc: startUtc);
 
   factory ReservationUpdateModel.fromEntity(ReservationUpdate entity) {
     return ReservationUpdateModel(
       name: entity.name,
       email: entity.email,
       phone: entity.phone,
-      startTimeUtc: entity.startTimeUtc,
+      startUtc: entity.startUtc,
       peopleCount: entity.peopleCount,
       comment: entity.comment,
     );

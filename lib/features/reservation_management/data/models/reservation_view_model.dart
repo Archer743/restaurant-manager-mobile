@@ -8,20 +8,20 @@ part 'reservation_view_model.g.dart';
 class ReservationViewModel extends ReservationView {
   @override
   @AppDateTimeUtcConverter()
-  final DateTime startTimeUtc;
+  final DateTime startUtc;
 
   ReservationViewModel({
     required super.id,
     required super.tag,
     required super.name,
-    required this.startTimeUtc,
+    required this.startUtc,
     required super.peopleCount,
     required super.isCreatedByStaff,
     required super.isClosed,
     super.email,
     super.phone,
     super.comment,
-  }) : super(startTimeUtc: startTimeUtc);
+  }) : super(startUtc: startUtc);
 
   factory ReservationViewModel.fromJson(Map<String, dynamic> json) =>
       _$ReservationViewModelFromJson(json);

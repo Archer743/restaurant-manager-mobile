@@ -12,7 +12,8 @@ ReservationPreviewModel _$ReservationPreviewModelFromJson(
       id: json['id'] as String,
       tag: json['tag'] as String,
       name: json['name'] as String,
-      time: const AppTimeOfDayConverter().fromJson(json['time'] as String),
+      startUtc:
+          const AppDateTimeUtcConverter().fromJson(json['startUtc'] as String),
       peopleCount: (json['peopleCount'] as num).toInt(),
       isClosed: json['isClosed'] as bool,
     );
@@ -25,5 +26,5 @@ Map<String, dynamic> _$ReservationPreviewModelToJson(
       'name': instance.name,
       'peopleCount': instance.peopleCount,
       'isClosed': instance.isClosed,
-      'time': const AppTimeOfDayConverter().toJson(instance.time),
+      'startUtc': const AppDateTimeUtcConverter().toJson(instance.startUtc),
     };

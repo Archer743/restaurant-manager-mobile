@@ -4,7 +4,7 @@ import 'package:restaurant_manager_app/core/domain/repository/auth_shared_reposi
 import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/core/network/auth_request_handler.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/data/data_sources/confirmed_reservations_api_service.dart';
-import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/entities/date_range.dart';
+import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/entities/utc_range.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/repository/confirmed_reservations_repository.dart';
 import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/typedefs.dart';
 
@@ -22,28 +22,26 @@ class ConfirmedReservationsRepositoryImpl
 
   @override
   Future<Either<Failure, CalendarConfirmedReservations>>
-      getConfirmedReservations(DateRange dateRange) async {
+      getConfirmedReservations(UtcRange utcRange) async {
     return await handleAuthRequest<CalendarConfirmedReservations>(
       _tokenService,
       _authSharedRepo,
       (authorization) async {
         final response =
             await _confReservationsApiService.getConfirmedReservations(
-                authorization, dateRange.startDate, dateRange.endDate);
+                authorization, utcRange.startUtc, utcRange.endUtc);
 
-        final CalendarConfirmedReservations transformedMap = {};
-        final apiData = response.data;
+        final reservations = response.data;
+        final CalendarConfirmedReservations grouped = {};
 
-        // Change map key to DateTime
-        apiData.forEach(
-          (dateString, models) {
-            // Date in local time
-            final DateTime dateKey = DateTime.parse(dateString);
-            transformedMap[dateKey] = models;
-          },
-        );
+        for (final r in reservations) {
+          final date = r.startDateLocal;
 
-        return transformedMap;
+          grouped.putIfAbsent(date, () => []);
+          grouped[date]!.add(r);
+        }
+
+        return grouped;
       },
     );
   }

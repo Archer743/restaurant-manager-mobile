@@ -1,36 +1,50 @@
-import 'package:restaurant_manager_app/core/utils/datetime_utils.dart';
-import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/entities/date_range.dart';
+import 'package:flutter/widgets.dart';
+import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/entities/utc_range.dart';
 
 abstract class CalendarEvent {}
 
 class GetReservationsForMonth extends CalendarEvent {
-  late final DateTime monthStart;
-  late final DateTime monthEnd;
+  late final DateTime monthKey;   // Local month identifier (first day of month)
+  late final UtcRange utcRange;
 
   GetReservationsForMonth(DateTime focusedDay) {
-    monthStart = getFirstDayOfMonth(focusedDay);
-    monthEnd = getLastDayOfMonth(focusedDay);
+    monthKey = DateTime(focusedDay.year, focusedDay.month, 1);
+
+    utcRange = UtcRange(
+        startUtc: DateTime(focusedDay.year, focusedDay.month, 1).toUtc(),
+        endUtc: DateTime(focusedDay.year, focusedDay.month + 1, 1).toUtc(),
+    );
+
+    debugDate("focusedDay", focusedDay);
+    debugDate("monthKey", monthKey);
+    debugDate("startUtc", utcRange.startUtc);
+    debugDate("endUtc", utcRange.endUtc);
   }
 
-  DateRange toDateRange() {
-    return DateRange(startDate: monthStart, endDate: monthEnd);
+  void debugDate(String label, DateTime dt) {
+    debugPrint('--- $label ---');
+    debugPrint('Raw: $dt');
+    debugPrint('isUtc: ${dt.isUtc}');
+    debugPrint('toUtc: ${dt.toUtc()}');
+    debugPrint('toLocal: ${dt.toLocal()}');
+    debugPrint('-----------------------');
   }
 }
 
 class RefreshCalendar extends CalendarEvent {
-  // This list will store the unique first days of the months that need refreshing.
-  final List<DateTime> affectedMonths;
+  // This list will store the month keys that need refreshing.
+  final List<DateTime> affectedMonthKeys;
 
   // Constructor that takes a list of raw dates (e.g., original and updated reservation dates)
   // and processes them to get unique month start dates.
   RefreshCalendar({required List<DateTime> rawDatesAffected})
-      : affectedMonths = _processDatesToUniqueMonths(rawDatesAffected);
+      : affectedMonthKeys = _getMonthKeys(rawDatesAffected);
 
-  static List<DateTime> _processDatesToUniqueMonths(List<DateTime> dates) {
+  static List<DateTime> _getMonthKeys(List<DateTime> dates) {
     final Set<DateTime> uniqueMonthsSet = {};
 
     for (final date in dates) {
-      uniqueMonthsSet.add(getFirstDayOfMonth(date));
+      uniqueMonthsSet.add(DateTime(date.year, date.month, 1));
     }
 
     return uniqueMonthsSet.toList();
