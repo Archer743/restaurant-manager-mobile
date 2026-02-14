@@ -62,23 +62,28 @@ class _ConfirmedReservationsCalendarPageState
 
   // --- Calendar Callbacks ---
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
-    if (!isSameDay(_selectedDay, selectedDay)) {
+    final localSelected = selectedDay.toLocal();
+    final localFocused = focusedDay.toLocal();
+
+    if (!isSameDay(_selectedDay, localSelected)) {
       setState(() {
-        _selectedDay = selectedDay;
-        _focusedDay = focusedDay;
-        _selectedDayReservations.value = _getReservationsForDay(selectedDay);
+        _selectedDay = localSelected;
+        _focusedDay = localFocused;
+        _selectedDayReservations.value = _getReservationsForDay(localSelected);
       });
     }
   }
 
   void _onPageChanged(DateTime focusedDay) {
+    final localFocused = focusedDay.toLocal();
+
     setState(() {
-      _focusedDay = focusedDay;
+      _focusedDay = localFocused;
 
       if (_selectedDay != null) {
         int targetDay = _selectedDay!.day;
-        int year = focusedDay.year;
-        int month = focusedDay.month;
+        int year = _focusedDay.year;
+        int month = _focusedDay.month;
 
         // Try to create a DateTime with the same day in the new month.
         // Dart's DateTime constructor for month automatically rolls over if the day doesn't exist.
@@ -94,11 +99,11 @@ class _ConfirmedReservationsCalendarPageState
         }
       } else {
         // If no day was selected initially, just select the focusedDay
-        _selectedDay = focusedDay;
+        _selectedDay = _focusedDay;
       }
     });
 
-    context.read<CalendarBloc>().add(GetReservationsForMonth(focusedDay));
+    context.read<CalendarBloc>().add(GetReservationsForMonth(localFocused));
   }
 
   @override
@@ -119,7 +124,7 @@ class _ConfirmedReservationsCalendarPageState
               },
             );
           } else if (state is CalendarReload) {
-            // Reload Proccess
+            // Reload Process
             context
                 .read<CalendarBloc>()
                 .add(GetReservationsForMonth(_focusedDay));
@@ -220,7 +225,6 @@ class _ConfirmedReservationsCalendarPageState
       onPressed: () {
         // Pre-fill the date with the selected day.
 
-        // !!! NB: Focused day is in local time, selected day is in utc !!!
         final DateTime initialDateTime = _selectedDay?.toLocal() ?? _focusedDay;
         final normalizedDay = DateTime(
             initialDateTime.year, initialDateTime.month, initialDateTime.day);

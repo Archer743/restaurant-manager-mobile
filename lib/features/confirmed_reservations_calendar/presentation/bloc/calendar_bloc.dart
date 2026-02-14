@@ -1,21 +1,17 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:restaurant_manager_app/core/utils/future_utils.dart';
-import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/typedefs.dart';
-import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/usecases/get_confirmed_reservations_usecase.dart';
-import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_event.dart';
-import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_state.dart';
+import '../../domain/services/month_reservations_cache.dart';
+import '../../domain/usecases/get_confirmed_reservations_usecase.dart';
+import '../../presentation/bloc/calendar_event.dart';
+import '../../presentation/bloc/calendar_state.dart';
 
 class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
-  final GetConfirmedReservationsUsecase _getConfReservationsUsecase;
+  final GetConfirmedReservationsUsecase _usecase;
 
-  // TODO: Cache
-  final CachedConfirmedReservations _monthCache = {};
-  // Month : Expiry
-  final Map<DateTime, DateTime> _cacheExpiry = {};
-  // How long the cache is considered fresh TTL (Time-To-Live)
-  static const Duration _monthDataTTL = Duration(minutes: 5);
+  final MonthReservationsCache _cache =
+      MonthReservationsCache(ttl: const Duration(minutes: 5));
 
-  CalendarBloc(this._getConfReservationsUsecase) : super(CalendarInitial()) {
+  CalendarBloc(this._usecase) : super(CalendarInitial()) {
     on<GetReservationsForMonth>(_onGetReservationsForMonth);
     on<RefreshCalendar>(_onRefreshCalendar);
   }
@@ -24,37 +20,30 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
     GetReservationsForMonth event,
     Emitter<CalendarState> emit,
   ) async {
-    final bool isCached = _monthCache.containsKey(event.monthKey);
-    final DateTime? expiry = _cacheExpiry[event.monthKey];
-    final bool isStale = expiry == null || DateTime.now().isAfter(expiry);
+    final monthKey = event.monthKey;
 
-    // If data for the requested month is available in cache (even if stale), emit it immediately.
-    // This provides a "stale-while-revalidate" (SWR) experience.
-    if (isCached) {
-      emit(CalendarLoaded(_monthCache[event.monthKey]!));
+    final cached = _cache.get(monthKey);
+    final isFresh = _cache.isFresh(monthKey);
 
-      // If data is fresh, we're done. Otherwise, we'll proceed to fetch fresh data.
-      if (!isStale) return;
+    /// If data for the requested month is available in cache (even if stale),
+    /// emit it immediately.
+    /// This provides a "stale-while-revalidate" (SWR) experience.
+    if (cached != null) {
+      emit(CalendarLoaded(cached));
+      if (isFresh) return;
     } else {
-      // If no data is available for the requested month, show loading.
       emit(CalendarLoading());
     }
 
     // Fetch the current month's data if not cached or stale
-    final result =
-        await minDelayRun(_getConfReservationsUsecase(event.utcRange));
-
+    final result = await minDelayRun(_usecase(event.utcRange));
     if (emit.isDone) return;
 
     result.fold(
       (failure) => emit(CalendarError(failure)),
-      (reservations) {
-        // Store in cache
-        _monthCache[event.monthKey] = reservations;
-        _cacheExpiry[event.monthKey] = DateTime.now().add(_monthDataTTL);
-
-        // Emit the newly fetched (and now fresh) data
-        emit(CalendarLoaded(reservations));
+      (data) {
+        _cache.put(monthKey, data);
+        emit(CalendarLoaded(data));
       },
     );
   }
@@ -67,10 +56,7 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
 
     // Expire modified months so they are fetched again
     for (var monthKey in event.affectedMonthKeys) {
-      if (_cacheExpiry.containsKey(monthKey)) {
-        _cacheExpiry[monthKey] = DateTime.now();
-        isCacheExpiryModified = true;
-      }
+      if (_cache.expire(monthKey)) isCacheExpiryModified = true;
     }
 
     // Trigger the reload process for the current month displayed

@@ -1,21 +1,17 @@
 import 'package:flutter/widgets.dart';
-import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/entities/utc_range.dart';
+import '../../domain/entities/utc_range.dart';
+import '../../domain/utils/calendar_date_utils.dart';
 
 abstract class CalendarEvent {}
 
 class GetReservationsForMonth extends CalendarEvent {
-  late final DateTime monthKey;   // Local month identifier (first day of month)
+  late final DateTime monthKey;
   late final UtcRange utcRange;
 
-  GetReservationsForMonth(DateTime focusedDay) {
-    monthKey = DateTime(focusedDay.year, focusedDay.month, 1);
-
-    utcRange = UtcRange(
-        startUtc: DateTime(focusedDay.year, focusedDay.month, 1).toUtc(),
-        endUtc: DateTime(focusedDay.year, focusedDay.month + 1, 1).toUtc(),
-    );
-
-    debugDate("focusedDay", focusedDay);
+  GetReservationsForMonth(DateTime focusedLocal)
+      : monthKey = CalendarDateUtils.localMonthKey(focusedLocal),
+        utcRange = CalendarDateUtils.utcMonthRangeFromLocal(focusedLocal) {
+    debugDate("focusedLocal", focusedLocal);
     debugDate("monthKey", monthKey);
     debugDate("startUtc", utcRange.startUtc);
     debugDate("endUtc", utcRange.endUtc);
@@ -31,6 +27,7 @@ class GetReservationsForMonth extends CalendarEvent {
   }
 }
 
+// TODO: Fix the calendar refresh workflow - is this event even needed?
 class RefreshCalendar extends CalendarEvent {
   // This list will store the month keys that need refreshing.
   final List<DateTime> affectedMonthKeys;

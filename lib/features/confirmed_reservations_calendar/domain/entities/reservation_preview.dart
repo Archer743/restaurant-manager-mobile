@@ -20,7 +20,4 @@ class ReservationPreview {
   DateTime get startLocal => startUtc.toLocal();
 
   TimeOfDay get startTimeLocal => TimeOfDay.fromDateTime(startLocal);
-
-  DateTime get startDateLocal =>
-      DateTime(startLocal.year, startLocal.month, startLocal.day);
 }
