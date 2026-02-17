@@ -3,15 +3,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:restaurant_manager_app/config/routing/app_routes.dart';
 import 'package:restaurant_manager_app/core/presentation/services/snackbar_service.dart';
-import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/entities/reservation_preview.dart';
-import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/typedefs.dart';
-import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_bloc.dart';
-import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_event.dart';
-import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_state.dart';
-import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/widgets/reservation_card.dart';
+import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/domain/utils/calendar_date_utils.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/coordinators/reservation_refresh_coordinator.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:restaurant_manager_app/config/theme/theme.dart';
+import '../../domain/entities/reservation_preview.dart';
+import '../bloc/calendar_bloc.dart';
+import '../bloc/calendar_event.dart';
+import '../bloc/calendar_state.dart';
+import '../widgets/calendar_view.dart';
+import '../widgets/selected_day_reservations.dart';
 
 class ConfirmedReservationsCalendarPage extends StatefulWidget {
   const ConfirmedReservationsCalendarPage({super.key});
@@ -23,87 +23,27 @@ class ConfirmedReservationsCalendarPage extends StatefulWidget {
 
 class _ConfirmedReservationsCalendarPageState
     extends State<ConfirmedReservationsCalendarPage> {
-  // Working with local time
-  DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
-  final DateTime _firstCalendarDay = DateTime(2025, 1, 1);
+  late final DateTime _firstCalendarDay;
   late final DateTime _lastCalendarDay;
 
-  CalendarConfirmedReservations _currMonthReservations = {};
-  final ValueNotifier<List<ReservationPreview>> _selectedDayReservations =
-      ValueNotifier([]);
+  late DateTime _focusedDay; // The day that determines which month is visible
+  late DateTime _selectedDay; // The day the user clicked
 
   @override
   void initState() {
     super.initState();
-    _selectedDay = _focusedDay;
 
-    _lastCalendarDay = DateTime(
-      DateTime.now().year + 5,
-      DateTime.now().month,
-      DateTime.now().day,
-    );
+    final now = DateTime.now();
 
-    // Dispatch the initial event to fetch reservations for the current month
-    // WidgetsBinding.instance.addPostFrameCallback is used to ensure context is available
+    _focusedDay = _selectedDay = CalendarDateUtils.normalizeDate(now);
+
+    // 3 months history, 6 months forward
+    _firstCalendarDay = DateTime.utc(now.year, now.month - 3, 1);
+    _lastCalendarDay = DateTime.utc(now.year, now.month + 6, 0);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CalendarBloc>().add(GetReservationsForMonth(_focusedDay));
+      _fetchMonthData(_focusedDay);
     });
-  }
-
-  // --- Table Calendar Event Loader ---
-  List<ReservationPreview> _getReservationsForDay(DateTime day) {
-    // 'day' from calendar is in UTC format
-    final localTime = day.toLocal();
-    final normalizedDay =
-        DateTime(localTime.year, localTime.month, localTime.day);
-    return _currMonthReservations[normalizedDay] ?? [];
-  }
-
-  // --- Calendar Callbacks ---
-  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
-    final localSelected = selectedDay.toLocal();
-    final localFocused = focusedDay.toLocal();
-
-    if (!isSameDay(_selectedDay, localSelected)) {
-      setState(() {
-        _selectedDay = localSelected;
-        _focusedDay = localFocused;
-        _selectedDayReservations.value = _getReservationsForDay(localSelected);
-      });
-    }
-  }
-
-  void _onPageChanged(DateTime focusedDay) {
-    final localFocused = focusedDay.toLocal();
-
-    setState(() {
-      _focusedDay = localFocused;
-
-      if (_selectedDay != null) {
-        int targetDay = _selectedDay!.day;
-        int year = _focusedDay.year;
-        int month = _focusedDay.month;
-
-        // Try to create a DateTime with the same day in the new month.
-        // Dart's DateTime constructor for month automatically rolls over if the day doesn't exist.
-        // E.g., DateTime(2025, 4, 31) will create 2025-05-01.
-        DateTime potentialNewSelectedDay = DateTime(year, month, targetDay);
-
-        // Check if the created date's month matches the intended month.
-        // If it doesn't, it means the targetDay was too high for the 'month'.
-        if (potentialNewSelectedDay.month != month) {
-          _selectedDay = DateTime(year, month + 1, 0);
-        } else {
-          _selectedDay = potentialNewSelectedDay;
-        }
-      } else {
-        // If no day was selected initially, just select the focusedDay
-        _selectedDay = _focusedDay;
-      }
-    });
-
-    context.read<CalendarBloc>().add(GetReservationsForMonth(localFocused));
   }
 
   @override
@@ -111,130 +51,106 @@ class _ConfirmedReservationsCalendarPageState
     return Scaffold(
       appBar: AppBar(title: const Text('Потвърдени резервации')),
       body: BlocConsumer<CalendarBloc, CalendarState>(
-        listener: (context, state) {
-          if (state is CalendarLoaded) {
-            setState(
-              () {
-                _currMonthReservations = state.reservations;
-
-                if (_selectedDay != null) {
-                  _selectedDayReservations.value =
-                      _getReservationsForDay(_selectedDay!);
-                }
-              },
-            );
-          } else if (state is CalendarReload) {
-            // Reload Process
-            context
-                .read<CalendarBloc>()
-                .add(GetReservationsForMonth(_focusedDay));
-          } else if (state is CalendarError) {
-            SnackBarService.showFailure(context, state.failure);
-
-            if (state.failure.requiresReauthentication) {
-              context.go(AppRoutes.welcome);
-            }
-          }
-        },
+        listener: _listener,
         builder: (context, state) {
           return Column(
             children: [
-              _buildCalendar(),
-              state is CalendarLoaded
-                  ? _buildSelectedReservationsList()
-                  : const SizedBox(height: 16),
+              CalendarView(
+                firstDay: _firstCalendarDay,
+                lastDay: _lastCalendarDay,
+                focusedDay: _focusedDay,
+                selectedDay: _selectedDay,
+                onDaySelected: _onDaySelected,
+                onPageChanged: _onPageChanged,
+                eventLoader: (day) {
+                  if (state is! CalendarLoaded) return [];
+                  return state.reservations[day] ?? [];
+                },
+              ),
+              SelectedDayReservations(
+                reservations: state is CalendarLoaded
+                    ? state.reservations[_selectedDay] ?? []
+                    : [],
+                onTap: _openReservation,
+              ),
             ],
           );
         },
       ),
-      floatingActionButton: _buildCreateReservationButton(),
+      floatingActionButton: _buildFab(),
     );
   }
 
-  Widget _buildCalendar() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Card(
-        elevation: 5, // Subtle shadow for depth
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadius),
-        ),
-        clipBehavior: Clip.antiAlias, // Ensures content respects border radius
-        color: primaryColor.withOpacity(0.1),
-        child: TableCalendar(
-          firstDay: _firstCalendarDay,
-          lastDay: _lastCalendarDay,
-          focusedDay: _focusedDay,
-          locale: 'bg_BG',
-          calendarFormat: CalendarFormat.month,
-          startingDayOfWeek: StartingDayOfWeek.monday,
-          availableGestures: AvailableGestures.horizontalSwipe,
-          selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-          onDaySelected: _onDaySelected,
-          onPageChanged: _onPageChanged,
-          eventLoader: _getReservationsForDay,
-          headerStyle: calendarHeaderStyle,
-          daysOfWeekStyle: calendarDaysOfWeekStyle,
-          calendarStyle: calendarStyle,
-        ),
-      ),
+  void _fetchMonthData(DateTime focusedDay) {
+    context.read<CalendarBloc>().add(GetReservationsForMonth(focusedDay));
+  }
+
+  void _listener(BuildContext context, CalendarState state) {
+    if (state is CalendarReload) {
+      context.read<CalendarBloc>().add(GetReservationsForMonth(_focusedDay));
+    } else if (state is CalendarError) {
+      SnackBarService.showFailure(context, state.failure);
+
+      if (state.failure.requiresReauthentication) {
+        context.go(AppRoutes.welcome);
+      }
+    }
+  }
+
+  void _openReservation(ReservationPreview reservation) {
+    final coordinator = ReservationRefreshCoordinator.forCalendar(
+      calendarBloc: context.read<CalendarBloc>(),
+    );
+
+    context.push(
+      '${AppRoutes.reservation}/${reservation.id}',
+      extra: coordinator,
     );
   }
 
-  Widget _buildSelectedReservationsList() {
-    return ValueListenableBuilder(
-        valueListenable: _selectedDayReservations,
-        builder: (context, reservations, _) {
-          if (reservations.isEmpty) {
-            return Expanded(
-              child: Center(
-                child: Text('Няма резервации на този ден',
-                    style: defaultTextStyle),
-              ),
-            );
-          }
-
-          return Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.only(bottom: 80.0),
-              itemCount: reservations.length,
-              itemBuilder: (context, index) {
-                final reservation = reservations[index];
-                return ReservationCard(
-                  reservation: reservation,
-                  onTap: () {
-                    final coordinator =
-                        ReservationRefreshCoordinator.forCalendar(
-                      calendarBloc: context.read<CalendarBloc>(),
-                    );
-
-                    context.push(
-                      '${AppRoutes.reservation}/${reservation.id}',
-                      extra: coordinator,
-                    );
-                  },
-                );
-              },
-            ),
-          );
-        });
+  // Both provided days are normalized
+  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+    if (!isSameDay(_selectedDay, selectedDay)) {
+      setState(() {
+        _selectedDay = selectedDay;
+        _focusedDay = focusedDay;
+      });
+    }
   }
 
-  Widget _buildCreateReservationButton() {
+  // Here focusedDay is the first day of the current visible month (normalized)
+  void _onPageChanged(DateTime focusedDay) {
+    setState(() {
+      _focusedDay = focusedDay;
+
+      // Keep the selected day in sync with the currently visible month.
+      // We try to recreate the selected day using the same day number
+      // in the newly focused month.
+      DateTime newSelectedDay =
+          DateTime.utc(_focusedDay.year, _focusedDay.month, _selectedDay.day);
+
+      if (newSelectedDay.month != _focusedDay.month) {
+        // Day 0 is the last day of the previous month
+        _selectedDay = DateTime.utc(_focusedDay.year, _focusedDay.month + 1, 0);
+      } else {
+        _selectedDay = newSelectedDay;
+      }
+    });
+
+    _fetchMonthData(focusedDay);
+  }
+
+  Widget _buildFab() {
     return FloatingActionButton(
       onPressed: () {
-        // Pre-fill the date with the selected day.
-
-        final DateTime initialDateTime = _selectedDay?.toLocal() ?? _focusedDay;
-        final normalizedDay = DateTime(
-            initialDateTime.year, initialDateTime.month, initialDateTime.day);
-
-        final Map<String, dynamic> extraData = {
-          'initialDateLocal': normalizedDay,
-          'calendarBloc': context.read<CalendarBloc>(),
-        };
-
-        context.push(AppRoutes.reservation, extra: extraData);
+        context.push(
+          AppRoutes.reservation,
+          extra: {
+            'initialDateLocal': DateTime(
+                _selectedDay.year, _selectedDay.month, _selectedDay.day),
+            'calendarBloc': context.read<CalendarBloc>(),
+          },
+        );
       },
       child: const Icon(Icons.add),
     );

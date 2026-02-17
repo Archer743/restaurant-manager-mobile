@@ -33,7 +33,7 @@ class ConfirmedReservationsRepositoryImpl
                 authorization, utcRange.startUtc, utcRange.endUtc);
 
         final reservations = response.data;
-        return ReservationGroupingMapper.groupByLocalDay(reservations);
+        return ReservationGroupingMapper.groupByDayKey(reservations);
       },
     );
   }

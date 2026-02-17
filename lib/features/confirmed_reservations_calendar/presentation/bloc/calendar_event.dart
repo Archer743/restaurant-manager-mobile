@@ -1,4 +1,3 @@
-import 'package:flutter/widgets.dart';
 import '../../domain/entities/utc_range.dart';
 import '../../domain/utils/calendar_date_utils.dart';
 
@@ -8,22 +7,12 @@ class GetReservationsForMonth extends CalendarEvent {
   late final DateTime monthKey;
   late final UtcRange utcRange;
 
-  GetReservationsForMonth(DateTime focusedLocal)
-      : monthKey = CalendarDateUtils.localMonthKey(focusedLocal),
-        utcRange = CalendarDateUtils.utcMonthRangeFromLocal(focusedLocal) {
-    debugDate("focusedLocal", focusedLocal);
-    debugDate("monthKey", monthKey);
-    debugDate("startUtc", utcRange.startUtc);
-    debugDate("endUtc", utcRange.endUtc);
-  }
+  GetReservationsForMonth(DateTime focusedDay) {
+    monthKey = CalendarDateUtils.normalizeDate(
+      DateTime(focusedDay.year, focusedDay.month, 1),
+    );
 
-  void debugDate(String label, DateTime dt) {
-    debugPrint('--- $label ---');
-    debugPrint('Raw: $dt');
-    debugPrint('isUtc: ${dt.isUtc}');
-    debugPrint('toUtc: ${dt.toUtc()}');
-    debugPrint('toLocal: ${dt.toLocal()}');
-    debugPrint('-----------------------');
+    utcRange = CalendarDateUtils.getUtcMonthRange(focusedDay);
   }
 }
 
@@ -41,7 +30,9 @@ class RefreshCalendar extends CalendarEvent {
     final Set<DateTime> uniqueMonthsSet = {};
 
     for (final date in dates) {
-      uniqueMonthsSet.add(DateTime(date.year, date.month, 1));
+      uniqueMonthsSet.add(CalendarDateUtils.normalizeDate(
+        DateTime(date.year, date.month, 1),
+      ));
     }
 
     return uniqueMonthsSet.toList();
