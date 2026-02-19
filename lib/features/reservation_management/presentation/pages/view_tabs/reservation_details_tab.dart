@@ -18,6 +18,7 @@ import 'package:restaurant_manager_app/features/reservation_management/presentat
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/coordinators/reservation_refresh_coordinator.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/buttons/reservation_actions_menu.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/forms/controllers/reservation_form_controller.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/forms/reservation_form.dart';
 
 /// Acts as a bridge between the ReservationDetailsTab and the ReservationViewPage
@@ -87,19 +88,13 @@ class ReservationDetailsTab extends StatefulWidget {
 
 class _ReservationDetailsTabState extends State<ReservationDetailsTab>
     with AutomaticKeepAliveClientMixin {
+  late final ReservationFormController _formController;
   final _formKey = GlobalKey<FormState>();
   ReservationFormMode _displayMode = ReservationFormMode.view;
   bool _isCreatedByStaff = false;
+
   ReservationView? _originalReservation;
   final _hasChangesNotifier = ValueNotifier(false);
-
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _dateController = TextEditingController();
-  final _timeController = TextEditingController();
-  final _peopleCountController = TextEditingController();
-  final _commentController = TextEditingController();
 
   bool _isReservationDataAvailable(ReservationDetailsState state) {
     return state is ReservationDetailsLoaded ||
@@ -107,17 +102,17 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
   }
 
   void _setControllers(ReservationView reservation) {
-    _nameController.text = reservation.name;
-    _peopleCountController.text = reservation.peopleCount.toString();
-    _emailController.text = reservation.email ?? '';
-    _phoneController.text = reservation.phone ?? '';
-    _commentController.text = reservation.comment ?? '';
+    _formController.name.text = reservation.name;
+    _formController.peopleCount.text = reservation.peopleCount.toString();
+    _formController.email.text = reservation.email ?? '';
+    _formController.phone.text = reservation.phone ?? '';
+    _formController.comment.text = reservation.comment ?? '';
 
     final (localDate, localTime) =
         extractLocalComponentsFromUtc(reservation.startUtc);
 
-    _dateController.text = localDate.toYYYYMMDDString();
-    _timeController.text = localTime.toHHMMSSString();
+    _formController.date.text = localDate.toYYYYMMDDString();
+    _formController.time.text = localTime.toHHMMSSString();
   }
 
   void _onFormChanged() {
@@ -126,14 +121,15 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
     final (originalLocalDate, originalLocalTime) =
         extractLocalComponentsFromUtc(_originalReservation!.startUtc);
 
-    final hasChanges = _nameController.text != _originalReservation!.name ||
-        _peopleCountController.text !=
+    final hasChanges = _formController.name.text !=
+            _originalReservation!.name ||
+        _formController.peopleCount.text !=
             _originalReservation!.peopleCount.toString() ||
-        _dateController.text != originalLocalDate.toYYYYMMDDString() ||
-        _timeController.text != originalLocalTime.toHHMMSSString() ||
-        _emailController.text != (_originalReservation!.email ?? '') ||
-        _phoneController.text != (_originalReservation!.phone ?? '') ||
-        _commentController.text != (_originalReservation!.comment ?? '');
+        _formController.date.text != originalLocalDate.toYYYYMMDDString() ||
+        _formController.time.text != originalLocalTime.toHHMMSSString() ||
+        _formController.email.text != (_originalReservation!.email ?? '') ||
+        _formController.phone.text != (_originalReservation!.phone ?? '') ||
+        _formController.comment.text != (_originalReservation!.comment ?? '');
 
     _hasChangesNotifier.value = hasChanges;
   }
@@ -142,13 +138,13 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
     if (_formKey.currentState?.validate() ?? false) {
       context.read<ReservationDetailsBloc>().add(
             UpdateReservationDetails(
-              name: _nameController.text,
-              dateString: _dateController.text,
-              timeString: _timeController.text,
-              peopleCountString: _peopleCountController.text,
-              email: _emailController.text,
-              phone: _phoneController.text,
-              commentString: _commentController.text,
+              name: _formController.name.text,
+              dateString: _formController.date.text,
+              timeString: _formController.time.text,
+              peopleCountString: _formController.peopleCount.text,
+              email: _formController.email.text,
+              phone: _formController.phone.text,
+              commentString: _formController.comment.text,
             ),
           );
     }
@@ -173,27 +169,20 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
   @override
   void initState() {
     super.initState();
-    _nameController.addListener(_onFormChanged);
-    _emailController.addListener(_onFormChanged);
-    _phoneController.addListener(_onFormChanged);
-    _dateController.addListener(_onFormChanged);
-    _timeController.addListener(_onFormChanged);
-    _peopleCountController.addListener(_onFormChanged);
-    _commentController.addListener(_onFormChanged);
+    _formController = ReservationFormController();
+    _formController.name.addListener(_onFormChanged);
+    _formController.email.addListener(_onFormChanged);
+    _formController.phone.addListener(_onFormChanged);
+    _formController.date.addListener(_onFormChanged);
+    _formController.time.addListener(_onFormChanged);
+    _formController.peopleCount.addListener(_onFormChanged);
+    _formController.comment.addListener(_onFormChanged);
   }
 
   @override
   void dispose() {
     _hasChangesNotifier.dispose();
-
-    _nameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    _dateController.dispose();
-    _timeController.dispose();
-    _peopleCountController.dispose();
-    _commentController.dispose();
-
+    _formController.dispose();
     super.dispose();
   }
 
@@ -337,15 +326,9 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
             physics: const AlwaysScrollableScrollPhysics(),
             child: ReservationForm(
               formKey: _formKey,
+              formController: _formController,
               displayMode: _displayMode,
               isCreatedByStaff: _isCreatedByStaff,
-              nameController: _nameController,
-              emailController: _emailController,
-              phoneController: _phoneController,
-              dateController: _dateController,
-              timeController: _timeController,
-              peopleCountController: _peopleCountController,
-              commentController: _commentController,
             ),
           ),
         ),

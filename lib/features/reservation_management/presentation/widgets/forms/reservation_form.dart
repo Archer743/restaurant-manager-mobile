@@ -8,47 +8,38 @@ import 'package:restaurant_manager_app/features/reservation_management/presentat
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/fields/reservation_name_field.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/fields/time_field.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_form_mode.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/forms/controllers/reservation_form_controller.dart';
 
 class ReservationForm extends StatelessWidget {
-  final GlobalKey<FormState> formKey;
-  final ReservationFormMode displayMode;
-  final bool isCreatedByStaff;
-
-  final TextEditingController nameController;
-  final TextEditingController emailController;
-  final TextEditingController phoneController;
-  final TextEditingController dateController;
-  final TextEditingController timeController;
-  final TextEditingController peopleCountController;
-  final TextEditingController commentController;
+  final GlobalKey<FormState> _formKey;
+  final ReservationFormController _formController;
+  final ReservationFormMode _displayMode;
+  final bool _isCreatedByStaff;
 
   const ReservationForm({
     super.key,
-    required this.formKey,
-    required this.displayMode,
-    required this.nameController,
-    required this.emailController,
-    required this.phoneController,
-    required this.dateController,
-    required this.timeController,
-    required this.peopleCountController,
-    required this.commentController,
-    this.isCreatedByStaff = true,
-  });
+    required GlobalKey<FormState> formKey,
+    required ReservationFormController formController,
+    required ReservationFormMode displayMode,
+    bool isCreatedByStaff = true,
+  })  : _formKey = formKey,
+        _formController = formController,
+        _displayMode = displayMode,
+        _isCreatedByStaff = isCreatedByStaff;
 
   ReservationFormMode get _getContactInfoDisplayMode {
-    if (displayMode == ReservationFormMode.edit && !isCreatedByStaff) {
+    if (_displayMode == ReservationFormMode.edit && !_isCreatedByStaff) {
       // Force view mode for client-created contact info in edit mode
       return ReservationFormMode.view;
     }
 
-    return displayMode;
+    return _displayMode;
   }
 
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: formKey,
+      key: _formKey,
       child: Column(
         children: [
           SizedBox(height: spacingByHeight(context, 0.04)),
@@ -65,23 +56,25 @@ class ReservationForm extends StatelessWidget {
     return Column(
       children: [
         ReservationNameField(
-            controller: nameController,
+            controller: _formController.name,
             displayMode: _getContactInfoDisplayMode),
         SizedBox(height: spacingByHeight(context, 0.035)),
-        DateField(rawController: dateController, displayMode: displayMode),
+        DateField(
+            rawController: _formController.date, displayMode: _displayMode),
         SizedBox(height: spacingByHeight(context, 0.035)),
-        TimeField(rawController: timeController, displayMode: displayMode),
+        TimeField(
+            rawController: _formController.time, displayMode: _displayMode),
         SizedBox(height: spacingByHeight(context, 0.035)),
         PeopleCountField(
-            controller: peopleCountController, displayMode: displayMode),
+            controller: _formController.peopleCount, displayMode: _displayMode),
       ],
     );
   }
 
   Widget _buildOptionalFields(BuildContext context) {
-    final bool hasOptionalData = emailController.text.isNotEmpty ||
-        phoneController.text.isNotEmpty ||
-        commentController.text.isNotEmpty;
+    final bool hasOptionalData = _formController.email.text.isNotEmpty ||
+        _formController.phone.text.isNotEmpty ||
+        _formController.comment.text.isNotEmpty;
 
     return Theme(
       data: Theme.of(context).copyWith(
@@ -90,20 +83,21 @@ class ReservationForm extends StatelessWidget {
       ),
       child: ExpansionTile(
         initiallyExpanded:
-            displayMode == ReservationFormMode.view ? hasOptionalData : false,
+            _displayMode == ReservationFormMode.view ? hasOptionalData : false,
         leading: const Icon(Icons.info_outline, size: 23),
         title: const Text('Допълнителни детайли'),
         children: [
           SizedBox(height: spacingByHeight(context, 0.02)),
           EmailField(
-              controller: emailController,
+              controller: _formController.email,
               displayMode: _getContactInfoDisplayMode),
           SizedBox(height: spacingByHeight(context, 0.035)),
           PhoneNumberField(
-              controller: phoneController,
+              controller: _formController.phone,
               displayMode: _getContactInfoDisplayMode),
           SizedBox(height: spacingByHeight(context, 0.035)),
-          CommentField(controller: commentController, displayMode: displayMode),
+          CommentField(
+              controller: _formController.comment, displayMode: _displayMode),
         ],
       ),
     );

@@ -8,14 +8,15 @@ import 'package:restaurant_manager_app/core/presentation/widgets/buttons/action_
 import 'package:restaurant_manager_app/core/utils/datetime_utils.dart';
 import 'package:restaurant_manager_app/core/utils/spacing.dart';
 import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_form_mode.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/create/reservation_create_bloc.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/create/reservation_create_event.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/create/reservation_create_state.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/forms/reservation_form.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/forms/controllers/reservation_form_controller.dart';
+import '../../domain/entities/reservation_form_mode.dart';
+import '../bloc/create/reservation_create_bloc.dart';
+import '../bloc/create/reservation_create_event.dart';
+import '../bloc/create/reservation_create_state.dart';
+import '../widgets/forms/reservation_form.dart';
 
 class ReservationCreatePage extends StatefulWidget {
-  final DateTime initialDateLocal; // Local time
+  final DateTime initialDateLocal;
 
   const ReservationCreatePage({super.key, required this.initialDateLocal});
 
@@ -24,50 +25,21 @@ class ReservationCreatePage extends StatefulWidget {
 }
 
 class _ReservationCreatePageState extends State<ReservationCreatePage> {
+  late final ReservationFormController _formController;
   final _formKey = GlobalKey<FormState>();
-
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _dateController = TextEditingController();
-  final _timeController = TextEditingController();
-  final _peopleCountController = TextEditingController();
-  final _commentController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _dateController.text = widget.initialDateLocal.toYYYYMMDDString();
-    _timeController.text = TimeOfDay.now().toHHMMSSString();
+    _formController = ReservationFormController();
+    _formController.date.text = widget.initialDateLocal.toYYYYMMDDString();
+    _formController.time.text = TimeOfDay.now().toHHMMSSString();
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    _dateController.dispose();
-    _timeController.dispose();
-    _peopleCountController.dispose();
-    _commentController.dispose();
+    _formController.dispose();
     super.dispose();
-  }
-
-  void _submitForm() {
-    if (_formKey.currentState?.validate() ?? false) {
-      // Submit form
-      context.read<ReservationCreateBloc>().add(
-            CreateReservation(
-              name: _nameController.text,
-              email: _emailController.text,
-              phone: _phoneController.text,
-              dateString: _dateController.text,
-              timeString: _timeController.text,
-              peopleCountString: _peopleCountController.text,
-              comment: _commentController.text,
-            ),
-          );
-    }
   }
 
   @override
@@ -75,19 +47,7 @@ class _ReservationCreatePageState extends State<ReservationCreatePage> {
     return Scaffold(
       appBar: const BackLeadingAppBar(title: 'Нова резервация'),
       body: BlocConsumer<ReservationCreateBloc, ReservationCreateState>(
-        listener: (context, state) {
-          if (state is ReservationSaved) {
-            SnackBarService.showSuccess(
-                context, 'Резервацията беше запазена успешно');
-            context.pop(); // Go back to prev page
-          } else if (state is ReservationError) {
-            SnackBarService.showFailure(context, state.failure);
-
-            if (state.failure.requiresReauthentication) {
-              context.go(AppRoutes.welcome);
-            }
-          }
-        },
+        listener: _listener,
         builder: (context, state) {
           return Center(
             child: Padding(
@@ -96,15 +56,9 @@ class _ReservationCreatePageState extends State<ReservationCreatePage> {
                 child: Column(
                   children: [
                     ReservationForm(
+                      formController: _formController,
                       formKey: _formKey,
                       displayMode: ReservationFormMode.create,
-                      nameController: _nameController,
-                      emailController: _emailController,
-                      phoneController: _phoneController,
-                      dateController: _dateController,
-                      timeController: _timeController,
-                      peopleCountController: _peopleCountController,
-                      commentController: _commentController,
                     ),
                     ActionButton(
                       label: 'Запази',
@@ -120,5 +74,27 @@ class _ReservationCreatePageState extends State<ReservationCreatePage> {
         },
       ),
     );
+  }
+
+  void _submitForm() {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    final request = _formController.getRequest();
+    context.read<ReservationCreateBloc>().add(CreateReservation(request));
+  }
+
+  void _listener(BuildContext context, ReservationCreateState state) {
+    if (state is ReservationSaved) {
+      SnackBarService.showSuccess(
+          context, 'Резервацията беше запазена успешно');
+
+      context.pop(); // Go back to previous page
+    } else if (state is ReservationError) {
+      SnackBarService.showFailure(context, state.failure);
+
+      if (state.failure.requiresReauthentication) {
+        context.go(AppRoutes.welcome);
+      }
+    }
   }
 }

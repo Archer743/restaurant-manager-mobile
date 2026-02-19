@@ -7,7 +7,6 @@ import 'package:restaurant_manager_app/features/auth/presentation/bloc/register/
 import 'package:restaurant_manager_app/features/auth/presentation/pages/login_page.dart';
 import 'package:restaurant_manager_app/features/auth/presentation/pages/register_page.dart';
 import 'package:restaurant_manager_app/features/auth/presentation/pages/welcome_page.dart';
-import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_bloc.dart';
 import 'package:restaurant_manager_app/features/home/presentation/home_page.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_event.dart';
@@ -66,19 +65,15 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.reservation,
       builder: (context, state) {
-        try {
-          final extraData = state.extra as Map<String, dynamic>;
-          final DateTime initialDateLocal = extraData['initialDateLocal']!;
+        final initialDateLocal =
+            state.extra is DateTime ? state.extra as DateTime : DateTime.now();
 
-          return MultiBlocProvider(
-            providers: [
-              BlocProvider<ReservationCreateBloc>(create: (_) => sl()),
-            ],
-            child: ReservationCreatePage(initialDateLocal: initialDateLocal),
-          );
-        } catch (_) {
-          return const Text('Error: Path ${AppRoutes.reservation}');
-        }
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<ReservationCreateBloc>(create: (_) => sl()),
+          ],
+          child: ReservationCreatePage(initialDateLocal: initialDateLocal),
+        );
       },
       routes: [
         // Sub-route for viewing/editing an existing reservation

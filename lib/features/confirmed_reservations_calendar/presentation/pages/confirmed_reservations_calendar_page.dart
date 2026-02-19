@@ -146,10 +146,7 @@ class _ConfirmedReservationsCalendarPageState
       onPressed: () {
         context.push(
           AppRoutes.reservation,
-          extra: {
-            'initialDateLocal': DateTime(
-                _selectedDay.year, _selectedDay.month, _selectedDay.day),
-          },
+          extra: _selectedDay,
         );
       },
       child: const Icon(Icons.add),

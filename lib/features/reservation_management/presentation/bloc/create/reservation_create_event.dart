@@ -1,21 +1,11 @@
+import '../../../domain/requests/create_reservation_request.dart';
+import '../../../domain/entities/reservation_create.dart';
+
 abstract class ReservationCreateEvent {}
 
 class CreateReservation extends ReservationCreateEvent {
-  final String name;
-  final String email;
-  final String phone;
-  final String dateString;
-  final String timeString;
-  final String peopleCountString;
-  final String comment;
+  final ReservationCreate reservation;
 
-  CreateReservation({
-    required this.name,
-    required this.email,
-    required this.phone,
-    required this.dateString,
-    required this.timeString,
-    required this.peopleCountString,
-    required this.comment,
-  });
+  CreateReservation(CreateReservationRequest request)
+      : reservation = request.toEntity();
 }

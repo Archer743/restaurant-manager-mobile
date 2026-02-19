@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:restaurant_manager_app/core/data/converters/app_datetime_converter.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_create.dart';
+import '../../domain/entities/reservation_create.dart';
 
 part 'reservation_create_model.g.dart';
 

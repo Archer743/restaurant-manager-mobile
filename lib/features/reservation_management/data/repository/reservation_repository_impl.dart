@@ -6,18 +6,18 @@ import 'package:restaurant_manager_app/core/domain/events/reservation_events.dar
 import 'package:restaurant_manager_app/core/domain/repository/auth_shared_repository.dart';
 import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/core/network/auth_request_handler.dart';
-import 'package:restaurant_manager_app/features/reservation_management/data/data_sources/reservation_api_service.dart';
-import 'package:restaurant_manager_app/features/reservation_management/data/data_sources/reservation_table_api_service.dart';
-import 'package:restaurant_manager_app/features/reservation_management/data/models/reservation_create_model.dart';
-import 'package:restaurant_manager_app/features/reservation_management/data/models/reservation_tables_update_model.dart';
-import 'package:restaurant_manager_app/features/reservation_management/data/models/reservation_update_model.dart';
-import 'package:restaurant_manager_app/features/reservation_management/data/models/reservation_shift_view_model.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_create.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_tables_update.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_update.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_view.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_shift_view.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/repository/reservation_repository.dart';
+import '../data_sources/reservation_api_service.dart';
+import '../data_sources/reservation_table_api_service.dart';
+import '../models/reservation_create_model.dart';
+import '../models/reservation_tables_update_model.dart';
+import '../models/reservation_update_model.dart';
+import '../models/reservation_shift_view_model.dart';
+import '../../domain/entities/reservation_create.dart';
+import '../../domain/entities/reservation_tables_update.dart';
+import '../../domain/entities/reservation_update.dart';
+import '../../domain/entities/reservation_view.dart';
+import '../../domain/entities/reservation_shift_view.dart';
+import '../../domain/repository/reservation_repository.dart';
 
 class ReservationRepositoryImpl implements ReservationRepository {
   final AppEventBus _eventBus;
@@ -37,19 +37,20 @@ class ReservationRepositoryImpl implements ReservationRepository {
 
   @override
   Future<Either<Failure, void>> createReservation(
-    ReservationCreate data,
+    ReservationCreate reservation,
   ) async {
     return await handleAuthRequest<Null>(
       _tokenService,
       _authSharedRepo,
       (authorization) async {
-        final createModel = ReservationCreateModel.fromEntity(data);
+        final createModel = ReservationCreateModel.fromEntity(reservation);
 
         await _reservationApiService.createReservation(
             authorization, createModel);
 
+        // Inform all listeners that new reservation was created
         _eventBus.fire(ReservationsChangedEvent(
-          affectedDates: [data.startUtc],
+          affectedDates: [reservation.startUtc],
         ));
 
         return null;

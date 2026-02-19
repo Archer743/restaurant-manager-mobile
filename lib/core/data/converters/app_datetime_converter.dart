@@ -16,6 +16,6 @@ class AppDateTimeUtcConverter implements JsonConverter<DateTime, String> {
 
   @override
   String toJson(DateTime object) {
-    return object.toUtc().toIso8601String();
+    return object.toIso8601String();
   }
 }
