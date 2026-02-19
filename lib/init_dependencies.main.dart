@@ -100,7 +100,7 @@ void _initCalendarFeature() {
       () => GetConfirmedReservationsUsecase(sl()));
 
   // [Blocs]
-  sl.registerFactory<CalendarBloc>(() => CalendarBloc(sl()));
+  sl.registerFactory<CalendarBloc>(() => CalendarBloc(sl(), sl()));
 }
 
 void _initReservationManagementFeature() {
@@ -114,6 +114,7 @@ void _initReservationManagementFeature() {
   // [Repositories]
   sl.registerLazySingleton<ReservationRepository>(
     () => ReservationRepositoryImpl(
+      sl<AppEventBus>(),
       sl<AuthSharedRepository>(),
       sl<TokenStorageService>(),
       sl<ReservationApiService>(),

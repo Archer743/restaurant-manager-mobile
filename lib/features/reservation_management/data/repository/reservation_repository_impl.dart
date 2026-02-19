@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:restaurant_manager_app/core/data/data_sources/local/token_storage_service.dart';
+import 'package:restaurant_manager_app/core/domain/events/app_event_bus.dart';
+import 'package:restaurant_manager_app/core/domain/events/reservation_events.dart';
 import 'package:restaurant_manager_app/core/domain/repository/auth_shared_repository.dart';
 import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/core/network/auth_request_handler.dart';
@@ -18,12 +20,15 @@ import 'package:restaurant_manager_app/features/reservation_management/domain/en
 import 'package:restaurant_manager_app/features/reservation_management/domain/repository/reservation_repository.dart';
 
 class ReservationRepositoryImpl implements ReservationRepository {
+  final AppEventBus _eventBus;
+
   final AuthSharedRepository _authSharedRepo;
   final TokenStorageService _tokenService;
   final ReservationApiService _reservationApiService;
   final ReservationTableApiService _reservationTableApiService;
 
   ReservationRepositoryImpl(
+    this._eventBus,
     this._authSharedRepo,
     this._tokenService,
     this._reservationApiService,
@@ -42,6 +47,10 @@ class ReservationRepositoryImpl implements ReservationRepository {
 
         await _reservationApiService.createReservation(
             authorization, createModel);
+
+        _eventBus.fire(ReservationsChangedEvent(
+          affectedDates: [data.startUtc],
+        ));
 
         return null;
       },

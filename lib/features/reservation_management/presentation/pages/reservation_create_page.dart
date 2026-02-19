@@ -8,8 +8,6 @@ import 'package:restaurant_manager_app/core/presentation/widgets/buttons/action_
 import 'package:restaurant_manager_app/core/utils/datetime_utils.dart';
 import 'package:restaurant_manager_app/core/utils/spacing.dart';
 import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
-import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_bloc.dart';
-import 'package:restaurant_manager_app/features/confirmed_reservations_calendar/presentation/bloc/calendar_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_form_mode.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/create/reservation_create_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/create/reservation_create_event.dart';
@@ -36,10 +34,6 @@ class _ReservationCreatePageState extends State<ReservationCreatePage> {
   final _peopleCountController = TextEditingController();
   final _commentController = TextEditingController();
 
-  // Refresh Calendar Page
-  late final CalendarBloc? _calendarBloc;
-  bool _refreshRequired = false;
-
   @override
   void initState() {
     super.initState();
@@ -47,22 +41,8 @@ class _ReservationCreatePageState extends State<ReservationCreatePage> {
     _timeController.text = TimeOfDay.now().toHHMMSSString();
   }
 
-  // Runs after the widget is inserted into the widget tree and context is still valid.
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _calendarBloc = context.read<CalendarBloc?>();
-  }
-
   @override
   void dispose() {
-    // Update Calendar Page
-    if (_refreshRequired && _calendarBloc != null) {
-      _calendarBloc.add(RefreshCalendar(
-        rawDatesAffected: [DateTime.parse(_dateController.text)],
-      ));
-    }
-
     _nameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
@@ -97,7 +77,6 @@ class _ReservationCreatePageState extends State<ReservationCreatePage> {
       body: BlocConsumer<ReservationCreateBloc, ReservationCreateState>(
         listener: (context, state) {
           if (state is ReservationSaved) {
-            setState(() => _refreshRequired = true);
             SnackBarService.showSuccess(
                 context, 'Резервацията беше запазена успешно');
             context.pop(); // Go back to prev page

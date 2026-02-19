@@ -140,6 +140,7 @@ class _ConfirmedReservationsCalendarPageState
     _fetchMonthData(focusedDay);
   }
 
+  // Create new reservation button
   Widget _buildFab() {
     return FloatingActionButton(
       onPressed: () {
@@ -148,7 +149,6 @@ class _ConfirmedReservationsCalendarPageState
           extra: {
             'initialDateLocal': DateTime(
                 _selectedDay.year, _selectedDay.month, _selectedDay.day),
-            'calendarBloc': context.read<CalendarBloc>(),
           },
         );
       },

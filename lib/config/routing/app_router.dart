@@ -69,12 +69,10 @@ final GoRouter appRouter = GoRouter(
         try {
           final extraData = state.extra as Map<String, dynamic>;
           final DateTime initialDateLocal = extraData['initialDateLocal']!;
-          final CalendarBloc calendarBloc = extraData['calendarBloc']!;
 
           return MultiBlocProvider(
             providers: [
               BlocProvider<ReservationCreateBloc>(create: (_) => sl()),
-              BlocProvider<CalendarBloc>.value(value: calendarBloc),
             ],
             child: ReservationCreatePage(initialDateLocal: initialDateLocal),
           );

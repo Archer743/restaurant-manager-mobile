@@ -56,12 +56,8 @@ class MonthReservationsCache {
     _expiry[monthKey] = DateTime.now().add(ttl);
   }
 
-  bool expire(DateTime monthKey) {
-    if (_expiry.containsKey(monthKey)) {
-      _expiry[monthKey] = DateTime.now();
-      return true;
-    }
-
-    return false;
+  void expire(DateTime monthKey) {
+    if (!_expiry.containsKey(monthKey)) return;
+    _expiry[monthKey] = DateTime.now();
   }
 }
