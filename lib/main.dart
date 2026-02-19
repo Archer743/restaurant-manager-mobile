@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:restaurant_manager_app/config/theme/theme.dart';
 import 'package:restaurant_manager_app/config/routing/app_router.dart';
-import 'package:restaurant_manager_app/injection_container.dart';
+import 'package:restaurant_manager_app/init_dependencies.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

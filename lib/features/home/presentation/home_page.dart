@@ -11,7 +11,7 @@ import 'package:restaurant_manager_app/features/restaurant_floor_plan/presentati
 import 'package:restaurant_manager_app/features/user_profile/presentation/bloc/user_profile_bloc.dart';
 import 'package:restaurant_manager_app/features/user_profile/presentation/bloc/user_profile_event.dart';
 import 'package:restaurant_manager_app/features/user_profile/presentation/pages/user_profile_page.dart';
-import 'package:restaurant_manager_app/injection_container.dart';
+import 'package:restaurant_manager_app/init_dependencies.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

@@ -20,7 +20,7 @@ import 'package:restaurant_manager_app/features/reservation_management/presentat
 import 'package:restaurant_manager_app/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/bloc/splash_event.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/splash_page.dart';
-import 'package:restaurant_manager_app/injection_container.dart';
+import 'package:restaurant_manager_app/init_dependencies.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: AppRoutes.splash,
