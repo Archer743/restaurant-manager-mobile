@@ -114,7 +114,6 @@ void _initReservationManagementFeature() {
   // [Repositories]
   sl.registerLazySingleton<ReservationRepository>(
     () => ReservationRepositoryImpl(
-      sl<AppEventBus>(),
       sl<AuthSharedRepository>(),
       sl<TokenStorageService>(),
       sl<ReservationApiService>(),
@@ -149,7 +148,7 @@ void _initReservationManagementFeature() {
 
   // [Blocs]
   sl.registerFactory<ReservationCreateBloc>(
-    () => ReservationCreateBloc(sl<CreateReservationUseCase>()),
+    () => ReservationCreateBloc(sl(), sl()),
   );
 
   sl.registerFactory<ReservationDetailsBloc>(

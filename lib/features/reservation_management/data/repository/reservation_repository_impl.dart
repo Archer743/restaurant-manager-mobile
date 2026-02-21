@@ -20,15 +20,12 @@ import '../../domain/entities/reservation_shift_view.dart';
 import '../../domain/repository/reservation_repository.dart';
 
 class ReservationRepositoryImpl implements ReservationRepository {
-  final AppEventBus _eventBus;
-
   final AuthSharedRepository _authSharedRepo;
   final TokenStorageService _tokenService;
   final ReservationApiService _reservationApiService;
   final ReservationTableApiService _reservationTableApiService;
 
   ReservationRepositoryImpl(
-    this._eventBus,
     this._authSharedRepo,
     this._tokenService,
     this._reservationApiService,
@@ -47,11 +44,6 @@ class ReservationRepositoryImpl implements ReservationRepository {
 
         await _reservationApiService.createReservation(
             authorization, createModel);
-
-        // Inform all listeners that new reservation was created
-        _eventBus.fire(ReservationsChangedEvent(
-          affectedDates: [reservation.startUtc],
-        ));
 
         return null;
       },

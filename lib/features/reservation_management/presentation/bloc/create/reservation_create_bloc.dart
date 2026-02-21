@@ -1,5 +1,7 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:restaurant_manager_app/core/domain/events/app_event_bus.dart';
+import 'package:restaurant_manager_app/core/domain/events/reservation_events.dart';
 import 'package:restaurant_manager_app/core/utils/future_utils.dart';
 import '../../../domain/usecases/create_reservation_usecase.dart';
 import 'reservation_create_event.dart';
@@ -7,9 +9,11 @@ import 'reservation_create_state.dart';
 
 class ReservationCreateBloc
     extends Bloc<ReservationCreateEvent, ReservationCreateState> {
+  final AppEventBus _eventBus;
   final CreateReservationUseCase _usecase;
 
-  ReservationCreateBloc(this._usecase) : super(ReservationInitial()) {
+  ReservationCreateBloc(this._eventBus, this._usecase)
+      : super(ReservationInitial()) {
     // droppable - If a request is in progress -> ignore new ones.
     on<CreateReservation>(_onCreateReservation, transformer: droppable());
   }
@@ -27,7 +31,14 @@ class ReservationCreateBloc
 
     result.fold(
       (failure) => emit(ReservationError(failure)),
-      (_) => emit(ReservationSaved()),
+      (_) {
+        // Inform all listeners that a new reservation has been created
+        _eventBus.fire(
+          ReservationsChangedEvent(affectedDates: [event.reservation.startUtc]),
+        );
+
+        emit(ReservationSaved());
+      },
     );
   }
 }
