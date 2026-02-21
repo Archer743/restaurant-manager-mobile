@@ -13,12 +13,10 @@ import 'package:restaurant_manager_app/config/theme/theme.dart';
 
 class ReservationViewPage extends StatefulWidget {
   final String reservationId;
-  final ReservationRefreshCoordinator coordinator;
 
   const ReservationViewPage({
     super.key,
     required this.reservationId,
-    required this.coordinator,
   });
 
   @override
@@ -40,8 +38,7 @@ class _ReservationViewPageState extends State<ReservationViewPage>
 
   @override
   void dispose() {
-    // Refresh all related screens
-    widget.coordinator.executeRefresh();
+    // TODO: Refresh all related screens
 
     _tabController.dispose();
     _detailsTabController.dispose();
@@ -143,13 +140,11 @@ class _ReservationViewPageState extends State<ReservationViewPage>
             ReservationDetailsTab(
               reservationId: widget.reservationId,
               controller: _detailsTabController,
-              coordinator: widget.coordinator,
               onRefresh: _handleRefresh,
             ),
             ReservationTablesTab(
               reservationId: widget.reservationId,
               detailsTabController: _detailsTabController,
-              coordinator: widget.coordinator,
               onRefresh: _handleRefresh,
             ),
           ],

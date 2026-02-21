@@ -102,10 +102,7 @@ final GoRouter appRouter = GoRouter(
                       sl()..add(GetTablesAvailability(reservationId)),
                 ),
               ],
-              child: ReservationViewPage(
-                reservationId: reservationId,
-                coordinator: coordinator,
-              ),
+              child: ReservationViewPage(reservationId: reservationId),
             );
           },
         ),

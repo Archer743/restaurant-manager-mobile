@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:restaurant_manager_app/core/constants/error_codes.dart';
+import 'package:restaurant_manager_app/core/domain/events/app_event_bus.dart';
 import 'package:restaurant_manager_app/core/errors/failure.dart';
 import 'package:restaurant_manager_app/core/utils/datetime_utils.dart';
 import 'package:restaurant_manager_app/core/utils/future_utils.dart';
 import 'package:restaurant_manager_app/core/utils/timeofday_utils.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_update.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_view.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/close_reservation_usecase.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/get_reservation_usecase.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/remove_reservation_usecase.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/reopen_reservation_usecase.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/update_reservation_usecase.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_event.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_state.dart';
+import '../../../domain/entities/reservation_update.dart';
+import '../../../domain/entities/reservation_view.dart';
+import '../../../domain/usecases/close_reservation_usecase.dart';
+import '../../../domain/usecases/get_reservation_usecase.dart';
+import '../../../domain/usecases/remove_reservation_usecase.dart';
+import '../../../domain/usecases/reopen_reservation_usecase.dart';
+import '../../../domain/usecases/update_reservation_usecase.dart';
+import 'reservation_details_event.dart';
+import 'reservation_details_state.dart';
 
 class ReservationDetailsBloc
     extends Bloc<ReservationDetailsEvent, ReservationDetailsState> {
+  final AppEventBus _eventBus;
+
   final GetReservationUseCase _getReservationUseCase;
   final UpdateReservationUseCase _updateReservationUseCase;
   final RemoveReservationUseCase _removeReservationUseCase;
@@ -24,6 +27,7 @@ class ReservationDetailsBloc
   final ReopenReservationUseCase _reopenReservationUseCase;
 
   ReservationDetailsBloc(
+    this._eventBus,
     this._getReservationUseCase,
     this._updateReservationUseCase,
     this._removeReservationUseCase,
@@ -41,10 +45,8 @@ class ReservationDetailsBloc
     GetReservationDetails event,
     Emitter<ReservationDetailsState> emit,
   ) async {
-    if (isClosed) return;
     emit(ReservationDetailsLoading());
 
-    if (isClosed) return;
     final result = await minDelayRun(
       _getReservationUseCase(event.id),
       minimumDelay: const Duration(milliseconds: 500),
@@ -78,7 +80,6 @@ class ReservationDetailsBloc
 
     emit(ReservationDetailsLoading());
 
-    if (isClosed) return;
     final result = await minDelayRun(
       _updateReservationUseCase(
         UpdateReservationParams(id: originalReservation.id, update: update),

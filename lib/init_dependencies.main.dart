@@ -153,6 +153,7 @@ void _initReservationManagementFeature() {
 
   sl.registerFactory<ReservationDetailsBloc>(
     () => ReservationDetailsBloc(
+      sl<AppEventBus>(),
       sl<GetReservationUseCase>(),
       sl<UpdateReservationUseCase>(),
       sl<RemoveReservationUseCase>(),

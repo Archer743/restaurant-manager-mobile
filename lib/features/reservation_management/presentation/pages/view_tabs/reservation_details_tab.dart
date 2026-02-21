@@ -71,14 +71,12 @@ class ReservationDetailsTabController {
 class ReservationDetailsTab extends StatefulWidget {
   final String reservationId;
   final ReservationDetailsTabController controller;
-  final ReservationRefreshCoordinator coordinator;
   final Future<void> Function() onRefresh;
 
   const ReservationDetailsTab({
     super.key,
     required this.reservationId,
     required this.controller,
-    required this.coordinator,
     required this.onRefresh,
   });
 
@@ -219,9 +217,8 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
     if (state is ReservationClosed) {
       widget.controller.updateIsClosed(state.reservation.isClosed);
 
-      widget.coordinator.requireCalendarRefresh(state.reservation.startUtc);
-      widget.coordinator.requireFloorPlanRefresh();
-      widget.coordinator.requirePreviewDismiss();
+      // TODO: refresh calendar and floor plan
+      // TODO: preview dismiss (close reservation preview)
 
       // Reflect the change in tables tab
       context.read<ReservationTablesBloc>().add(ReservationClosedEvent());
@@ -230,7 +227,8 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
           context, 'Резервацията беше приключена успешно.');
     } else if (state is ReservationActivated) {
       widget.controller.updateIsClosed(state.reservation.isClosed);
-      widget.coordinator.requireCalendarRefresh(state.reservation.startUtc);
+
+      // TODO: refresh calendar
 
       // Reload tables tab
       context
@@ -253,10 +251,8 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
         widget.controller.updatePeopleCount(state.reservation.peopleCount);
       });
 
-      widget.coordinator.requireCalendarRefresh(state.originalStartUtc);
-      widget.coordinator.requireCalendarRefresh(state.reservation.startUtc);
-      widget.coordinator.requireFloorPlanRefresh();
-      widget.coordinator.requireReservationPreviewRefresh();
+      // TODO: refresh calendar (originalStartUtc, reservation.startUtc)
+      // TODO: refresh floor plan and reservation preview
 
       // Reload tables tab
       context
@@ -276,9 +272,8 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
         _setControllers(state.reservation);
       });
     } else if (state is ReservationRemoved) {
-      widget.coordinator.requireCalendarRefresh(state.affectedDateUtc);
-      widget.coordinator.requireFloorPlanRefresh();
-      widget.coordinator.requirePreviewDismiss();
+      // TODO: refresh calendar and floor plan
+      // TODO: preview dismiss (close reservation preview)
 
       SnackBarService.showSuccess(context, 'Резервацията беше изтрита успешно');
 

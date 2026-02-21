@@ -13,7 +13,6 @@ import 'package:restaurant_manager_app/core/domain/entities/table_availability.d
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_state.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/coordinators/reservation_refresh_coordinator.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/view_tabs/reservation_details_tab.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/dialogs/table_selection_warning_dialog.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/shift_display.dart';
@@ -21,14 +20,12 @@ import 'package:restaurant_manager_app/features/reservation_management/presentat
 class ReservationTablesTab extends StatefulWidget {
   final String reservationId;
   final ReservationDetailsTabController detailsTabController;
-  final ReservationRefreshCoordinator coordinator;
   final Future<void> Function() onRefresh;
 
   const ReservationTablesTab({
     super.key,
     required this.reservationId,
     required this.detailsTabController,
-    required this.coordinator,
     required this.onRefresh,
   });
 
@@ -84,8 +81,7 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
         context.go(AppRoutes.welcome);
       }
     } else if (state is ReservationTablesUpdated) {
-      widget.coordinator.requireFloorPlanRefresh();
-      widget.coordinator.requireReservationPreviewRefresh();
+      // TODO: refresh floor plan and reservation preview
 
       SnackBarService.showSuccess(context, 'Масите бяха обновени успешно');
     }
