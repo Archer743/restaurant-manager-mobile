@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:restaurant_manager_app/core/presentation/widgets/back_leading_app_bar.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_bloc.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_event.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_bloc.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_event.dart';
-import 'package:restaurant_manager_app/features/reservation_management/domain/entities/reservation_form_mode.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/coordinators/reservation_refresh_coordinator.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/view_tabs/reservation_details_tab.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/view_tabs/reservation_tables_tab.dart';
 import 'package:restaurant_manager_app/config/theme/theme.dart';
+import '../../domain/entities/reservation_form_mode.dart';
+import '../bloc/view/reservation_view_bloc.dart';
+import '../bloc/view/reservation_view_event.dart';
+import '../bloc/tables/reservation_tables_bloc.dart';
+import '../bloc/tables/reservation_tables_event.dart';
+import '../pages/view_tabs/reservation_details_tab.dart';
+import '../pages/view_tabs/reservation_tables_tab.dart';
 
 class ReservationViewPage extends StatefulWidget {
   final String reservationId;
@@ -27,9 +26,6 @@ class _ReservationViewPageState extends State<ReservationViewPage>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
 
-  /// Controls shared state between the parent and details tab.
-  final _detailsTabController = ReservationDetailsTabController();
-
   @override
   void initState() {
     super.initState();
@@ -39,17 +35,14 @@ class _ReservationViewPageState extends State<ReservationViewPage>
   @override
   void dispose() {
     // TODO: Refresh all related screens
-
     _tabController.dispose();
-    _detailsTabController.dispose();
-
     super.dispose();
   }
 
   Future<void> _handleRefresh() async {
     context
-        .read<ReservationDetailsBloc>()
-        .add(GetReservationDetails(widget.reservationId));
+        .read<ReservationViewBloc>()
+        .add(GetReservation(widget.reservationId));
 
     context
         .read<ReservationTablesBloc>()
@@ -58,98 +51,73 @@ class _ReservationViewPageState extends State<ReservationViewPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _buildAppBar(),
-      body: _buildTabBarView(),
-    );
-  }
+    // The scaffold will only be rebuilt if these fields are changed
+    final displayMode =
+        context.select((ReservationViewBloc bloc) => bloc.state.displayMode);
+    final tag = context
+        .select((ReservationViewBloc bloc) => bloc.state.reservation?.tag);
+    final isClosed = context
+        .select((ReservationViewBloc bloc) => bloc.state.reservation?.isClosed);
 
-  PreferredSizeWidget _buildAppBar() {
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(kToolbarHeight + kTextTabBarHeight),
-      child: ValueListenableBuilder<ReservationFormMode>(
-        valueListenable: _detailsTabController.displayModeNotifier,
-        builder: (context, displayMode, _) {
-          return ValueListenableBuilder<String>(
-            valueListenable: _detailsTabController.tagNotifier,
-            builder: (context, tag, __) {
-              final tabBar = TabBar(
-                controller: _tabController,
-                tabs: const [
-                  Tab(text: 'Детайли'),
-                  Tab(text: 'Маси'),
-                ],
-              );
-
-              final tagText = tag.isNotEmpty ? tag : 'Резервация';
-              final titleText = displayMode == ReservationFormMode.view
-                  ? tagText
-                  : 'Редакция';
-
-              return BackLeadingAppBar(
-                title: titleText,
-                bottom: displayMode == ReservationFormMode.edit
-                    ? PreferredSize(
-                        preferredSize: const Size.fromHeight(kTextTabBarHeight),
-                        child: AbsorbPointer(child: tabBar),
-                      )
-                    : tabBar,
-                actions: [
-                  _buildIsClosedIndicator(),
-                ],
-              );
-            },
-          );
-        },
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        context.read<ReservationViewBloc>().add(CommitReservationChanges());
+      },
+      child: Scaffold(
+        appBar: _buildAppBar(tag, isClosed, displayMode),
+        body: _buildTabBarView(displayMode),
       ),
     );
   }
 
-  Widget _buildIsClosedIndicator() {
-    return ValueListenableBuilder<bool?>(
-      valueListenable: _detailsTabController.isClosedNotifier,
-      builder: (context, isClosed, _) {
-        if (isClosed == null) return const SizedBox.shrink();
+  PreferredSizeWidget _buildAppBar(
+      String? tag, bool? isClosed, ReservationFormMode displayMode) {
+    final tabBar = TabBar(
+      controller: _tabController,
+      tabs: const [Tab(text: 'Детайли'), Tab(text: 'Маси')],
+    );
 
-        return Padding(
-          // Match the default padding of the leading IconButton
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(
-            isClosed ? "Приключена" : "Активна",
-            style: TextStyle(
-              color: isClosed ? successColor : actionColor,
-              fontWeight: FontWeight.w600,
+    final tagText = tag ?? 'Резервация';
+    final title = displayMode.isView ? tagText : 'Редакция';
+
+    return BackLeadingAppBar(
+      title: title,
+      bottom: displayMode.isEdit
+          ? PreferredSize(
+              preferredSize: const Size.fromHeight(kTextTabBarHeight),
+              child: AbsorbPointer(child: tabBar),
+            )
+          : tabBar,
+      actions: [
+        if (isClosed != null)
+          Padding(
+            // Match the default padding of the leading IconButton
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              isClosed ? "Приключена" : "Активна",
+              style: TextStyle(
+                color: isClosed ? successColor : actionColor,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-        );
-      },
+          )
+      ],
     );
   }
 
-  Widget _buildTabBarView() {
-    return ValueListenableBuilder<ReservationFormMode>(
-      valueListenable: _detailsTabController.displayModeNotifier,
-      builder: (context, displayMode, _) {
-        return TabBarView(
-          controller: _tabController,
-          // While editing, prevent swiping away from the details tab.
-          physics: displayMode == ReservationFormMode.edit
-              ? const NeverScrollableScrollPhysics()
-              : null,
-          children: [
-            ReservationDetailsTab(
-              reservationId: widget.reservationId,
-              controller: _detailsTabController,
-              onRefresh: _handleRefresh,
-            ),
-            ReservationTablesTab(
-              reservationId: widget.reservationId,
-              detailsTabController: _detailsTabController,
-              onRefresh: _handleRefresh,
-            ),
-          ],
-        );
-      },
+  Widget _buildTabBarView(ReservationFormMode displayMode) {
+    return TabBarView(
+      controller: _tabController,
+      // While editing, prevent swiping away from the details tab.
+      physics: displayMode.isEdit ? const NeverScrollableScrollPhysics() : null,
+      children: [
+        ReservationDetailsTab(
+            reservationId: widget.reservationId, onRefresh: _handleRefresh),
+        ReservationTablesTab(
+            reservationId: widget.reservationId, onRefresh: _handleRefresh),
+      ],
     );
   }
 }

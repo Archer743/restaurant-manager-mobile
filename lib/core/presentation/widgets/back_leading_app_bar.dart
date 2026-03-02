@@ -19,7 +19,7 @@ class BackLeadingAppBar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: true,
       leading: IconButton(
         onPressed: () {
-          if (context.mounted) Navigator.of(context).pop();
+          if (context.mounted) Navigator.of(context).maybePop();
         },
         icon: const Icon(Icons.arrow_back_ios_new_rounded),
       ),

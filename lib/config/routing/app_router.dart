@@ -8,12 +8,11 @@ import 'package:restaurant_manager_app/features/auth/presentation/pages/login_pa
 import 'package:restaurant_manager_app/features/auth/presentation/pages/register_page.dart';
 import 'package:restaurant_manager_app/features/auth/presentation/pages/welcome_page.dart';
 import 'package:restaurant_manager_app/features/home/presentation/home_page.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_bloc.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_event.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/view/reservation_view_bloc.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/view/reservation_view_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/create/reservation_create_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_event.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/coordinators/reservation_refresh_coordinator.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/reservation_create_page.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/reservation_view_page.dart';
 import 'package:restaurant_manager_app/features/splash/presentation/bloc/splash_bloc.dart';
@@ -81,21 +80,16 @@ final GoRouter appRouter = GoRouter(
           path: ':id',
           builder: (context, state) {
             final reservationId = state.pathParameters['id'];
-            final Object? extra = state.extra;
-
-            final coordinator =
-                extra is ReservationRefreshCoordinator ? extra : null;
 
             // TODO: Navigate to an error page
-            if (reservationId == null || coordinator == null) {
-              return const Text('Error: Reservation ID or Coordinator missing');
+            if (reservationId == null) {
+              return const Text('Error: Reservation Id missing');
             }
 
             return MultiBlocProvider(
               providers: [
-                BlocProvider<ReservationDetailsBloc>(
-                  create: (_) =>
-                      sl()..add(GetReservationDetails(reservationId)),
+                BlocProvider<ReservationViewBloc>(
+                  create: (_) => sl()..add(GetReservation(reservationId)),
                 ),
                 BlocProvider<ReservationTablesBloc>(
                   create: (_) =>

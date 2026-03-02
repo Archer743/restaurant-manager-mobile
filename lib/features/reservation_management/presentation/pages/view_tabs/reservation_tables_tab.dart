@@ -13,19 +13,16 @@ import 'package:restaurant_manager_app/core/domain/entities/table_availability.d
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_event.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_state.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/pages/view_tabs/reservation_details_tab.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/dialogs/table_selection_warning_dialog.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/widgets/shift_display.dart';
 
 class ReservationTablesTab extends StatefulWidget {
   final String reservationId;
-  final ReservationDetailsTabController detailsTabController;
   final Future<void> Function() onRefresh;
 
   const ReservationTablesTab({
     super.key,
     required this.reservationId,
-    required this.detailsTabController,
     required this.onRefresh,
   });
 
@@ -197,6 +194,38 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
           final bool tablesSelected = (state is ReservationTablesLoaded &&
               state.selectedTableIds.isNotEmpty);
 
+          // TODO: Get peopleCount for the dialog
+          // return AnimatedSwitcher(
+          //   duration: const Duration(milliseconds: 250),
+          //   transitionBuilder: (child, animation) =>
+          //       FadeTransition(opacity: animation, child: child),
+          //   child: tablesSelected
+          //       ? Padding(
+          //           padding: const EdgeInsets.all(16),
+          //           child: SizedBox(
+          //             width: double.infinity,
+          //             height: 50,
+          //             child: ValueListenableBuilder<int?>(
+          //               valueListenable:
+          //                   widget.detailsTabController.peopleCountNotifier,
+          //               builder: (context, peopleCount, _) {
+          //                 return ElevatedButton.icon(
+          //                   onPressed: peopleCount != null
+          //                       ? () => _onSavePressed(state, peopleCount)
+          //                       : null,
+          //                   icon: const Icon(Icons.save),
+          //                   label: const Text('Запази промените'),
+          //                   style: ElevatedButton.styleFrom(
+          //                     backgroundColor: actionColor,
+          //                   ),
+          //                 );
+          //               },
+          //             ),
+          //           ),
+          //         )
+          //       : const SizedBox.shrink(),
+          // );
+
           return AnimatedSwitcher(
             duration: const Duration(milliseconds: 250),
             transitionBuilder: (child, animation) =>
@@ -205,25 +234,16 @@ class _ReservationTablesTabState extends State<ReservationTablesTab>
                 ? Padding(
                     padding: const EdgeInsets.all(16),
                     child: SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ValueListenableBuilder<int?>(
-                        valueListenable:
-                            widget.detailsTabController.peopleCountNotifier,
-                        builder: (context, peopleCount, _) {
-                          return ElevatedButton.icon(
-                            onPressed: peopleCount != null
-                                ? () => _onSavePressed(state, peopleCount)
-                                : null,
-                            icon: const Icon(Icons.save),
-                            label: const Text('Запази промените'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: actionColor,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton.icon(
+                          onPressed: null,
+                          icon: const Icon(Icons.save),
+                          label: const Text('Запази промените'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: actionColor,
+                          ),
+                        )),
                   )
                 : const SizedBox.shrink(),
           );

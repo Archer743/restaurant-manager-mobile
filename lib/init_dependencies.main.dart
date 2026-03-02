@@ -151,8 +151,8 @@ void _initReservationManagementFeature() {
     () => ReservationCreateBloc(sl(), sl()),
   );
 
-  sl.registerFactory<ReservationDetailsBloc>(
-    () => ReservationDetailsBloc(
+  sl.registerFactory<ReservationViewBloc>(
+    () => ReservationViewBloc(
       sl<AppEventBus>(),
       sl<GetReservationUseCase>(),
       sl<UpdateReservationUseCase>(),

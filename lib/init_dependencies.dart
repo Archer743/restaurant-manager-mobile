@@ -35,7 +35,7 @@ import 'package:restaurant_manager_app/features/reservation_management/domain/us
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/reopen_reservation_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/update_reservation_tables_usecase.dart';
 import 'package:restaurant_manager_app/features/reservation_management/domain/usecases/update_reservation_usecase.dart';
-import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/details/reservation_details_bloc.dart';
+import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/view/reservation_view_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/create/reservation_create_bloc.dart';
 import 'package:restaurant_manager_app/features/reservation_management/presentation/bloc/tables/reservation_tables_bloc.dart';
 import 'package:restaurant_manager_app/features/restaurant_floor_plan/data/data_sources/floor_plan_api_service.dart';
