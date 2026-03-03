@@ -148,9 +148,55 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
     );
   }
 
+  // Widget _buildContent(BuildContext context, ReservationViewState state) {
+  //   if (!state.hasReservation || state.status.isLoading) {
+  //     // Always scrollable to allow pull-to-refresh while loading
+  //     return SingleChildScrollView(
+  //       physics: const AlwaysScrollableScrollPhysics(),
+  //       child: SizedBox(
+  //         height: spacingByHeight(context, 0.8),
+  //         child: const Center(child: CircularProgressIndicator()),
+  //       ),
+  //     );
+  //   }
+
+  //   final double bottomPadding = state.displayMode.isEdit ? 70.0 : 16.0;
+
+  //   return Center(
+  //     child: Padding(
+  //       padding: EdgeInsets.fromLTRB(45, 0, 45, bottomPadding),
+  //       child: SingleChildScrollView(
+  //         physics: const AlwaysScrollableScrollPhysics(),
+  //         child: ReservationForm(
+  //           formKey: _formKey,
+  //           formController: _formController,
+  //           displayMode: state.displayMode,
+  //           isCreatedByStaff: state.reservation!.isCreatedByStaff,
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+
   Widget _buildContent(BuildContext context, ReservationViewState state) {
-    if (!state.hasReservation || state.status.isLoading) {
-      // Always scrollable to allow pull-to-refresh while loading
+    final double bottomPadding = state.displayMode.isEdit ? 70.0 : 16.0;
+
+    final content = Center(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(45, 0, 45, bottomPadding),
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ReservationForm(
+            formKey: _formKey,
+            formController: _formController,
+            displayMode: state.displayMode,
+            isCreatedByStaff: state.reservation?.isCreatedByStaff ?? false,
+          ),
+        ),
+      ),
+    );
+
+    if (state.status.isLoading && !state.hasReservation) {
       return SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: SizedBox(
@@ -160,22 +206,23 @@ class _ReservationDetailsTabState extends State<ReservationDetailsTab>
       );
     }
 
-    final double bottomPadding = state.displayMode.isEdit ? 70.0 : 16.0;
-
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(45, 0, 45, bottomPadding),
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: ReservationForm(
-            formKey: _formKey,
-            formController: _formController,
-            displayMode: state.displayMode,
-            isCreatedByStaff: state.reservation!.isCreatedByStaff,
-          ),
+    if (state.status.isLoading && state.hasReservation) {
+      return AbsorbPointer(
+        child: Stack(
+          children: [
+            content,
+            Container(
+              color: Colors.black.withOpacity(0.3), // semitransparent overlay
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          ],
         ),
-      ),
-    );
+      );
+    }
+
+    return content;
   }
 
   void _listener(BuildContext context, ReservationViewState state) {
