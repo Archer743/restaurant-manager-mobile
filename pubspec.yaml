@@ -36,7 +36,7 @@ dependencies:
   dartz: ^0.10.1
 
   # Securely store access and refresh tokens on the device
-  flutter_secure_storage: ^4.2.1
+  flutter_secure_storage: ^9.2.2
 
   # App Routing
   go_router: ^14.6.2
@@ -60,6 +60,13 @@ dev_dependencies:
   retrofit_generator: 8.2.1
   build_runner: ^2.4.9
   json_serializable: ^6.8.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icons/app_icon.png"
+  remove_alpha_ios: true
 
 flutter:
   uses-material-design: true
